@@ -10,6 +10,10 @@ import { MyCoursesPage } from './pages/MyCoursesPage';
 import { CourseDetailPage } from './pages/CourseDetailPage';
 import { CreateCoursePage } from './pages/CreateCoursePage';
 import { EditCoursePage } from './pages/EditCoursePage';
+import { DashboardPage } from './pages/DashboardPage';
+import { ImportCoursePage } from './pages/ImportCoursePage';
+import { BookmarksPage } from './pages/BookmarksPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
 
 function App() {
   return (
@@ -48,6 +52,16 @@ function App() {
         }
       />
       <Route
+        path="/courses/import"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ImportCoursePage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/courses/:id"
         element={
           <Layout>
@@ -68,6 +82,16 @@ function App() {
 
       {/* Protected routes */}
       <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <DashboardPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/my-courses"
         element={
           <ProtectedRoute>
@@ -78,11 +102,31 @@ function App() {
         }
       />
       <Route
+        path="/bookmarks"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <BookmarksPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/users"
         element={
           <ProtectedRoute>
             <Layout>
               <UsersPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AnalyticsPage />
             </Layout>
           </ProtectedRoute>
         }

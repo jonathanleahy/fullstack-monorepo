@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useState, useEffect } from 'react';
+import { courseService } from '../services/courseService';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -7,6 +9,25 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
+  const [hasAuthoredCourses, setHasAuthoredCourses] = useState(false);
+
+  useEffect(() => {
+    const checkAuthoredCourses = async () => {
+      if (!user) {
+        setHasAuthoredCourses(false);
+        return;
+      }
+
+      try {
+        const result = await courseService.getMyAuthoredCourses({ page: 1, limit: 1 });
+        setHasAuthoredCourses(result.total > 0);
+      } catch {
+        setHasAuthoredCourses(false);
+      }
+    };
+
+    checkAuthoredCourses();
+  }, [user]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -23,9 +44,22 @@ export function Layout({ children }: LayoutProps) {
               Courses
             </Link>
             {user && (
-              <Link to="/my-courses" className="text-muted-foreground hover:text-foreground transition-colors">
-                My Courses
-              </Link>
+              <>
+                <Link to="/my-courses" className="text-muted-foreground hover:text-foreground transition-colors">
+                  My Courses
+                </Link>
+                <Link to="/bookmarks" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Bookmarks
+                </Link>
+                <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Dashboard
+                </Link>
+                {hasAuthoredCourses && (
+                  <Link to="/analytics" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Analytics
+                  </Link>
+                )}
+              </>
             )}
             {user ? (
               <div className="flex items-center gap-4">

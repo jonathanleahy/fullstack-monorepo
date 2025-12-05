@@ -3,3 +3,6 @@ export { FormField } from './FormField';
 export type { FormFieldProps } from './FormField';
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
 export type { TabsProps, TabsTriggerProps, TabsContentProps } from './Tabs';
+export { Alert, AlertTitle, AlertDescription, alertVariants } from './Alert';
+export { Tooltip } from './Tooltip';
+export type { TooltipProps } from './Tooltip';

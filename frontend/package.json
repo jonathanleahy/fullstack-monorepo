@@ -23,6 +23,7 @@
     "@repo/playbook": "workspace:*",
     "@repo/shared": "workspace:*",
     "@tanstack/react-query": "^5.17.0",
+    "@uiw/react-md-editor": "^4.0.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "graphql": "^16.8.1",
@@ -30,8 +31,11 @@
     "lucide-react": "^0.309.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
     "react-router-dom": "^6.21.1",
-    "tailwind-merge": "^2.2.0"
+    "remark-gfm": "^4.0.0",
+    "tailwind-merge": "^2.2.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.0",

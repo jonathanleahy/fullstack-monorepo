@@ -15,6 +15,7 @@ import (
 	"github.com/project/backend/adapters/db"
 	"github.com/project/backend/adapters/graphql"
 	httpAdapter "github.com/project/backend/adapters/http"
+	"github.com/project/backend/adapters/storage"
 	"github.com/project/backend/application/usecases"
 	"github.com/project/backend/config"
 	"github.com/project/backend/domain/services"
@@ -48,6 +49,12 @@ func main() {
 	userRepo := db.NewUserRepository(database)
 	libraryCourseRepo := db.NewLibraryCourseRepository(database)
 	userCourseRepo := db.NewUserCourseRepository(database)
+	bookmarkRepo := db.NewBookmarkRepository(database)
+	analyticsRepo := db.NewAnalyticsRepository(database)
+	attachmentRepo := db.NewAttachmentRepository(database)
+
+	// Initialize file storage
+	fileStorage := storage.NewFileStorage()
 
 	// Initialize auth service
 	authService := services.NewAuthService(cfg.JWTSecret)
@@ -62,7 +69,13 @@ func main() {
 		AuthUseCase:       authUseCase,
 		LibraryCourseRepo: libraryCourseRepo,
 		UserCourseRepo:    userCourseRepo,
+		BookmarkRepo:      bookmarkRepo,
+		AnalyticsRepo:     analyticsRepo,
+		AttachmentRepo:    attachmentRepo,
 	}
+
+	// Initialize HTTP handlers
+	attachmentHandler := httpAdapter.NewAttachmentHandler(attachmentRepo, libraryCourseRepo, fileStorage)
 
 	// Create GraphQL server
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: resolver}))
@@ -80,7 +93,7 @@ func main() {
 	// CORS
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   cfg.AllowedOrigins,
-		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
 		MaxAge:           300,
@@ -93,6 +106,14 @@ func main() {
 	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("OK"))
+	})
+
+	// REST API endpoints
+	r.Route("/api", func(r chi.Router) {
+		// Attachment endpoints
+		r.Post("/courses/{courseId}/lessons/{lessonIndex}/attachments", attachmentHandler.UploadAttachment)
+		r.Get("/attachments/{id}", attachmentHandler.DownloadAttachment)
+		r.Delete("/attachments/{id}", attachmentHandler.DeleteAttachment)
 	})
 
 	// GraphQL endpoints

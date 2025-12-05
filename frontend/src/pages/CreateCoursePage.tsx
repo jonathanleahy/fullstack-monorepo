@@ -6,7 +6,7 @@ import { courseService } from '../services/courseService';
 import { extractGraphQLError } from '../services/graphql';
 import { useAuth } from '../hooks/useAuth';
 import type { LessonInput } from '../types/course';
-import { Button, Card, CardContent } from '@repo/playbook';
+import { Card, CardContent } from '@repo/playbook';
 
 export function CreateCoursePage() {
   const navigate = useNavigate();

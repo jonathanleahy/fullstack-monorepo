@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLibraryCourses } from '../hooks/useCourses';
+import { TagFilter } from '../components/TagFilter';
+import { courseService } from '../services/courseService';
 import type { Difficulty } from '../types/course';
 import {
   Button,
@@ -25,6 +27,20 @@ export function CoursesPage() {
   const { courses, total, isLoading, error, fetchCourses, searchCourses } = useLibraryCourses();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | ''>('');
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const tags = await courseService.getAllTags();
+        setAvailableTags(tags);
+      } catch {
+        // Silently fail - tags are optional
+      }
+    };
+    loadTags();
+  }, []);
 
   useEffect(() => {
     fetchCourses(undefined, selectedDifficulty || undefined);
@@ -87,6 +103,17 @@ export function CoursesPage() {
         </Select>
       </div>
 
+      {/* Tag Filter */}
+      {availableTags.length > 0 && (
+        <div className="mb-6">
+          <TagFilter
+            availableTags={availableTags}
+            selectedTags={selectedTags}
+            onChange={setSelectedTags}
+          />
+        </div>
+      )}
+
       {/* Loading state */}
       {isLoading && (
         <div className="text-center py-12">
@@ -114,7 +141,12 @@ export function CoursesPage() {
       {/* Course grid */}
       {!isLoading && !error && (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
+          {courses
+            .filter(course =>
+              selectedTags.length === 0 ||
+              selectedTags.some(tag => course.tags?.includes(tag))
+            )
+            .map((course) => (
             <Link key={course.id} to={`/courses/${course.id}`}>
               <Card className="h-full hover:shadow-lg transition-shadow">
                 <CardHeader>
@@ -133,6 +165,18 @@ export function CoursesPage() {
                     <span>By {course.author}</span>
                     <span>{course.estimatedHours}h</span>
                   </div>
+                  {course.tags && course.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {course.tags.slice(0, 3).map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {course.tags.length > 3 && (
+                        <span className="text-xs text-muted-foreground">+{course.tags.length - 3}</span>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
                 <CardFooter className="text-sm text-muted-foreground">
                   {course.lessons.length} lesson{course.lessons.length !== 1 ? 's' : ''}

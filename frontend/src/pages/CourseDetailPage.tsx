@@ -1,9 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useLibraryCourse, useCourseActions } from '../hooks/useCourses';
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useLibraryCourse } from '../hooks/useCourses';
 import { courseService } from '../services/courseService';
+import { analyticsService } from '../services/analyticsService';
 import { useAuth } from '../hooks/useAuth';
-import type { Difficulty, UserCourse } from '../types/course';
+import type { Difficulty, UserCourse, CourseAnalytics } from '../types/course';
+import { MarkdownRenderer } from '../components/MarkdownRenderer';
+import { BookmarkButton } from '../components/BookmarkButton';
+import { EnrollButton } from '../components/EnrollButton';
+import { LessonProgress } from '../components/LessonProgress';
+import { Card, CardHeader, CardTitle, CardContent, Badge, Progress } from '@repo/playbook';
 
 const difficultyColors: Record<Difficulty, string> = {
   BEGINNER: 'bg-green-100 text-green-800',
@@ -13,92 +19,96 @@ const difficultyColors: Record<Difficulty, string> = {
 
 export function CourseDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { course, isLoading, error, fetchCourse } = useLibraryCourse();
-  const { startCourse, updateProgress, isLoading: isActioning } = useCourseActions();
 
   const [userCourse, setUserCourse] = useState<UserCourse | null>(null);
   const [selectedLesson, setSelectedLesson] = useState(0);
-  const [isLoadingUserCourse, setIsLoadingUserCourse] = useState(false);
+  const [analytics, setAnalytics] = useState<CourseAnalytics | null>(null);
 
   useEffect(() => {
     if (id) {
       fetchCourse(id);
+      // Record course view
+      analyticsService.recordCourseView(id).catch(() => {
+        // Silently fail - view tracking is non-critical
+      });
     }
   }, [id, fetchCourse]);
 
-  // Check if user is enrolled when course loads
-  useEffect(() => {
-    const checkEnrollment = async () => {
-      if (!course || !isAuthenticated) return;
 
-      setIsLoadingUserCourse(true);
+  // Load analytics if user is the author
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      if (!course || !user || user.id !== course.authorId) return;
+
       try {
-        const myCourses = await courseService.getMyCourses();
-        const enrolled = myCourses.courses.find(
-          (uc) => uc.libraryCourseId === course.id
-        );
-        if (enrolled) {
-          setUserCourse(enrolled);
-          setSelectedLesson(enrolled.currentLessonIndex);
-        }
+        const analyticsData = await analyticsService.getCourseAnalytics(course.id);
+        setAnalytics(analyticsData);
       } catch {
-        // Not enrolled or error - that's fine
-      } finally {
-        setIsLoadingUserCourse(false);
+        // Analytics loading is non-critical
       }
     };
 
-    checkEnrollment();
-  }, [course, isAuthenticated]);
+    loadAnalytics();
+  }, [course, user]);
 
-  const handleEnroll = async () => {
-    if (!course) return;
-
-    const result = await startCourse(course.id);
-    if (result) {
-      setUserCourse(result);
+  const handleEnrollmentChange = useCallback((enrolled: UserCourse | null) => {
+    setUserCourse(enrolled);
+    if (enrolled) {
+      setSelectedLesson(enrolled.currentLessonIndex);
     }
-  };
+  }, []);
 
-  const handleLessonComplete = async () => {
-    if (!userCourse || !course) return;
+  const handleProgressUpdate = useCallback((updated: UserCourse) => {
+    setUserCourse(updated);
+  }, []);
 
-    const nextLesson = selectedLesson + 1;
-    const progress = Math.round(((nextLesson) / course.lessons.length) * 100);
-
-    const result = await updateProgress(
-      userCourse.id,
-      Math.min(progress, 100),
-      Math.min(nextLesson, course.lessons.length - 1)
-    );
-
-    if (result) {
-      setUserCourse(result);
-      if (nextLesson < course.lessons.length) {
-        setSelectedLesson(nextLesson);
-      }
-    }
-  };
-
-  const handleSelectLesson = async (index: number) => {
+  const handleSelectLesson = useCallback(async (index: number) => {
     setSelectedLesson(index);
 
     // Update current lesson index if enrolled
-    if (userCourse) {
-      const result = await updateProgress(
-        userCourse.id,
-        userCourse.progress,
-        index
-      );
-      if (result) {
-        setUserCourse(result);
+    if (userCourse && course) {
+      try {
+        const updated = await courseService.setCurrentLesson(course.id, index);
+        setUserCourse(updated);
+      } catch (err) {
+        console.error('Failed to update current lesson:', err);
       }
     }
-  };
+  }, [userCourse, course]);
 
-  if (isLoading || isLoadingUserCourse) {
+  // Keyboard navigation
+  const handleKeyNavigation = useCallback((e: KeyboardEvent) => {
+    if (!course) return;
+
+    // Don't handle if user is typing in an input
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'j':
+        if (selectedLesson > 0) {
+          handleSelectLesson(selectedLesson - 1);
+        }
+        break;
+      case 'ArrowRight':
+      case 'k':
+        if (selectedLesson < course.lessons.length - 1) {
+          handleSelectLesson(selectedLesson + 1);
+        }
+        break;
+    }
+  }, [course, selectedLesson, handleSelectLesson]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyNavigation);
+    return () => window.removeEventListener('keydown', handleKeyNavigation);
+  }, [handleKeyNavigation]);
+
+  if (isLoading) {
     return (
       <div className="text-center py-12">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -133,7 +143,6 @@ export function CourseDetailPage() {
 
   const currentLesson = course.lessons[selectedLesson];
   const isCompleted = userCourse?.completedAt != null;
-  const isLastLesson = selectedLesson === course.lessons.length - 1;
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -157,7 +166,7 @@ export function CourseDetailPage() {
                 <span className={`px-3 py-1 text-sm rounded-full ${difficultyColors[course.difficulty]}`}>
                   {course.difficulty.toLowerCase()}
                 </span>
-                {isAuthenticated && (
+                {isAuthenticated && user?.id === course.authorId && (
                   <Link
                     to={`/courses/${course.id}/edit`}
                     className="px-3 py-1 text-sm border rounded-md hover:bg-accent transition-colors"
@@ -175,7 +184,63 @@ export function CourseDetailPage() {
               <span>&bull;</span>
               <span>{course.lessons.length} lessons</span>
             </div>
+            {course.tags && course.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {course.tags.map(tag => (
+                  <span key={tag} className="px-2 py-0.5 text-xs bg-muted rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Analytics Summary (if author) */}
+          {analytics && user?.id === course.authorId && (
+            <Card className="mb-6">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Course Analytics</CardTitle>
+                  <Link
+                    to="/analytics"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    View Full Analytics
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <div className="text-2xl font-bold text-primary">
+                      {analytics.totalViews.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Total Views</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-primary">
+                      {analytics.uniqueViews.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Unique Views</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-primary">
+                      {analytics.totalEnrollments.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Enrollments</div>
+                  </div>
+                  <div>
+                    <Badge variant={
+                      analytics.completionRate >= 70 ? 'success' :
+                      analytics.completionRate >= 40 ? 'warning' : 'danger'
+                    }>
+                      {analytics.completionRate.toFixed(1)}% completion
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Progress bar (if enrolled) */}
           {userCourse && (
@@ -184,15 +249,10 @@ export function CourseDetailPage() {
                 <span className="font-medium">Your Progress</span>
                 <span>{userCourse.progress}%</span>
               </div>
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all ${isCompleted ? 'bg-green-500' : 'bg-primary'}`}
-                  style={{ width: `${userCourse.progress}%` }}
-                />
-              </div>
-              {isCompleted && (
+              <Progress value={userCourse.progress} className="h-3" />
+              {isCompleted && userCourse.completedAt && (
                 <p className="mt-2 text-sm text-green-600">
-                  Completed on {new Date(userCourse.completedAt!).toLocaleDateString()}
+                  Completed on {new Date(userCourse.completedAt).toLocaleDateString()}
                 </p>
               )}
             </div>
@@ -205,9 +265,30 @@ export function CourseDetailPage() {
                 <h2 className="text-xl font-semibold">
                   Lesson {selectedLesson + 1}: {currentLesson.title}
                 </h2>
+                <div className="flex items-center gap-3">
+                  <LessonProgress
+                    lessonIndex={selectedLesson}
+                    userCourse={userCourse}
+                    libraryCourseId={course.id}
+                    onProgressUpdate={handleProgressUpdate}
+                  />
+                  {isAuthenticated && (
+                    <BookmarkButton
+                      libraryCourseId={course.id}
+                      lessonIndex={selectedLesson}
+                      courseTitle={course.title}
+                      lessonTitle={currentLesson.title}
+                    />
+                  )}
+                </div>
               </div>
               <div className="prose max-w-none">
-                <p className="whitespace-pre-wrap">{currentLesson.content}</p>
+                <MarkdownRenderer content={currentLesson.content} />
+              </div>
+
+              <div className="mt-4 text-xs text-muted-foreground text-center">
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">←</kbd> or <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">j</kbd> Previous lesson &nbsp;|&nbsp;
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">→</kbd> or <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">k</kbd> Next lesson
               </div>
 
               {/* Lesson navigation */}
@@ -220,20 +301,6 @@ export function CourseDetailPage() {
                   >
                     Previous
                   </button>
-
-                  {!isCompleted && (
-                    <button
-                      onClick={handleLessonComplete}
-                      disabled={isActioning}
-                      className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
-                    >
-                      {isActioning
-                        ? 'Saving...'
-                        : isLastLesson
-                        ? 'Complete Course'
-                        : 'Mark Complete & Continue'}
-                    </button>
-                  )}
 
                   <button
                     onClick={() => handleSelectLesson(selectedLesson + 1)}
@@ -251,32 +318,15 @@ export function CourseDetailPage() {
         {/* Sidebar */}
         <div className="lg:col-span-1">
           {/* Enrollment card */}
-          {!userCourse && (
-            <div className="border rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Start Learning</h3>
-              {isAuthenticated ? (
-                <button
-                  onClick={handleEnroll}
-                  disabled={isActioning}
-                  className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {isActioning ? 'Enrolling...' : 'Enroll Now'}
-                </button>
-              ) : (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Sign in to enroll in this course and track your progress.
-                  </p>
-                  <button
-                    onClick={() => navigate('/login', { state: { from: `/courses/${id}` } })}
-                    className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                  >
-                    Sign In to Enroll
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+          <div className="border rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-semibold mb-4">
+              {userCourse ? 'Your Progress' : 'Start Learning'}
+            </h3>
+            <EnrollButton
+              course={course}
+              onEnrollmentChange={handleEnrollmentChange}
+            />
+          </div>
 
           {/* Lessons list */}
           <div className="border rounded-lg overflow-hidden">
@@ -288,7 +338,7 @@ export function CourseDetailPage() {
                 .sort((a, b) => a.order - b.order)
                 .map((lesson, index) => {
                   const isCurrentLesson = index === selectedLesson;
-                  const isCompletedLesson = userCourse && index < userCourse.currentLessonIndex;
+                  const isCompletedLesson = userCourse?.completedLessons?.includes(index) ?? false;
 
                   return (
                     <button

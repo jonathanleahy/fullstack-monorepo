@@ -12,6 +12,8 @@ export interface LibraryCourse {
   description: string;
   lessons: Lesson[];
   author: string;
+  authorId: string;
+  tags: string[];
   difficulty: Difficulty;
   estimatedHours: number;
   createdAt: string;
@@ -25,9 +27,10 @@ export interface UserCourse {
   libraryCourse?: LibraryCourse;
   progress: number;
   currentLessonIndex: number;
+  completedLessons: number[];
   startedAt: string;
   updatedAt: string;
-  completedAt?: string;
+  completedAt: string | null;
 }
 
 export interface LibraryCourseConnection {
@@ -74,6 +77,7 @@ export interface CreateLibraryCourseInput {
   author: string;
   difficulty: Difficulty;
   estimatedHours: number;
+  tags?: string[];
 }
 
 export interface UpdateLibraryCourseInput {
@@ -83,4 +87,39 @@ export interface UpdateLibraryCourseInput {
   author?: string;
   difficulty?: Difficulty;
   estimatedHours?: number;
+  tags?: string[];
+}
+
+export interface ImportCoursesInput {
+  courses: CreateLibraryCourseInput[];
+}
+
+export interface Bookmark {
+  id: string;
+  userId: string;
+  libraryCourseId: string;
+  lessonIndex: number;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface Attachment {
+  id: string;
+  libraryCourseId: string;
+  lessonIndex: number;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  uploadedAt: string;
+  downloadUrl: string;
+}
+
+export interface CourseAnalytics {
+  libraryCourseId: string;
+  totalViews: number;
+  uniqueViews: number;
+  totalEnrollments: number;
+  completionRate: number;
+  averageProgress: number;
 }

@@ -48,6 +48,8 @@ type LibraryCourse struct {
 	Description    string
 	Lessons        []Lesson
 	Author         string
+	AuthorID       string
+	Tags           []string
 	Difficulty     Difficulty
 	EstimatedHours int
 	CreatedAt      time.Time
@@ -55,12 +57,19 @@ type LibraryCourse struct {
 }
 
 // NewLibraryCourse creates a new LibraryCourse with validation
-func NewLibraryCourse(title, description string, lessons []Lesson, author string, difficulty Difficulty, estimatedHours int) (*LibraryCourse, error) {
+func NewLibraryCourse(title, description string, lessons []Lesson, author, authorID string, tags []string, difficulty Difficulty, estimatedHours int) (*LibraryCourse, error) {
 	if title == "" {
 		return nil, ErrInvalidCourseTitle
 	}
 	if len(lessons) == 0 {
 		return nil, ErrNoLessons
+	}
+	if authorID == "" {
+		return nil, ErrInvalidUserID
+	}
+
+	if tags == nil {
+		tags = []string{}
 	}
 
 	now := time.Now()
@@ -69,6 +78,8 @@ func NewLibraryCourse(title, description string, lessons []Lesson, author string
 		Description:    description,
 		Lessons:        lessons,
 		Author:         author,
+		AuthorID:       authorID,
+		Tags:           tags,
 		Difficulty:     difficulty,
 		EstimatedHours: estimatedHours,
 		CreatedAt:      now,
@@ -103,6 +114,7 @@ type UserCourse struct {
 	LibraryCourseID    string
 	Progress           int // 0-100 percentage
 	CurrentLessonIndex int
+	CompletedLessons   []int // Lesson indices that are completed
 	StartedAt          time.Time
 	UpdatedAt          time.Time
 	CompletedAt        *time.Time
@@ -123,6 +135,7 @@ func NewUserCourse(userID, libraryCourseID string) (*UserCourse, error) {
 		LibraryCourseID:    libraryCourseID,
 		Progress:           0,
 		CurrentLessonIndex: 0,
+		CompletedLessons:   []int{},
 		StartedAt:          now,
 		UpdatedAt:          now,
 		CompletedAt:        nil,
@@ -151,5 +164,75 @@ func (uc *UserCourse) AdvanceLesson(totalLessons int) {
 	if uc.CurrentLessonIndex < totalLessons-1 {
 		uc.CurrentLessonIndex++
 		uc.UpdatedAt = time.Now()
+	}
+}
+
+// SetCurrentLesson sets the current lesson index
+func (uc *UserCourse) SetCurrentLesson(lessonIndex int) error {
+	if lessonIndex < 0 {
+		return ErrInvalidLessonIndex
+	}
+	uc.CurrentLessonIndex = lessonIndex
+	uc.UpdatedAt = time.Now()
+	return nil
+}
+
+// MarkLessonCompleted marks a lesson as completed and updates progress
+func (uc *UserCourse) MarkLessonCompleted(lessonIndex int, totalLessons int) error {
+	if lessonIndex < 0 || lessonIndex >= totalLessons {
+		return ErrInvalidLessonIndex
+	}
+
+	// Check if already completed
+	for _, idx := range uc.CompletedLessons {
+		if idx == lessonIndex {
+			return nil // Already completed
+		}
+	}
+
+	uc.CompletedLessons = append(uc.CompletedLessons, lessonIndex)
+	uc.CalculateProgress(totalLessons)
+	uc.UpdatedAt = time.Now()
+
+	return nil
+}
+
+// MarkLessonIncomplete removes a lesson from completed list and updates progress
+func (uc *UserCourse) MarkLessonIncomplete(lessonIndex int, totalLessons int) error {
+	if lessonIndex < 0 || lessonIndex >= totalLessons {
+		return ErrInvalidLessonIndex
+	}
+
+	// Remove from completed lessons
+	newCompleted := []int{}
+	for _, idx := range uc.CompletedLessons {
+		if idx != lessonIndex {
+			newCompleted = append(newCompleted, idx)
+		}
+	}
+	uc.CompletedLessons = newCompleted
+	uc.CalculateProgress(totalLessons)
+	uc.UpdatedAt = time.Now()
+
+	return nil
+}
+
+// CalculateProgress calculates progress based on completed lessons
+func (uc *UserCourse) CalculateProgress(totalLessons int) {
+	if totalLessons == 0 {
+		uc.Progress = 0
+		return
+	}
+
+	progress := (len(uc.CompletedLessons) * 100) / totalLessons
+	uc.Progress = progress
+
+	// Mark as completed if all lessons are done
+	if progress == 100 && uc.CompletedAt == nil {
+		now := time.Now()
+		uc.CompletedAt = &now
+	} else if progress < 100 && uc.CompletedAt != nil {
+		// Unmark completion if progress drops below 100
+		uc.CompletedAt = nil
 	}
 }
