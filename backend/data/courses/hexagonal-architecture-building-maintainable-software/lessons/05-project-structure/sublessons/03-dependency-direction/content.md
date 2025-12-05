@@ -1,5 +1,11 @@
 # Dependency Direction
 
+## Sam's Scenario
+
+When Sam tried to import the HTTP handler in a use case to send a notification, Alex stopped him: "Wait! That breaks the dependency rule. Use cases can't depend on adapters. You need an abstraction - a port." This lesson explains the sacred dependency rule.
+
+## The Dependency Rule
+
 The **Dependency Rule** is the most important principle in Hexagonal Architecture: dependencies always point **inward**, toward the domain.
 
 ## The Dependency Rule
@@ -27,7 +33,7 @@ flowchart TB
     style Outer fill:#87CEEB,stroke:#333
 ```
 
-## What This Means in Code
+## What This Means for BookShelf
 
 ```go
 // ❌ WRONG: Domain imports adapter
@@ -35,21 +41,34 @@ package entities
 
 import "database/sql"  // Domain knows about infrastructure!
 
-type User struct {
-    db *sql.DB  // Domain holds infrastructure reference
+type Book struct {
+    ID string
+    db *sql.DB  // Book entity holds database reference - BAD!
+}
+
+func (b *Book) Save() error {
+    b.db.Exec("INSERT INTO books...")  // Domain does SQL - VERY BAD!
 }
 
 // ✅ CORRECT: Adapter imports domain
-package postgres
+package sqlite
 
-import "myapp/internal/domain/entities"  // Adapter knows domain
+import (
+    "bookshelf/internal/domain/entities"  // Adapter knows domain
+    "database/sql"
+)
 
-type UserRepository struct {
-    db *sql.DB
+type BookRepository struct {
+    db *sql.DB  // Infrastructure stays in adapter
 }
 
-func (r *UserRepository) Save(ctx context.Context, user *entities.User) error {
-    // Adapter translates domain to infrastructure
+func (r *BookRepository) Save(ctx context.Context, book *entities.Book) error {
+    // Adapter translates domain entity to SQL
+    _, err := r.db.ExecContext(ctx,
+        "INSERT INTO books (id, title, author, isbn) VALUES (?, ?, ?, ?)",
+        book.ID, book.Title, book.Author, book.ISBN.Value(),
+    )
+    return err
 }
 ```
 
@@ -77,45 +96,57 @@ flowchart LR
 ## Enforcing with Go Package Structure
 
 ```go
-// internal/domain/entities/user.go
+// internal/domain/entities/book.go
 package entities
 
 // NO imports from adapters or application!
 // Only standard library and domain packages
 
-type User struct {
-    ID    string
-    Name  string
-    Email string
+type Book struct {
+    ID     string
+    Title  string
+    Author string
+    ISBN   ISBN
+    Status BookStatus
 }
 
-// internal/domain/repositories/user.go
+// internal/domain/repositories/book.go
 package repositories
 
-import "myapp/internal/domain/entities"
+import "bookshelf/internal/domain/entities"
 
 // Interface defined in domain - implemented by adapters
-type UserRepository interface {
-    Save(ctx context.Context, user *entities.User) error
-    FindByID(ctx context.Context, id string) (*entities.User, error)
+type BookRepository interface {
+    Save(ctx context.Context, book *entities.Book) error
+    FindByID(ctx context.Context, id string) (*entities.Book, error)
+    FindByISBN(ctx context.Context, isbn entities.ISBN) (*entities.Book, error)
 }
 
-// internal/adapters/db/postgres/user_repo.go
+// internal/adapters/db/postgres/book_repo.go
 package postgres
 
 import (
-    "myapp/internal/domain/entities"
-    "myapp/internal/domain/repositories"
-    "github.com/jackc/pgx/v5/pgxpool"  // Infrastructure dependency
+    "bookshelf/internal/domain/entities"
+    "bookshelf/internal/domain/repositories"
+    "github.com/jackc/pgx/v5/pgxpool"  // Infrastructure dependency OK here
 )
 
 // Adapter implements domain interface
-type UserRepository struct {
+type BookRepository struct {
     db *pgxpool.Pool
 }
 
 // Compile-time check: ensure interface is implemented
-var _ repositories.UserRepository = (*UserRepository)(nil)
+var _ repositories.BookRepository = (*BookRepository)(nil)
+
+func (r *BookRepository) Save(ctx context.Context, book *entities.Book) error {
+    // Infrastructure concerns only in adapters
+    query := `INSERT INTO books (id, title, author, isbn, status)
+              VALUES ($1, $2, $3, $4, $5)`
+    _, err := r.db.Exec(ctx, query,
+        book.ID, book.Title, book.Author, book.ISBN.Value(), book.Status)
+    return err
+}
 ```
 
 ## Dependency Inversion in Practice
@@ -171,3 +202,7 @@ forbiddenImports := map[string][]string{
 | **Application** | Domain | Adapters, Infrastructure |
 | **Adapters** | Application, Domain, Infrastructure | - |
 | **Cmd** | All layers | - |
+
+## Sam's Insight
+
+"So the Book entity can't import `database/sql`, the use case can't import the HTTP handler, and everything points toward the domain," Sam summarized. "The adapters know about the domain, but the domain is blissfully unaware of adapters." Alex beamed: "Perfect! Now your architecture is compiler-enforced."

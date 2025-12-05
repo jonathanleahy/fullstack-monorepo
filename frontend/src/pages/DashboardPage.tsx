@@ -119,36 +119,58 @@ export function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {enrolledCourses.map((uc) => (
-                <Card key={uc.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="pt-4">
-                    <Link to={`/courses/${uc.libraryCourseId}`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium truncate">{uc.libraryCourse?.title}</h3>
+                <Card key={uc.id} className="hover:shadow-md transition-all hover:border-primary/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      {/* Course icon/avatar */}
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        uc.completedAt
+                          ? 'bg-green-100 text-green-600'
+                          : 'bg-primary/10 text-primary'
+                      }`}>
                         {uc.completedAt ? (
-                          <Badge variant="default" className="bg-green-500 text-white">Completed</Badge>
+                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
                         ) : (
-                          <span className="text-sm text-muted-foreground">{uc.progress}%</span>
+                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                          </svg>
                         )}
                       </div>
-                      <Progress value={uc.progress} className="h-2 mb-2" />
-                    </Link>
-                    <div className="flex gap-2 mt-2">
-                      {!uc.completedAt && (
-                        <Button asChild size="sm" className="flex-1">
+
+                      {/* Course info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <Link
+                            to={`/courses/${uc.libraryCourseId}`}
+                            className="font-medium text-foreground hover:text-primary transition-colors line-clamp-1"
+                          >
+                            {uc.libraryCourse?.title}
+                          </Link>
+                          {uc.completedAt ? (
+                            <Badge variant="default" className="bg-green-500 text-white flex-shrink-0">
+                              Completed
+                            </Badge>
+                          ) : (
+                            <span className="text-sm font-medium text-primary flex-shrink-0">
+                              {uc.progress}%
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Progress bar */}
+                        <Progress value={uc.progress} className="h-2 mb-3" />
+
+                        {/* Action button */}
+                        <Button asChild size="sm" variant={uc.completedAt ? "outline" : "default"}>
                           <Link to={`/courses/${uc.libraryCourseId}`}>
-                            Continue Learning
+                            {uc.completedAt ? 'Review Course' : 'Continue Learning'}
                           </Link>
                         </Button>
-                      )}
-                      {uc.completedAt && (
-                        <Button asChild size="sm" variant="outline" className="flex-1">
-                          <Link to={`/courses/${uc.libraryCourseId}`}>
-                            Review Course
-                          </Link>
-                        </Button>
-                      )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

@@ -1,5 +1,11 @@
 # Configuration Management
 
+## Sam's Scenario
+
+Maya needed the mobile app to use the cloud database, but Chen's on-premise deployment needed local SQLite. Sam asked: "How do I support both?" Alex explained: "Configuration! Use environment variables to choose adapters at startup. Same code, different config."
+
+## Configuration Strategy
+
 Configuration determines which adapters to use and how to connect them. It's the bridge between your environment and your application.
 
 ## Configuration Flow
@@ -28,18 +34,19 @@ flowchart LR
     style Config fill:#FFD700,stroke:#333
 ```
 
-## Configuration Struct
+## BookShelf Configuration Struct
 
 ```go
 // internal/config/config.go
 package config
 
+import "time"
+
 type Config struct {
     Environment string          `env:"APP_ENV" default:"development"`
     Server      ServerConfig
     Database    DatabaseConfig
-    Email       EmailConfig
-    Auth        AuthConfig
+    Library     LibraryConfig
 }
 
 type ServerConfig struct {
@@ -55,19 +62,26 @@ type DatabaseConfig struct {
     Port     int    `env:"DB_PORT" default:"5432"`
     User     string `env:"DB_USER"`
     Password string `env:"DB_PASSWORD"`
-    Name     string `env:"DB_NAME" default:"app"`
+    Name     string `env:"DB_NAME" default:"bookshelf.db"`
     SSLMode  string `env:"DB_SSLMODE" default:"disable"`
 }
 
-type EmailConfig struct {
-    Provider string `env:"EMAIL_PROVIDER" default:"console"`
-    APIKey   string `env:"EMAIL_API_KEY"`
-    From     string `env:"EMAIL_FROM" default:"noreply@example.com"`
+type LibraryConfig struct {
+    MaxActiveLoans  int     `env:"LIBRARY_MAX_ACTIVE_LOANS" default:"5"`
+    MaxOverdueLoans int     `env:"LIBRARY_MAX_OVERDUE_LOANS" default:"0"`
+    LateFeePerDay   float64 `env:"LIBRARY_LATE_FEE_PER_DAY" default:"0.50"`
+    MaxLateFee      float64 `env:"LIBRARY_MAX_LATE_FEE" default:"25.00"`
+    GraceDays       int     `env:"LIBRARY_GRACE_DAYS" default:"3"`
+    LoanPeriodDays  int     `env:"LIBRARY_LOAN_PERIOD_DAYS" default:"14"`
 }
 
-type AuthConfig struct {
-    JWTSecret     string        `env:"JWT_SECRET" required:"true"`
-    TokenDuration time.Duration `env:"TOKEN_DURATION" default:"24h"`
+func (d *DatabaseConfig) DSN() string {
+    if d.Driver == "sqlite" {
+        return d.Name
+    }
+    // Postgres DSN
+    return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+        d.Host, d.Port, d.User, d.Password, d.Name, d.SSLMode)
 }
 ```
 
@@ -131,42 +145,54 @@ flowchart TB
 
 ```go
 // cmd/api/main.go
-func createUserRepository(cfg *config.Config) (repositories.UserRepository, error) {
+func createBookRepository(cfg *config.Config) (repositories.BookRepository, error) {
     switch cfg.Database.Driver {
     case "postgres":
         pool, err := pgxpool.New(context.Background(), cfg.Database.DSN())
         if err != nil {
             return nil, err
         }
-        return postgres.NewUserRepository(pool), nil
+        return postgres.NewBookRepository(pool), nil
 
     case "sqlite":
-        db, err := sql.Open("sqlite3", cfg.Database.Name)
+        db, err := sql.Open("sqlite3", cfg.Database.DSN())
         if err != nil {
             return nil, err
         }
-        return sqlite.NewUserRepository(db), nil
+        return sqlite.NewBookRepository(db), nil
 
     case "memory":
-        return memory.NewUserRepository(), nil
+        return memory.NewBookRepository(), nil  // For testing
 
     default:
         return nil, fmt.Errorf("unknown database driver: %s", cfg.Database.Driver)
     }
 }
 
-func createEmailSender(cfg *config.Config) (ports.EmailSender, error) {
-    switch cfg.Email.Provider {
-    case "sendgrid":
-        return sendgrid.NewEmailSender(cfg.Email.APIKey, cfg.Email.From), nil
-    case "ses":
-        return ses.NewEmailSender(cfg.Email.From), nil
-    case "console":
-        return console.NewEmailSender(), nil  // Logs emails to console
-    default:
-        return nil, fmt.Errorf("unknown email provider: %s", cfg.Email.Provider)
-    }
-}
+// Example environment files:
+
+// .env.development (Sam's local dev)
+// DB_DRIVER=sqlite
+// DB_NAME=bookshelf_dev.db
+// LIBRARY_MAX_ACTIVE_LOANS=10
+
+// .env.production (Maya's cloud deployment)
+// DB_DRIVER=postgres
+// DB_HOST=prod-db.example.com
+// DB_PORT=5432
+// DB_USER=bookshelf_prod
+// DB_PASSWORD=<secret>
+// DB_NAME=bookshelf
+// DB_SSLMODE=require
+
+// .env.onpremise (Chen's Riverside Library)
+// DB_DRIVER=postgres
+// DB_HOST=localhost
+// DB_PORT=5432
+// DB_USER=library_admin
+// DB_NAME=riverside_books
+// LIBRARY_MAX_ACTIVE_LOANS=5
+// LIBRARY_LATE_FEE_PER_DAY=1.00
 ```
 
 ## Configuration Best Practices
@@ -179,3 +205,7 @@ func createEmailSender(cfg *config.Config) (ports.EmailSender, error) {
 | **Type safety** | Use structs, not string maps |
 | **Secret management** | Never commit secrets; use vault in production |
 | **Environment-specific** | Different adapters for dev/test/prod |
+
+## Sam's Insight
+
+"So Maya's mobile app uses Postgres in the cloud with these env vars, Chen's on-premise uses local Postgres with different values, and my dev environment uses SQLite," Sam explained. "Same codebase, just different configuration!" Alex nodded: "And if you add GraphQL for the mobile app, that's just another cmd entry point with the same use cases."

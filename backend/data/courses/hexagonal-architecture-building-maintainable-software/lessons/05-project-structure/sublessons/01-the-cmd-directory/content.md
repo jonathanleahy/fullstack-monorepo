@@ -1,5 +1,11 @@
 # The cmd Directory
 
+## Sam's Scenario
+
+Sam asked: "Where do I create instances of my repositories and use cases?" Alex explained: "In `main.go` - the composition root. This is the only place that knows about all concrete implementations. It's like the conductor's podium where you assemble the entire orchestra."
+
+## The Composition Root
+
 The cmd directory contains your application entry points - where everything gets wired together.
 
 ## Composition Root
@@ -28,31 +34,65 @@ flowchart TB
 // cmd/api/main.go
 package main
 
+import (
+    "log/slog"
+    "os"
+    "bookshelf/internal/adapters/db/sqlite"
+    "bookshelf/internal/adapters/http"
+    "bookshelf/internal/application/usecases"
+    "bookshelf/internal/config"
+    "bookshelf/internal/domain/services"
+)
+
 func main() {
-    // Load configuration
+    // 1. Load configuration
     cfg := config.Load()
 
-    // Create infrastructure
+    // 2. Setup infrastructure
     db := setupDatabase(cfg)
     logger := setupLogger(cfg)
 
-    // Create adapters (driven)
+    // 3. Create driven adapters (repositories)
+    bookRepo := sqlite.NewBookRepository(db)
     userRepo := sqlite.NewUserRepository(db)
-    emailSender := sendgrid.NewEmailSender(cfg.SendGridKey)
+    loanRepo := sqlite.NewLoanRepository(db)
 
-    // Create domain services
-    authService := services.NewAuthService(cfg.JWTSecret)
+    // 4. Create domain services
+    lateFeeCalc := services.NewLateFeeCalculator(0.50, 25.00, 3)
+    eligibility := services.NewLoanEligibilityService(5, 0)
 
-    // Create use cases
-    userUseCase := usecases.NewUserUseCase(userRepo, emailSender, logger)
+    // 5. Create use cases
+    createBookUC := usecases.NewCreateBookUseCase(bookRepo, logger)
+    loanBookUC := usecases.NewLoanBookUseCase(bookRepo, userRepo, eligibility, logger)
+    returnBookUC := usecases.NewReturnBookUseCase(bookRepo, loanRepo, lateFeeCalc, logger)
+    searchBooksUC := usecases.NewSearchBooksUseCase(bookRepo)
 
-    // Create adapters (driving)
-    userHandler := http.NewUserHandler(userUseCase)
+    // 6. Create driving adapters (handlers)
+    bookHandler := http.NewBookHandler(createBookUC, searchBooksUC)
+    loanHandler := http.NewLoanHandler(loanBookUC, returnBookUC)
 
-    // Start server
-    router := http.NewRouter(userHandler, authService)
-    router.ListenAndServe(":8080")
+    // 7. Start server
+    router := http.NewRouter(bookHandler, loanHandler)
+    logger.Info("BookShelf API starting", "port", cfg.Server.Port)
+    router.ListenAndServe(cfg.Server.Port)
+}
+
+func setupDatabase(cfg *config.Config) *sql.DB {
+    db, err := sql.Open(cfg.Database.Driver, cfg.Database.DSN())
+    if err != nil {
+        slog.Error("failed to connect to database", "error", err)
+        os.Exit(1)
+    }
+    return db
+}
+
+func setupLogger(cfg *config.Config) *slog.Logger {
+    return slog.New(slog.NewJSONHandler(os.Stdout, nil))
 }
 ```
 
 The main function is the **composition root** - the only place that knows about all concrete implementations.
+
+## Sam's Insight
+
+"So `main.go` is where I choose SQLite vs Postgres, or REST vs GraphQL," Sam noted. "Everything else is just interfaces and abstractions." Alex confirmed: "Exactly. If Chen wants on-premise with Postgres, you just swap the adapter in main.go. No business logic changes."

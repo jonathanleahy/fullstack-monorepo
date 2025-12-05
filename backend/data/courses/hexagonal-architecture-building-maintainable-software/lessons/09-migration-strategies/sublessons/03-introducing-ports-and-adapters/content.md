@@ -1,5 +1,13 @@
 # Introducing Ports and Adapters
 
+## Sam's Scenario
+
+Riley's domain entities were clean, but the use cases were still coupled directly to the PostgreSQL database driver. "How do I test my use cases without a real database?" Riley asked.
+
+"That's where ports and adapters come in," Sam explained. "Create a repository interface (the port), and implement it with a PostgreSQL adapter. Your use case depends on the interface, so you can test it with a mock repository. Let me show you how to introduce ports step by step."
+
+## Creating the Boundaries
+
 Once you've extracted the domain, you can introduce ports and adapters incrementally. This step creates the boundaries that make your architecture truly hexagonal.
 
 ## The Process
@@ -198,3 +206,13 @@ var _ repositories.UserRepository = (*sqlite.UserRepository)(nil)
 var _ repositories.UserRepository = (*postgres.UserRepository)(nil)
 var _ repositories.UserRepository = (*memory.UserRepository)(nil)
 ```
+
+## Riley's Port and Adapter Success
+
+After introducing the ItemRepository port and PostgresItemRepository adapter, Riley created a second adapter: InMemoryItemRepository for tests.
+
+"Now my use case tests run in 5 milliseconds with the in-memory adapter," Riley exclaimed. "No database setup, no cleanup, just pure business logic testing. And in production, I inject the PostgreSQL adapter. The use case doesn't know the difference."
+
+Riley also created a CSVItemAdapter to export items to spreadsheets. "I implemented the same ItemRepository interface, but backed by CSV files instead of a database. It took 30 minutes. The use cases worked without modification."
+
+Sam nodded approvingly. "That's the power of ports and adapters. Your core logic is reusable, and you can swap infrastructure freely. You've achieved the hexagonal architecture promise."

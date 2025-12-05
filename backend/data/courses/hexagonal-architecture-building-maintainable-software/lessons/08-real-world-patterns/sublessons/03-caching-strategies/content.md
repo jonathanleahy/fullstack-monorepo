@@ -1,5 +1,13 @@
 # Caching Strategies
 
+## Sam's Scenario
+
+BookShelf was slowing down. Every book search hit the database, and popular books were queried dozens of times per second. Sam needed caching, but he didn't want to clutter his repository code with Redis calls.
+
+"Use the decorator pattern," Alex suggested. "Wrap your BookRepository with a CachedBookRepository. The use cases don't know they're talking to a cache - they just see the same interface. Let me show you how to add caching without touching your business logic."
+
+## Caching Without Complexity
+
 Caching improves performance but adds complexity. In Hexagonal Architecture, we can implement caching as a decorator without changing business logic.
 
 ## Where Does Caching Fit?
@@ -181,3 +189,13 @@ func (h *CacheInvalidationHandler) Handle(ctx context.Context, e events.Event) e
 | **Invalidate on writes** | Keep cache consistent with DB |
 | **Handle cache failures gracefully** | Fall back to database |
 | **Monitor hit rates** | Track cache effectiveness |
+
+## Sam's Performance Boost
+
+After adding the cached repository decorator, BookShelf's performance improved dramatically. Book searches that took 50ms now took 2ms when cached. Database load dropped by 80% for read operations.
+
+"The beautiful part," Sam told Maya, "is that my use cases have no idea there's a cache. If Redis goes down, the decorator falls back to PostgreSQL. If we want to change caching strategies, we just swap the decorator. The business logic never changes."
+
+Maya was impressed. "So when we scale to 100,000 users, caching will keep us fast without requiring a rewrite?"
+
+"Exactly," Sam confirmed. "Hexagonal architecture makes performance optimizations like caching purely operational concerns."

@@ -1,5 +1,17 @@
 # The Strangler Fig Pattern
 
+## Sam's Scenario
+
+"We can't stop development to rewrite everything," Riley worried. "I have features to ship and users to support."
+
+"You don't need to," Sam reassured them. "We'll use the strangler fig pattern. You'll keep the old code running while gradually building new hexagonal components alongside it. We'll route traffic to the new system piece by piece using feature flags. If something breaks, we just flip the flag back. No big bang, no risk."
+
+Riley was skeptical. "How do we run old and new code side by side?"
+
+Sam pulled up a diagram. "Let me show you how the strangler fig pattern works."
+
+## Incremental Migration
+
 The Strangler Fig pattern, named after fig trees that gradually wrap and replace their hosts, allows you to migrate incrementally without risky big-bang rewrites.
 
 ## The Pattern
@@ -159,3 +171,13 @@ func (r *MigrationRouter) CreateUser(w http.ResponseWriter, req *http.Request) {
 - **Continuous delivery**: Never stop shipping
 - **Measurable progress**: Track percentage migrated
 - **Team learning**: Learn patterns on low-risk features first
+
+## Sam's Migration Plan for Riley
+
+Sam set up a migration router for Riley's supply tracking system. Week 1: They migrated CreateItem to hexagonal architecture and routed 10% of traffic through the new handler. No issues. Week 2: 50% of traffic. Still smooth. Week 3: 100% of CreateItem traffic used the new handler.
+
+"We migrated the most critical endpoint without a single outage," Riley said, amazed. "Users had no idea we were refactoring underneath."
+
+Over the next two months, Riley and Sam migrated one endpoint at a time: UpdateItem, DeleteItem, ListItems, SearchItems. Each migration was isolated, testable, and reversible.
+
+"The strangler fig pattern saved us," Riley told their team. "We refactored to hexagonal architecture while shipping new features every week. No big rewrite, no downtime, no drama."

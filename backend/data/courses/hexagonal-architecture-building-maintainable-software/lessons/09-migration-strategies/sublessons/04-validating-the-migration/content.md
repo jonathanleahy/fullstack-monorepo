@@ -1,5 +1,21 @@
 # Validating the Migration
 
+## Sam's Scenario
+
+After two months of migration, Riley wanted to know: "Did hexagonal architecture actually help? How do we measure success?"
+
+Sam helped Riley define metrics before the migration started and tracked them throughout:
+
+**Before Migration:**
+- Test coverage: 12%
+- Test execution: 45 seconds (all integration tests)
+- Time to add feature: 5-7 days
+- Production bugs: 8-10 per month
+
+"Let's measure these same metrics after migration," Sam suggested. "And let's add performance benchmarks to ensure we didn't slow anything down."
+
+## Measuring Success
+
 How do you know the migration is successful? Define success criteria upfront and measure throughout.
 
 ## Success Metrics
@@ -193,3 +209,22 @@ flowchart LR
 
     style Results fill:#90EE90,stroke:#333
 ```
+
+## Riley's Results
+
+Three months after completing the migration, Riley measured the impact:
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Test coverage | 12% | 78% | +66% |
+| Test execution time | 45s | 1.2s | 37x faster |
+| Time to add feature | 5-7 days | 1-2 days | 3-4x faster |
+| Production bugs/month | 8-10 | 1-2 | 5x reduction |
+| New dev onboarding | 8 weeks | 2 weeks | 4x faster |
+| API latency p99 | 180ms | 165ms | Improved |
+
+"Hexagonal architecture didn't just improve code quality," Riley told their team. "It made the business move faster. We ship features in days instead of weeks, bugs are down 80%, and new developers are productive in 2 weeks instead of 2 months."
+
+Riley looked at Sam gratefully. "Thank you for showing me the strangler fig pattern. We migrated incrementally without stopping feature development. No big rewrite, no disaster. Just steady improvement."
+
+Sam smiled. "That's the beauty of hexagonal architecture migration. You can get there incrementally, measuring results every step of the way. And now you have a maintainable system that can evolve with your business."

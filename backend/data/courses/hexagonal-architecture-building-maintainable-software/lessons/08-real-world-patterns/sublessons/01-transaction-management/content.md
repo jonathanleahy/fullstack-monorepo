@@ -1,5 +1,13 @@
 # Transaction Management
 
+## Sam's Scenario
+
+Sam discovered a critical bug in BookShelf: when a user borrowed a book, sometimes the loan was created but the book wasn't marked as unavailable. The operations weren't atomic, leading to race conditions where two users could borrow the same book.
+
+"You need transactions," Alex explained. "When you borrow a book, you need to create the loan AND mark the book unavailable in a single atomic operation. If either fails, both should roll back. Let me show you how to implement the Unit of Work pattern in hexagonal architecture."
+
+## The Transaction Problem
+
 When a use case needs to save to multiple repositories atomically, you need transaction management. Here's how to do it in Hexagonal Architecture.
 
 ## The Problem
@@ -188,3 +196,9 @@ func TxFromContext(ctx context.Context) pgx.Tx {
 | **Rollback on error** | Always handle cleanup |
 | **Side effects after commit** | Send emails/events after success |
 | **Test rollback scenarios** | Verify consistency on failures |
+
+## Sam's Fix
+
+After implementing transactions for BorrowBook, Sam tested the race condition scenario again. Two users trying to borrow the same book simultaneously? The second transaction failed with a proper error. Creating a loan but failing to mark the book unavailable? The entire transaction rolled back, leaving the database consistent.
+
+"Transactions are tricky," Sam told Alex. "But the Unit of Work pattern made them manageable. Now BookShelf's critical operations are atomic, and I can sleep better knowing the database stays consistent even under concurrent load."

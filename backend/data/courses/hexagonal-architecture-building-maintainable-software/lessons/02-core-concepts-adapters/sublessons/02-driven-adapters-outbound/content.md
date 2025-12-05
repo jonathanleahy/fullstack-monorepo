@@ -1,5 +1,11 @@
 # Driven Adapters (Outbound)
 
+## Sam's Scenario: The Database Implementation
+
+"Now for the other side," Sam said. "My use case calls `bookRepo.Save(book)`. That's the port. But I need an actual implementation that talks to SQLite. That's a driven adapter, right?"
+
+"Exactly!" Alex confirmed. "Your `SQLiteBookRepository` is a driven adapter. It implements the `BookRepository` port and contains all the SQLite-specific code—SQL queries, connection handling, error mapping. Your use case just calls the interface and doesn't care about the implementation details."
+
 **What they do:** Implement the interfaces your domain needs, connecting to real infrastructure.
 
 ## Driven Adapter Implementation
@@ -37,35 +43,71 @@ classDiagram
     UserRepository <|.. SQLiteUserRepository
     UserRepository <|.. PostgresUserRepository
     UserRepository <|.. InMemoryUserRepository
-```
 
-**Examples:**
-- Database repositories (PostgreSQL, MongoDB, SQLite)
-- Email services (SendGrid, SES, SMTP)
-- Payment gateways (Stripe, PayPal)
-- External API clients
+## Sam's Insight
+
+"This is brilliant for testing!" Sam realized. "In my tests, I can use `InMemoryBookRepository`—no database needed, everything runs in milliseconds. In development, I use `SQLiteBookRepository`—easy setup, no server required. For Chen's production deployment, I use `OracleBookRepository`—enterprise-grade, meets their requirements."
+
+Sam continued, "And the best part? My `CreateLoan` use case looks exactly the same in all three environments:
 
 ```go
-// SQLite Adapter - implements UserRepository port
-type SQLiteUserRepository struct {
+func (uc *CreateLoanUseCase) Execute(ctx context.Context, input CreateLoanInput) (*Loan, error) {
+    // This line works with ANY adapter that implements BookRepository!
+    book, err := uc.bookRepo.FindByISBN(ctx, input.BookISBN)
+    // ... business logic ...
+}
+```
+
+The use case doesn't know or care which adapter is behind that interface!"
+```
+
+**Examples for BookShelf:**
+- Database repositories (SQLite for dev, Oracle for Chen's enterprise)
+- Email services (SMTP for dev, SendGrid for production)
+- External API clients (ISBN validation service)
+- File storage (local filesystem, S3 for book covers)
+
+```go
+// SQLite Adapter - implements BookRepository port
+type SQLiteBookRepository struct {
     db *sql.DB
 }
 
-func (r *SQLiteUserRepository) Save(ctx context.Context, user *entities.User) error {
-    query := `INSERT INTO users (id, name, email) VALUES (?, ?, ?)`
-    _, err := r.db.ExecContext(ctx, query, user.ID, user.Name, user.Email)
+func (r *SQLiteBookRepository) Save(ctx context.Context, book *entities.Book) error {
+    query := `INSERT INTO books (isbn, title, author, available) VALUES (?, ?, ?, ?)`
+    _, err := r.db.ExecContext(ctx, query, book.ISBN, book.Title, book.Author, book.Available)
     return err
 }
 
-func (r *SQLiteUserRepository) FindByID(ctx context.Context, id string) (*entities.User, error) {
-    query := `SELECT id, name, email FROM users WHERE id = ?`
+func (r *SQLiteBookRepository) FindByISBN(ctx context.Context, isbn string) (*entities.Book, error) {
+    query := `SELECT isbn, title, author, available FROM books WHERE isbn = ?`
 
-    var user entities.User
-    err := r.db.QueryRowContext(ctx, query, id).Scan(&user.ID, &user.Name, &user.Email)
+    var book entities.Book
+    err := r.db.QueryRowContext(ctx, query, isbn).Scan(
+        &book.ISBN, &book.Title, &book.Author, &book.Available)
 
     if err == sql.ErrNoRows {
-        return nil, entities.ErrUserNotFound
+        return nil, entities.ErrBookNotFound
     }
-    return &user, err
+    return &book, err
+}
+
+func (r *SQLiteBookRepository) FindByTitle(ctx context.Context, title string) ([]*entities.Book, error) {
+    query := `SELECT isbn, title, author, available FROM books WHERE title LIKE ?`
+    rows, err := r.db.QueryContext(ctx, query, "%"+title+"%")
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var books []*entities.Book
+    for rows.Next() {
+        var book entities.Book
+        if err := rows.Scan(&book.ISBN, &book.Title, &book.Author, &book.Available); err != nil {
+            return nil, err
+        }
+        books = append(books, &book)
+    }
+    return books, nil
 }
 ```

@@ -1,5 +1,15 @@
 # Cross-Cutting Concerns
 
+## Sam's Scenario
+
+BookShelf was growing rapidly, and Sam needed to add observability. Maya wanted metrics on borrowing patterns. Chen needed detailed logs for compliance audits. But Sam didn't want to clutter his clean domain logic with logging and metrics calls.
+
+"How do I add logging everywhere without putting logger.Info() calls in every method?" Sam asked Alex.
+
+"Cross-cutting concerns," Alex explained. "You use decorators and middleware to wrap your services without changing them. Let me show you how to add logging, metrics, and tracing to BookShelf without touching your domain."
+
+## Handling Cross-Cutting Concerns
+
 Cross-cutting concerns like logging, metrics, and tracing touch every part of your application. In Hexagonal Architecture, we handle them without polluting the domain.
 
 ## The Challenge
@@ -180,3 +190,11 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, input ports.CreateUserInp
 | **Use middleware** | For HTTP-specific concerns |
 | **Propagate context** | Pass ctx through all layers for tracing |
 | **Wire in main.go** | Composition root controls decoration |
+
+## Sam's Implementation
+
+Sam added logging and metrics decorators to BookShelf. His domain code stayed clean - no logger imports in Book, User, or Loan entities. His use cases remained focused on business logic. But in main.go, he wrapped his BorrowBookUseCase with LoggingDecorator and MetricsDecorator.
+
+"Perfect," Maya said during a demo. "I can see exactly how many books are borrowed per hour, average processing time, and error rates. And you didn't have to change your business logic at all."
+
+Sam smiled. "That's the decorator pattern. Cross-cutting concerns stay at the edges where they belong."

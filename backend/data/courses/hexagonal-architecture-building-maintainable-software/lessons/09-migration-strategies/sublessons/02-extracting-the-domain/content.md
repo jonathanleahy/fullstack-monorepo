@@ -1,5 +1,17 @@
 # Extracting the Domain
 
+## Sam's Scenario
+
+Riley's CreateItemHandler was a mess - 150 lines of mixed HTTP parsing, database queries, and business validation. Sam showed Riley how to extract the domain layer first.
+
+"The hardest part of migration is identifying what's actually business logic versus infrastructure plumbing," Sam explained. "Let's look at your CreateItemHandler and separate the business rules from the HTTP and database concerns."
+
+Together, they found the business rules buried in the handler: item names must be unique, quantities can't be negative, categories must exist, and reorder points trigger low-stock alerts.
+
+"This business logic belongs in domain entities, not HTTP handlers," Sam said. "Let's extract it."
+
+## The First Step
+
 The first and most important step: pull business logic out of handlers and infrastructure into a clean domain layer.
 
 ## Before and After
@@ -204,3 +216,13 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 - [ ] Created use case for orchestration
 - [ ] Updated handler to be thin
 - [ ] Added tests for domain logic
+
+## Riley's Extraction Results
+
+After extracting the Item domain entity, Riley was amazed. "The entity has 15 tests and they run in 2 milliseconds. Before, I couldn't test this logic at all because it was embedded in the HTTP handler with database calls."
+
+The CreateItemHandler shrank from 150 lines to 20 lines - just HTTP parsing, calling the use case, and formatting the response.
+
+"Now I can test business rules without a database, without HTTP mocking, without any infrastructure," Riley said. "The domain logic is finally isolated and testable. This is what you meant by 'the domain at the center.'"
+
+Sam smiled. "Exactly. Now your business logic is portable. If you need a CLI tool later, you'll reuse the same entities and use cases with a different adapter."

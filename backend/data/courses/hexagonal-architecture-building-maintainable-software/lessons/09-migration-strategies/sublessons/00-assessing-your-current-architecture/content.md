@@ -1,5 +1,15 @@
 # Assessing Your Current Architecture
 
+## Sam's Scenario
+
+Remember Riley, Sam's friend who was building a simple supply tracking tool? It turned out not so simple. Six months later, Riley's codebase was a tangled mess of database calls in HTTP handlers, business logic scattered everywhere, and zero tests.
+
+"I can't add features anymore without breaking something," Riley confessed to Sam. "Every change takes a week and introduces three bugs. Can you help me migrate to hexagonal architecture?"
+
+Sam pulled up Riley's code. "First, we need to assess what you have. Let's map out your current architecture - where's the business logic, what's coupled to what, and what are your biggest pain points. Then we'll create a migration plan."
+
+## Understanding Your Starting Point
+
 Before migrating, you need to understand what you have. This assessment will guide your migration strategy.
 
 ## What to Look For
@@ -154,3 +164,26 @@ Document your findings:
 - [ ] Prioritized areas for migration
 - [ ] Created target state diagram
 - [ ] Defined success criteria
+
+## Sam's Assessment of Riley's Code
+
+After reviewing Riley's codebase, Sam created an assessment:
+
+**Pain Points:**
+- Adding new features takes 5-7 days (used to be 1 day)
+- Every deploy breaks something
+- Can't test without full database
+- New developer onboarding takes 2+ months
+
+**Architecture Issues:**
+- Item validation mixed into HTTP handlers
+- Direct SQL queries in controllers
+- Business rules scattered across 12 files
+- Database types leak into response models
+
+**Migration Priority:**
+1. Item management (highest pain, core feature)
+2. User authentication (medium pain, isolated)
+3. Reporting (low pain, separate module)
+
+"We'll start with item management," Sam explained. "It's your core feature and causing the most pain. We'll use the strangler fig pattern to migrate it incrementally while you keep shipping features."

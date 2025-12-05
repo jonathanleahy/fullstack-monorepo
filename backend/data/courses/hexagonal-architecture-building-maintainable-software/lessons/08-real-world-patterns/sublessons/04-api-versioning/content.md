@@ -1,5 +1,13 @@
 # API Versioning
 
+## Sam's Scenario
+
+Maya's mobile app was using BookShelf's REST API successfully. But when Sam needed to make breaking changes - renaming fields, changing response structures - Maya panicked. "You can't break the mobile app! Users are on old versions we can't force-update."
+
+Alex helped Sam understand API versioning. "Your domain stays the same. You just create v1 and v2 HTTP adapters. Old mobile apps talk to v1, new apps talk to v2. Both adapters call the same use cases underneath. Let me show you how hexagonal architecture makes versioning trivial."
+
+## Versioning at the Edges
+
 APIs evolve over time. In Hexagonal Architecture, versioning happens in the driving adapters, keeping the domain stable.
 
 ## Why Versioning Matters
@@ -190,3 +198,13 @@ func DeprecationMiddleware(version string, sunset time.Time) func(http.Handler) 
 | **Deprecate gracefully** | Give clients time to migrate |
 | **Document changes** | Provide migration guides |
 | **Support 2-3 versions max** | Limit maintenance burden |
+
+## Sam's API Evolution
+
+Sam created separate v1 and v2 HTTP handlers for BookShelf. The v1 handlers maintained the old API contract for existing mobile users. The v2 handlers used the new, improved field names and response structures.
+
+Both versions called the exact same BorrowBookUseCase. The domain logic didn't change at all - only the HTTP adapters differed.
+
+"We're supporting three API versions now," Sam told Alex six months later. "V1 for legacy mobile, v2 for current mobile, and v3 for the new web app. And the domain layer doesn't even know versions exist. All the versioning complexity lives in thin adapter layers."
+
+Alex smiled. "That's hexagonal architecture working exactly as designed. Your valuable business logic is stable and reusable, while the interfaces can evolve independently."

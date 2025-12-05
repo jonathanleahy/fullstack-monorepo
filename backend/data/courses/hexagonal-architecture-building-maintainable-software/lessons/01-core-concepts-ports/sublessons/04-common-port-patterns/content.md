@@ -1,5 +1,11 @@
 # Common Port Patterns
 
+## Sam's Scenario: Building BookShelf's Port Catalog
+
+"Now that I understand ports," Sam said, "what ports does BookShelf actually need? I don't want to over-engineer, but I also don't want to miss important ones."
+
+Alex pulled out a list. "Let's identify the common patterns. Most applications need repositories for data, notifiers for communication, and services that define capabilities. BookShelf is no different."
+
 Let's look at the most common types of ports you'll create in real applications.
 
 ## Repository Port Pattern
@@ -27,13 +33,20 @@ classDiagram
 ```
 
 ```go
-// Repository pattern - CRUD operations for domain entities
-type UserRepository interface {
-    Save(ctx context.Context, user *User) error
-    FindByID(ctx context.Context, id string) (*User, error)
-    FindByEmail(ctx context.Context, email string) (*User, error)
-    Delete(ctx context.Context, id string) error
-    List(ctx context.Context, filter UserFilter) ([]*User, error)
+// Repository pattern - CRUD operations for BookShelf entities
+type BookRepository interface {
+    Save(ctx context.Context, book *Book) error
+    FindByISBN(ctx context.Context, isbn string) (*Book, error)
+    FindByTitle(ctx context.Context, title string) ([]*Book, error)
+    Delete(ctx context.Context, isbn string) error
+    List(ctx context.Context, filter BookFilter) ([]*Book, error)
+}
+
+type LoanRepository interface {
+    Save(ctx context.Context, loan *Loan) error
+    FindByID(ctx context.Context, id string) (*Loan, error)
+    FindByUserEmail(ctx context.Context, email string) ([]*Loan, error)
+    FindOverdue(ctx context.Context) ([]*Loan, error)
 }
 ```
 
@@ -42,20 +55,15 @@ type UserRepository interface {
 Abstracts sending notifications of any kind:
 
 ```go
-// Notification ports - various ways to notify users
-type EmailSender interface {
-    SendWelcomeEmail(ctx context.Context, to, userName string) error
-    SendPasswordReset(ctx context.Context, to, resetLink string) error
-    SendOrderConfirmation(ctx context.Context, to string, order *Order) error
+// Notification ports - BookShelf communications
+type EmailNotifier interface {
+    SendLoanConfirmation(ctx context.Context, to string, loan *Loan) error
+    SendOverdueReminder(ctx context.Context, to string, loan *Loan) error
+    SendBookAvailable(ctx context.Context, to string, book *Book) error
 }
 
-type SMSSender interface {
-    SendVerificationCode(ctx context.Context, phone, code string) error
-    SendAlert(ctx context.Context, phone, message string) error
-}
-
-type PushNotifier interface {
-    SendPush(ctx context.Context, deviceID, title, body string) error
+type SMSNotifier interface {
+    SendDueDateReminder(ctx context.Context, phone string, loan *Loan) error
 }
 ```
 
@@ -75,19 +83,19 @@ flowchart TB
 ```
 
 ```go
-// Service ports - what the application can do
-type UserService interface {
-    CreateUser(ctx context.Context, input CreateUserInput) (*User, error)
-    UpdateUser(ctx context.Context, id string, input UpdateUserInput) (*User, error)
-    GetUser(ctx context.Context, id string) (*User, error)
-    DeleteUser(ctx context.Context, id string) error
+// Service ports - BookShelf capabilities
+type LoanService interface {
+    CreateLoan(ctx context.Context, input CreateLoanInput) (*Loan, error)
+    ReturnBook(ctx context.Context, loanID string) error
+    GetLoan(ctx context.Context, id string) (*Loan, error)
+    ListOverdueLoans(ctx context.Context) ([]*Loan, error)
 }
 
-type OrderService interface {
-    PlaceOrder(ctx context.Context, input PlaceOrderInput) (*Order, error)
-    CancelOrder(ctx context.Context, id string) error
-    GetOrder(ctx context.Context, id string) (*Order, error)
-    ListOrders(ctx context.Context, filter OrderFilter) ([]*Order, error)
+type BookService interface {
+    AddBook(ctx context.Context, input AddBookInput) (*Book, error)
+    RemoveBook(ctx context.Context, isbn string) error
+    FindBook(ctx context.Context, isbn string) (*Book, error)
+    SearchBooks(ctx context.Context, query string) ([]*Book, error)
 }
 ```
 
@@ -128,5 +136,20 @@ type SearchIndex interface {
 
 1. **Name ports by capability**, not implementation
 2. **Keep ports focused** - follow Interface Segregation Principle
-3. **Use domain language** - `Save`, not `Insert`; `FindByID`, not `SelectByPK`
-4. **Return domain types** - `*User`, not `*UserRow`
+3. **Use domain language** - `Save`, not `Insert`; `FindByISBN`, not `SelectByPK`
+4. **Return domain types** - `*Book`, not `*BookRow`
+
+## Sam's Insight
+
+Sam created a simple chart for BookShelf:
+
+**Driving Ports (What BookShelf offers):**
+- `LoanService` - manage book loans
+- `BookService` - manage book catalog
+
+**Driven Ports (What BookShelf needs):**
+- `BookRepository` - store books
+- `LoanRepository` - store loans
+- `EmailNotifier` - send notifications
+
+"This is so clear!" Sam said. "Every port has a single, obvious responsibility. When Maya's mobile app needs to create a loan, it calls `LoanService`. When Chen's Oracle adapter needs to be implemented, it implements `BookRepository` and `LoanRepository`. The ports are the contracts that make everything work together."

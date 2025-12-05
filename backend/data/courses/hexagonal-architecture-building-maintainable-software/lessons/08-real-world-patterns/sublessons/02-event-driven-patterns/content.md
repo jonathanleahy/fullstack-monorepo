@@ -1,5 +1,13 @@
 # Event-Driven Patterns
 
+## Sam's Scenario
+
+Sam's BorrowBook use case was getting bloated. After creating a loan, it had to send a confirmation email, update analytics, create an activity log entry, and notify the recommendation engine. Every new requirement meant modifying the use case.
+
+"Your use case knows too much," Alex observed. "It shouldn't care about emails, analytics, or recommendations. Those are side effects. Let me introduce you to domain events - when a book is borrowed, just publish a 'BookBorrowed' event and let interested handlers react to it."
+
+## Decoupling with Events
+
 Domain events enable loose coupling between parts of your system. When something significant happens in your domain, publish an event.
 
 ## Why Domain Events?
@@ -210,3 +218,11 @@ flowchart LR
 | **Include all data** | Handlers shouldn't need to fetch more |
 | **Handle failures gracefully** | Event failures shouldn't break core logic |
 | **Consider ordering** | Some events may need ordered processing |
+
+## Sam's Refactoring
+
+After introducing domain events, Sam's BorrowBook use case became dramatically simpler. It created the loan, marked the book unavailable, and published a BookBorrowed event. That's it. Three focused responsibilities.
+
+Meanwhile, separate event handlers took care of the side effects: EmailHandler sent confirmations, AnalyticsHandler tracked borrowing patterns, ActivityHandler logged user actions, and RecommendationHandler updated suggestions.
+
+"Now when Maya wants to add a new feature that triggers when books are borrowed, I don't touch BorrowBook," Sam explained. "I just create a new event handler. The use case stays stable, and new features plug in cleanly."

@@ -381,7 +381,8 @@ func (r *mutationResolver) UpdateCourseProgress(ctx context.Context, libraryCour
 		return nil, errors.New("not authorized to update this course")
 	}
 
-	totalLessons := len(libraryCourse.Lessons)
+	// Use TotalLessonCount() to include all sublessons in the count
+	totalLessons := libraryCourse.TotalLessonCount()
 
 	if completed {
 		if err := userCourse.MarkLessonCompleted(lessonIndex, totalLessons); err != nil {
