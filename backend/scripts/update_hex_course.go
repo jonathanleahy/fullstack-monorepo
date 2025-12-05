@@ -19,14 +19,26 @@ type Lesson struct {
 }
 
 func main() {
-	// Open database
-	db, err := sql.Open("sqlite3", "../data/app.db")
+	// Open database - support both local and docker paths
+	dbPath := "../data/app.db"
+	// Check if running in docker (path will be /app/data/app.db)
+	if _, err := sql.Open("sqlite3", "/app/data/app.db"); err == nil {
+		dbPath = "/app/data/app.db"
+	}
+
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	courseID := "325d185d-2b79-450f-92e7-fabc030474d7"
+	// Find the hex architecture course by title
+	var courseID string
+	err = db.QueryRow(`SELECT id FROM library_courses WHERE title LIKE '%Hexagonal%' LIMIT 1`).Scan(&courseID)
+	if err != nil {
+		log.Fatal("Could not find Hexagonal Architecture course:", err)
+	}
+	fmt.Printf("Found course ID: %s\n", courseID)
 
 	// Create updated lessons with subchapters
 	lessons := []Lesson{

@@ -157,6 +157,37 @@ export function CourseDetailPage() {
     return true;
   }, [flatLessons, expandedLessons]);
 
+  // Auto-expand parent lessons when navigating to a subchapter
+  useEffect(() => {
+    if (flatLessons.length === 0) return;
+
+    const currentFlatLesson = flatLessons[selectedLesson];
+    if (!currentFlatLesson || currentFlatLesson.depth === 0) return;
+
+    // Find all parent lessons and expand them
+    const parentsToExpand: number[] = [];
+    let currentPath = currentFlatLesson.path.slice(0, -1);
+
+    while (currentPath.length > 0) {
+      const parentFlat = flatLessons.find(fl =>
+        fl.path.length === currentPath.length &&
+        fl.path.every((v, i) => v === currentPath[i])
+      );
+      if (parentFlat) {
+        parentsToExpand.push(parentFlat.flatIndex);
+      }
+      currentPath = currentPath.slice(0, -1);
+    }
+
+    if (parentsToExpand.length > 0) {
+      setExpandedLessons(prev => {
+        const next = new Set(prev);
+        parentsToExpand.forEach(idx => next.add(idx));
+        return next;
+      });
+    }
+  }, [selectedLesson, flatLessons]);
+
   useEffect(() => {
     if (id) {
       fetchCourse(id);
