@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { extractGraphQLError } from '../services/graphql';
 import {
   Button,
   Input,
@@ -13,9 +14,14 @@ import {
   CardFooter,
 } from '@repo/playbook';
 
+// Pre-fill with test credentials in development mode
+const isDev = import.meta.env.DEV;
+const DEFAULT_EMAIL = isDev ? 'test@example.com' : '';
+const DEFAULT_PASSWORD = isDev ? 'password123' : '';
+
 export function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(DEFAULT_EMAIL);
+  const [password, setPassword] = useState(DEFAULT_PASSWORD);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,7 +40,7 @@ export function LoginPage() {
       await login({ email, password });
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid email or password');
+      setError(extractGraphQLError(err));
     } finally {
       setIsSubmitting(false);
     }
