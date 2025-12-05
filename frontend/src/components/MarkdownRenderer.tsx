@@ -2,6 +2,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // Initialize mermaid with default config
 mermaid.initialize({
@@ -92,13 +94,23 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
               );
             }
 
-            // Regular code block
+            // Regular code block with syntax highlighting
+            const codeString = String(children).replace(/\n$/, '');
             return (
-              <pre className="bg-slate-900 text-slate-50 p-4 rounded-lg overflow-x-auto">
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              </pre>
+              <div className="not-prose my-4">
+                <SyntaxHighlighter
+                  style={oneDark}
+                  language={language || 'text'}
+                  PreTag="div"
+                  customStyle={{
+                    margin: 0,
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  {codeString}
+                </SyntaxHighlighter>
+              </div>
             );
           },
           pre({ children }) {
