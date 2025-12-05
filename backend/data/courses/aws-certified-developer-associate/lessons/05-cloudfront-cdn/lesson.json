@@ -1,0 +1,79 @@
+{
+  "id": "05-cloudfront-cdn",
+  "title": "CloudFront CDN",
+  "slug": "cloudfront-cdn",
+  "description": "Master Amazon CloudFront for global content delivery. Learn distributions, caching, security with signed URLs, and edge computing with Lambda@Edge.",
+  "order": 5,
+  "estimatedMinutes": 200,
+  "objectives": [
+    "Create and configure CloudFront distributions",
+    "Understand cache behaviors and invalidation",
+    "Implement signed URLs and signed cookies for secure content",
+    "Configure CloudFront with S3 and custom origins",
+    "Optimize performance with compression and edge caching",
+    "Implement Lambda@Edge for edge computing"
+  ],
+  "keywords": ["cloudfront", "cdn", "edge", "caching", "distributions", "signed-urls", "lambda@edge", "origin-access"],
+  "sublessons": [
+    {
+      "id": "00-alexs-challenge",
+      "title": "Alex's Challenge: Global Performance Crisis",
+      "order": 0
+    },
+    {
+      "id": "01-cloudfront-fundamentals",
+      "title": "CloudFront Fundamentals",
+      "order": 1
+    },
+    {
+      "id": "02-distributions",
+      "title": "Creating Distributions",
+      "order": 2
+    },
+    {
+      "id": "03-origins-and-behaviors",
+      "title": "Origins and Cache Behaviors",
+      "order": 3
+    },
+    {
+      "id": "04-caching-strategies",
+      "title": "Caching Strategies",
+      "order": 4
+    },
+    {
+      "id": "05-cache-invalidation",
+      "title": "Cache Invalidation",
+      "order": 5
+    },
+    {
+      "id": "06-security-https",
+      "title": "Security and HTTPS",
+      "order": 6
+    },
+    {
+      "id": "07-signed-urls-cookies",
+      "title": "Signed URLs and Signed Cookies",
+      "order": 7
+    },
+    {
+      "id": "08-origin-access",
+      "title": "Origin Access Control",
+      "order": 8
+    },
+    {
+      "id": "09-lambda-edge",
+      "title": "Lambda@Edge and CloudFront Functions",
+      "order": 9
+    },
+    {
+      "id": "10-monitoring-optimization",
+      "title": "Monitoring and Optimization",
+      "order": 10
+    },
+    {
+      "id": "11-chapter-summary",
+      "title": "Alex's Solution: Global Pet Photo Delivery",
+      "order": 11
+    }
+  ]
+}

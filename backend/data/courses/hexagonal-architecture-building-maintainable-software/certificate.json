@@ -1,0 +1,76 @@
+{
+  "title": "Hexagonal Architecture: Building Maintainable Software",
+  "certificate_title": "Certificate of Completion",
+  "subtitle": "Has successfully completed the Hexagonal Architecture course",
+
+  "requirements": {
+    "chapters_completed": 10,
+    "min_quiz_score": 70,
+    "final_exam_required": true,
+    "final_exam_min_score": 70
+  },
+
+  "skills_certified": [
+    "Hexagonal Architecture Design",
+    "Ports and Adapters Implementation",
+    "Domain-Driven Design Basics",
+    "Clean Code Architecture",
+    "Test-Driven Development",
+    "Legacy Code Migration"
+  ],
+
+  "badges": [
+    {
+      "id": "hex-fundamentals",
+      "name": "Hexagonal Fundamentals",
+      "description": "Completed chapters 1-3 covering core concepts",
+      "icon": "hexagon"
+    },
+    {
+      "id": "domain-master",
+      "name": "Domain Master",
+      "description": "Completed chapter 4 on domain layer design",
+      "icon": "core"
+    },
+    {
+      "id": "test-driven",
+      "name": "Test-Driven Developer",
+      "description": "Completed chapter 7 on testing hexagonal applications",
+      "icon": "test"
+    },
+    {
+      "id": "migration-expert",
+      "name": "Migration Expert",
+      "description": "Completed chapter 10 on legacy migration strategies",
+      "icon": "transform"
+    },
+    {
+      "id": "hex-architect",
+      "name": "Hexagonal Architect",
+      "description": "Passed the final exam with 80% or higher",
+      "icon": "architect"
+    }
+  ],
+
+  "certificate_content": {
+    "header": "Architecture Academy",
+    "body": "This is to certify that {student_name} has successfully completed the Hexagonal Architecture: Building Maintainable Software course, demonstrating proficiency in designing and implementing applications using the Ports and Adapters pattern.",
+    "date_format": "Completed on {completion_date}",
+    "credential_id": "HA-{unique_id}"
+  },
+
+  "sharing": {
+    "linkedin_enabled": true,
+    "linkedin_text": "I completed the Hexagonal Architecture course and earned my certificate! Learned how to build maintainable, testable applications using the Ports and Adapters pattern. #SoftwareArchitecture #CleanCode #HexagonalArchitecture",
+    "twitter_enabled": true,
+    "twitter_text": "Just earned my Hexagonal Architecture certificate! 🎯 Ready to build more maintainable software. #CleanArchitecture #SoftwareDev",
+    "download_pdf": true,
+    "download_png": true
+  },
+
+  "verification": {
+    "enabled": true,
+    "url_pattern": "/verify/{credential_id}",
+    "qr_code": true
+  }
+}

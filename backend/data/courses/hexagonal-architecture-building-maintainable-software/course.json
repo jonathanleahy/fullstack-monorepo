@@ -2,14 +2,134 @@
   "id": "325d185d-2b79-450f-92e7-fabc030474d7",
   "title": "Hexagonal Architecture: Building Maintainable Software",
   "subtitle": "Master the Ports and Adapters pattern for testable, flexible applications",
-  "description": "Master the Ports and Adapters pattern from the ground up. This comprehensive course takes you from 'what is this weird hexagon thing?' to confidently architecting enterprise applications. You'll learn through real examples, common mistakes to avoid, and hands-on exercises. By the end, you'll understand why companies like Netflix, Spotify, and countless startups use this pattern - and how to apply it in your own projects.",
-  "author": "Architecture Academy",
-  "author_bio": "Our courses are designed by experienced software architects who have built and maintained large-scale systems across industries including fintech, healthcare, and e-commerce.",
-  "difficulty": "intermediate",
-  "estimated_hours": 12,
-  "chapter_count": 10,
-  "subchapter_count": 50,
-  "tags": ["architecture", "golang", "clean-code", "testing", "design-patterns", "ports-and-adapters"],
-  "language": "en",
-  "last_updated": "2024-12-05"
+  "description": "Master the Ports and Adapters pattern from the ground up. Follow Sam, a solo founder transforming BookShelf from a tangled mess into a clean, testable system. Learn why companies like Netflix and Spotify use this pattern—and how to apply it in your own projects.",
+
+  "author": {
+    "name": "Architecture Academy",
+    "bio": "Our courses are designed by experienced software architects who have built and maintained large-scale systems across industries including fintech, healthcare, and e-commerce.",
+    "avatar": "/assets/authors/architecture-academy.jpg",
+    "social": {
+      "twitter": "@archacademy",
+      "linkedin": "architecture-academy",
+      "github": "arch-academy"
+    }
+  },
+
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_hours": 12,
+    "chapter_count": 10,
+    "subchapter_count": 50,
+    "language": "en",
+    "last_updated": "2024-12-05",
+    "version": "2.0.0"
+  },
+
+  "tags": [
+    "architecture",
+    "hexagonal-architecture",
+    "ports-and-adapters",
+    "clean-architecture",
+    "golang",
+    "testing",
+    "design-patterns",
+    "domain-driven-design"
+  ],
+
+  "categories": {
+    "primary": "Software Architecture",
+    "secondary": ["Design Patterns", "Clean Code", "Testing"]
+  },
+
+  "topics": [
+    "Hexagonal Architecture fundamentals",
+    "Ports and Adapters pattern",
+    "Domain-Driven Design basics",
+    "Dependency Inversion",
+    "Test-Driven Development",
+    "Clean Architecture principles",
+    "Legacy code migration"
+  ],
+
+  "skills_taught": [
+    "Design applications using Hexagonal Architecture",
+    "Create clean, testable domain layers",
+    "Implement swappable adapters for different technologies",
+    "Write unit tests without mocking infrastructure",
+    "Migrate legacy applications incrementally",
+    "Structure Go projects for maintainability"
+  ],
+
+  "target_audience": [
+    "Backend developers wanting to write more maintainable code",
+    "Developers struggling with tightly-coupled legacy systems",
+    "Tech leads evaluating architectural patterns",
+    "Anyone preparing for system design interviews"
+  ],
+
+  "prerequisites": {
+    "required": [
+      "Basic Go programming knowledge",
+      "Understanding of interfaces and dependency injection",
+      "Familiarity with REST APIs"
+    ],
+    "recommended": [
+      "Experience with database access patterns",
+      "Basic unit testing experience"
+    ],
+    "courses": []
+  },
+
+  "features": {
+    "has_quizzes": true,
+    "has_final_exam": true,
+    "has_certificate": true,
+    "has_case_studies": true,
+    "has_exercises": false,
+    "has_downloadable_resources": false
+  },
+
+  "seo": {
+    "keywords": ["hexagonal architecture", "ports and adapters", "clean architecture", "golang architecture", "testable code", "domain driven design"],
+    "meta_description": "Master Hexagonal Architecture with hands-on examples. Learn ports, adapters, and clean domain design through building a real application."
+  },
+
+  "related_courses": [
+    "domain-driven-design-fundamentals",
+    "test-driven-development-go"
+  ],
+
+  "pricing": {
+    "is_free": true,
+    "price": 0,
+    "currency": "USD"
+  },
+
+  "story": {
+    "protagonist": "Sam",
+    "project": "BookShelf",
+    "description": "Follow Sam, a solo founder who built BookShelf—a digital library management system—quickly to validate the idea. Now with paying customers, investors wanting mobile apps, and enterprises demanding on-premise deployment, Sam must transform a tangled codebase into something maintainable. Hexagonal Architecture becomes the lifeline.",
+    "characters": [
+      {
+        "name": "Sam",
+        "role": "Solo founder and developer of BookShelf",
+        "description": "Built BookShelf quickly to validate the idea, now facing the consequences of technical debt"
+      },
+      {
+        "name": "Maya",
+        "role": "Angel investor",
+        "description": "Excited about BookShelf but needs mobile app support before investing"
+      },
+      {
+        "name": "Chen",
+        "role": "Enterprise customer (Riverside Library)",
+        "description": "Wants to use BookShelf but requires on-premise deployment for data privacy"
+      },
+      {
+        "name": "Alex",
+        "role": "Senior architect (mentor)",
+        "description": "Former colleague who introduces Sam to Hexagonal Architecture"
+      }
+    ]
+  }
 }

@@ -1,0 +1,78 @@
+{
+  "id": "01-iam-and-security",
+  "title": "IAM and Security",
+  "slug": "iam-and-security",
+  "description": "Master AWS Identity and Access Management - the foundation of security on AWS. Learn to create users, groups, roles, and policies while following security best practices.",
+  "order": 1,
+  "estimatedMinutes": 210,
+  "objectives": [
+    "Create and manage IAM users, groups, and roles",
+    "Write effective IAM policies using JSON",
+    "Implement cross-account access with roles",
+    "Apply security best practices (MFA, least privilege, rotation)",
+    "Use KMS, Secrets Manager, and Parameter Store"
+  ],
+  "keywords": ["iam", "security", "policies", "roles", "mfa", "kms", "secrets-manager", "authentication", "authorization"],
+  "sublessons": [
+    {
+      "id": "00-alexs-challenge",
+      "title": "Alex's Challenge: The Security Audit",
+      "order": 0
+    },
+    {
+      "id": "01-iam-fundamentals",
+      "title": "IAM Fundamentals",
+      "order": 1
+    },
+    {
+      "id": "02-iam-users-and-groups",
+      "title": "IAM Users and Groups",
+      "order": 2
+    },
+    {
+      "id": "03-iam-policies-deep-dive",
+      "title": "IAM Policies Deep Dive",
+      "order": 3
+    },
+    {
+      "id": "04-policy-evaluation-logic",
+      "title": "Policy Evaluation Logic",
+      "order": 4
+    },
+    {
+      "id": "05-iam-roles",
+      "title": "IAM Roles",
+      "order": 5
+    },
+    {
+      "id": "06-roles-for-services",
+      "title": "Roles for AWS Services",
+      "order": 6
+    },
+    {
+      "id": "07-cross-account-access",
+      "title": "Cross-Account Access",
+      "order": 7
+    },
+    {
+      "id": "08-security-best-practices",
+      "title": "Security Best Practices",
+      "order": 8
+    },
+    {
+      "id": "09-kms-encryption",
+      "title": "KMS and Encryption",
+      "order": 9
+    },
+    {
+      "id": "10-secrets-manager-parameter-store",
+      "title": "Secrets Manager and Parameter Store",
+      "order": 10
+    },
+    {
+      "id": "11-chapter-summary",
+      "title": "Alex's Solution: Security Hardened!",
+      "order": 11
+    }
+  ]
+}

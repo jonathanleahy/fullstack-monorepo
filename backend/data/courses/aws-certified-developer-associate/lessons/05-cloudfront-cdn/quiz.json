@@ -1,0 +1,144 @@
+{
+  "questions": [
+    {
+      "id": "cloudfront-q1",
+      "type": "multiple_choice",
+      "question": "Alex needs to use a custom SSL certificate for images.pettracker.com with CloudFront. Where must the ACM certificate be created?",
+      "options": [
+        "In the same region as the S3 origin bucket",
+        "In us-east-1 (N. Virginia)",
+        "In any region - CloudFront certificates are global",
+        "In the region closest to the majority of users"
+      ],
+      "correctAnswer": 1,
+      "explanation": "ACM certificates used with CloudFront MUST be created in the us-east-1 (N. Virginia) region, regardless of where your origin is located. This is because CloudFront is a global service and all CloudFront configurations, including SSL certificates, are managed from us-east-1.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "cloudfront-q2",
+      "type": "multiple_choice",
+      "question": "A developer wants to restrict S3 bucket access so that objects can only be accessed through CloudFront. Which is the recommended approach?",
+      "options": [
+        "Origin Access Identity (OAI)",
+        "Origin Access Control (OAC)",
+        "S3 bucket policy with public read",
+        "Signed URLs for all requests"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Origin Access Control (OAC) is the recommended approach for restricting S3 access to CloudFront. OAC uses AWS Signature Version 4 (SigV4) and supports SSE-KMS encryption, unlike the legacy Origin Access Identity (OAI). OAC should be used for all new distributions.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "cloudfront-q3",
+      "type": "multiple_choice",
+      "question": "Alex's PetTracker app serves pet photos that users can access with a subscription. Some users need access to multiple photos at once. What should Alex use?",
+      "options": [
+        "Signed URLs for each individual photo",
+        "Signed cookies with a wildcard resource policy",
+        "S3 pre-signed URLs",
+        "Origin Access Control with bucket policy"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Signed cookies are ideal when users need access to multiple files (like multiple photos or streaming segments). The cookie is set once with a wildcard resource policy (e.g., /photos/*) and applies to all matching requests. Signed URLs would require generating a separate URL for each photo, which is inefficient for multiple files.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "cloudfront-q4",
+      "type": "multiple_choice",
+      "question": "Which CloudFront feature should be used to add security headers like Strict-Transport-Security to all responses with minimal latency impact?",
+      "options": [
+        "Lambda@Edge origin-response function",
+        "CloudFront Functions viewer-response",
+        "Response headers policy",
+        "Origin custom headers"
+      ],
+      "correctAnswer": 1,
+      "explanation": "CloudFront Functions at viewer-response is ideal for adding security headers. CloudFront Functions execute in under 1ms and are cheaper than Lambda@Edge. While response headers policies also work, CloudFront Functions provide more flexibility. Lambda@Edge would be overkill for simple header manipulation.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "cloudfront-q5",
+      "type": "multiple_choice",
+      "question": "A developer notices that different image sizes (/image.jpg?size=small vs /image.jpg?size=large) are returning the same cached image. What is the most likely cause?",
+      "options": [
+        "CloudFront caches the first response indefinitely",
+        "Query strings are not included in the cache key by default",
+        "The S3 origin doesn't support query strings",
+        "TTL is set too high"
+      ],
+      "correctAnswer": 1,
+      "explanation": "By default, CloudFront doesn't include query strings in the cache key, so /image.jpg?size=small and /image.jpg?size=large would hit the same cache entry. To fix this, configure the cache policy to include the 'size' query string in the cache key (whitelist approach is recommended).",
+      "difficulty": "hard"
+    },
+    {
+      "id": "cloudfront-q6",
+      "type": "multiple_choice",
+      "question": "Alex updated pet photos in S3 but CloudFront is still serving old versions. The cache TTL is set to 7 days. What is the most cost-effective solution?",
+      "options": [
+        "Create an invalidation for /* to clear all cache",
+        "Use versioned filenames (photo-v2.jpg) instead of invalidation",
+        "Reduce TTL to 1 hour for all images",
+        "Disable caching for the /images/* behavior"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Using versioned filenames is the most cost-effective solution. When you update a file, you deploy it with a new name (photo-v2.jpg), and the old cached version naturally expires. Invalidations cost money after the first 1000 paths/month, and reducing TTL or disabling cache defeats the purpose of CDN caching.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "cloudfront-q7",
+      "type": "multiple_choice",
+      "question": "A Lambda@Edge function needs to authenticate requests at the edge before reaching the origin. At which event should this function be triggered?",
+      "options": [
+        "Origin request",
+        "Origin response",
+        "Viewer request",
+        "Viewer response"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Viewer request is the correct event for authentication. This event fires before CloudFront checks the cache, allowing you to reject unauthorized requests immediately without wasting cache lookups or origin requests. Origin request fires after cache check, so unauthenticated cached content could be served.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "cloudfront-q8",
+      "type": "multiple_choice",
+      "question": "Alex wants to reduce origin load for a high-traffic global distribution. Which feature adds an additional caching layer between edge locations and the origin?",
+      "options": [
+        "Regional Edge Cache",
+        "Origin Shield",
+        "Cache Policy",
+        "Lambda@Edge caching"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Origin Shield adds an additional caching layer by designating one region as a shield origin. All cache misses from edge locations go to Origin Shield first, which then fetches from the origin only if it doesn't have the content. This significantly reduces origin requests. Regional Edge Caches exist automatically but Origin Shield provides more control.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "cloudfront-q9",
+      "type": "multiple_choice",
+      "question": "A developer needs to run code at the edge that makes external API calls to validate user permissions. Which should they use?",
+      "options": [
+        "CloudFront Functions",
+        "Lambda@Edge",
+        "Origin request headers",
+        "Cache behavior conditions"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Lambda@Edge is required for making external API calls because it has network access. CloudFront Functions do NOT have network access and can only manipulate request/response headers and URIs. Lambda@Edge supports Node.js and Python, runs for up to 30 seconds, and can make external calls.",
+      "difficulty": "hard"
+    },
+    {
+      "id": "cloudfront-q10",
+      "type": "multiple_choice",
+      "question": "Alex's CloudFront distribution shows a cache hit rate of only 30%. Which action would most likely improve the cache hit rate?",
+      "options": [
+        "Increase the number of edge locations by using PriceClass_All",
+        "Enable Origin Shield",
+        "Remove unnecessary headers from the cache key",
+        "Switch from OAC to OAI"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Removing unnecessary headers from the cache key would improve cache hit rate. When headers are in the cache key, requests with different header values result in different cache entries. Common culprits include forwarding all headers or cookies. Whitelisting only necessary cache key components increases the chance of cache hits.",
+      "difficulty": "hard"
+    }
+  ]
+}

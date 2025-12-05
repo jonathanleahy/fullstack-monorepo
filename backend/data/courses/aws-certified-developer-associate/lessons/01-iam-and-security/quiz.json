@@ -1,0 +1,138 @@
+{
+  "chapterId": "01-iam-and-security",
+  "title": "IAM and Security Quiz",
+  "description": "Test your knowledge of IAM users, roles, policies, and AWS security best practices",
+  "passingScore": 80,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Alex has an IAM policy with 'Effect: Allow' for S3 operations, but a separate policy with 'Effect: Deny' for s3:DeleteObject. What happens when Alex tries to delete an S3 object?",
+      "options": [
+        "The action is allowed because Allow was defined first",
+        "The action is denied because Deny was defined later",
+        "The action is denied because explicit Deny always overrides Allow",
+        "An error occurs due to conflicting policies"
+      ],
+      "correctAnswer": 2,
+      "explanation": "In IAM policy evaluation, an explicit Deny ALWAYS overrides any Allow statements. This is a fundamental rule regardless of where the policies are attached or in what order they were created."
+    },
+    {
+      "id": "q2",
+      "type": "multiple_choice",
+      "question": "A Lambda function needs to read from a DynamoDB table and write to an S3 bucket. What is the recommended way to grant these permissions?",
+      "options": [
+        "Create an IAM user with access keys and store them in Lambda environment variables",
+        "Create an IAM role with the required permissions and assign it as the Lambda execution role",
+        "Use the root account credentials in the Lambda function",
+        "Create access keys for the Lambda service and store them in Secrets Manager"
+      ],
+      "correctAnswer": 1,
+      "explanation": "AWS services like Lambda should always use IAM roles, not IAM users or access keys. Roles provide temporary credentials that are automatically rotated, eliminating the security risk of long-term credentials."
+    },
+    {
+      "id": "q3",
+      "type": "multiple_choice",
+      "question": "Alex wants to allow a third-party SaaS application to access an S3 bucket. What should be included in the role's trust policy to prevent the confused deputy problem?",
+      "options": [
+        "An IP address condition",
+        "An External ID condition",
+        "An MFA condition",
+        "A time-based condition"
+      ],
+      "correctAnswer": 1,
+      "explanation": "External ID prevents the confused deputy problem in cross-account scenarios. The third party must provide the External ID when assuming the role, ensuring they can't accidentally (or maliciously) use your role for another customer."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which IAM policy element specifies what AWS actions are allowed or denied?",
+      "options": [
+        "Principal",
+        "Resource",
+        "Action",
+        "Condition"
+      ],
+      "correctAnswer": 2,
+      "explanation": "The Action element specifies which AWS API actions (like s3:GetObject, dynamodb:PutItem) are allowed or denied by the policy statement."
+    },
+    {
+      "id": "q5",
+      "type": "multiple_choice",
+      "question": "Alex needs to store database credentials that should rotate automatically every 30 days. Which AWS service is best suited for this requirement?",
+      "options": [
+        "AWS Systems Manager Parameter Store",
+        "AWS Secrets Manager",
+        "AWS KMS",
+        "AWS Lambda environment variables"
+      ],
+      "correctAnswer": 1,
+      "explanation": "AWS Secrets Manager is designed specifically for managing secrets with automatic rotation capability. While Parameter Store can store secrets, it doesn't have built-in automatic rotation."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "question": "An EC2 instance needs to access S3. What is the most secure method to provide credentials to the instance?",
+      "options": [
+        "Store access keys in a configuration file on the instance",
+        "Pass access keys as user data during instance launch",
+        "Attach an IAM instance profile with an appropriate role",
+        "Use environment variables with hard-coded credentials"
+      ],
+      "correctAnswer": 2,
+      "explanation": "IAM instance profiles allow EC2 instances to assume IAM roles and receive temporary credentials automatically. The credentials are rotated automatically and never need to be stored on the instance."
+    },
+    {
+      "id": "q7",
+      "type": "multiple_choice",
+      "question": "Which statement about IAM groups is TRUE?",
+      "options": [
+        "Groups can contain other groups (nested groups)",
+        "Groups can be used as a principal in a resource-based policy",
+        "Users can belong to multiple groups",
+        "Groups can have their own access keys"
+      ],
+      "correctAnswer": 2,
+      "explanation": "IAM users can belong to multiple groups and inherit permissions from all of them. Groups cannot be nested, cannot be principals in resource policies, and don't have credentials - they're purely for organizing users and attaching policies."
+    },
+    {
+      "id": "q8",
+      "type": "multiple_choice",
+      "question": "What is the purpose of KMS envelope encryption?",
+      "options": [
+        "To encrypt data directly with the KMS master key",
+        "To generate data keys that encrypt data, then encrypt the data keys with the master key",
+        "To create multiple copies of the same encryption key",
+        "To allow encryption without any keys"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Envelope encryption generates a data key, uses it to encrypt your data locally, then encrypts the data key with the KMS master key. This overcomes KMS's 4KB limit and is more efficient for large data."
+    },
+    {
+      "id": "q9",
+      "type": "multiple_choice",
+      "question": "Alex's company has a policy that developers can only access production resources if they have authenticated with MFA. Which IAM policy condition key should be used?",
+      "options": [
+        "aws:SecureTransport",
+        "aws:MultiFactorAuthPresent",
+        "aws:PrincipalTag/MFA",
+        "iam:MFARequired"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The aws:MultiFactorAuthPresent condition key is true when the user has authenticated with MFA for their current session. This is commonly used to require MFA for sensitive operations."
+    },
+    {
+      "id": "q10",
+      "type": "multiple_choice",
+      "question": "A developer needs to grant an S3 bucket policy that allows a Lambda function from another AWS account to read objects. Which Principal format should be used?",
+      "options": [
+        "\"Principal\": \"*\"",
+        "\"Principal\": {\"Service\": \"lambda.amazonaws.com\"}",
+        "\"Principal\": {\"AWS\": \"arn:aws:iam::OTHER_ACCOUNT:role/LambdaRole\"}",
+        "\"Principal\": {\"Account\": \"OTHER_ACCOUNT\"}"
+      ],
+      "correctAnswer": 2,
+      "explanation": "For cross-account access to a specific role, use the full ARN of the IAM role in the other account. Using just the service principal (lambda.amazonaws.com) would allow ANY Lambda function, and \"*\" would allow anyone."
+    }
+  ]
+}

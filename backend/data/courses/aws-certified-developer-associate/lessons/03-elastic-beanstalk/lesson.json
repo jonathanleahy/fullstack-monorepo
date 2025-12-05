@@ -1,0 +1,78 @@
+{
+  "id": "03-elastic-beanstalk",
+  "title": "Elastic Beanstalk",
+  "slug": "elastic-beanstalk",
+  "description": "Master AWS's Platform as a Service for easy application deployment while maintaining full control over resources.",
+  "order": 3,
+  "estimatedMinutes": 180,
+  "objectives": [
+    "Deploy applications using Elastic Beanstalk",
+    "Configure environments with .ebextensions",
+    "Implement various deployment strategies",
+    "Set up worker environments for background processing",
+    "Troubleshoot common Beanstalk issues"
+  ],
+  "keywords": ["elastic-beanstalk", "deployment", "paas", "eb-cli", "environments", "ebextensions"],
+  "sublessons": [
+    {
+      "id": "00-alexs-challenge",
+      "title": "Alex's Challenge: Deployment Fatigue",
+      "order": 0
+    },
+    {
+      "id": "01-beanstalk-fundamentals",
+      "title": "Elastic Beanstalk Fundamentals",
+      "order": 1
+    },
+    {
+      "id": "02-environment-types",
+      "title": "Environment Types: Web Server and Worker",
+      "order": 2
+    },
+    {
+      "id": "03-eb-cli",
+      "title": "The EB CLI",
+      "order": 3
+    },
+    {
+      "id": "04-deployment-strategies",
+      "title": "Deployment Strategies",
+      "order": 4
+    },
+    {
+      "id": "05-ebextensions",
+      "title": "Configuration with .ebextensions",
+      "order": 5
+    },
+    {
+      "id": "06-platform-hooks",
+      "title": "Platform Hooks and Customization",
+      "order": 6
+    },
+    {
+      "id": "07-environment-configuration",
+      "title": "Environment Configuration",
+      "order": 7
+    },
+    {
+      "id": "08-database-integration",
+      "title": "Database Integration",
+      "order": 8
+    },
+    {
+      "id": "09-blue-green-deployments",
+      "title": "Blue/Green Deployments",
+      "order": 9
+    },
+    {
+      "id": "10-monitoring-troubleshooting",
+      "title": "Monitoring and Troubleshooting",
+      "order": 10
+    },
+    {
+      "id": "11-chapter-summary",
+      "title": "Alex's Solution: Automated Deployments",
+      "order": 11
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "questions": [
+    {
+      "id": "s3-q1",
+      "type": "multiple_choice",
+      "question": "Alex needs to upload a 7 GB file to S3. What is the correct approach?",
+      "options": [
+        "Use a single PUT request with the file",
+        "Use multipart upload",
+        "Split the file manually and upload as separate objects",
+        "Compress the file to under 5 GB first"
+      ],
+      "correctAnswer": 1,
+      "explanation": "S3 has a 5 GB limit for single PUT operations. For files larger than 5 GB, you must use multipart upload. It's actually recommended to use multipart upload for any file larger than 100 MB for better performance and reliability.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "s3-q2",
+      "type": "multiple_choice",
+      "question": "A developer wants to store infrequently accessed data that can be regenerated if lost. Which storage class provides the lowest cost?",
+      "options": [
+        "S3 Standard",
+        "S3 Standard-IA",
+        "S3 One Zone-IA",
+        "S3 Glacier Deep Archive"
+      ],
+      "correctAnswer": 2,
+      "explanation": "S3 One Zone-IA is the cheapest option for infrequently accessed data that doesn't require multi-AZ resilience. It's 20% cheaper than Standard-IA. Since the data can be regenerated if lost, the single-AZ risk is acceptable. Glacier Deep Archive is cheaper for storage but has retrieval delays of 12-48 hours.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "s3-q3",
+      "type": "multiple_choice",
+      "question": "A company needs to ensure all objects uploaded to their S3 bucket are encrypted with a specific KMS key. How should this be enforced?",
+      "options": [
+        "Enable default encryption with SSE-S3",
+        "Create a bucket policy that denies PUT requests without the correct encryption header",
+        "Enable versioning with MFA delete",
+        "Use ACLs to require encryption"
+      ],
+      "correctAnswer": 1,
+      "explanation": "A bucket policy with a Deny effect for PutObject requests that don't include the correct server-side encryption header (s3:x-amz-server-side-encryption = aws:kms and specific key) will enforce encryption. Default encryption only applies when no encryption is specified - it doesn't prevent uploads with different encryption.",
+      "difficulty": "hard"
+    },
+    {
+      "id": "s3-q4",
+      "type": "multiple_choice",
+      "question": "Alex generates a pre-signed URL for an object. After 30 minutes, the URL stops working even though the expiry was set to 1 hour. What is the most likely cause?",
+      "options": [
+        "The S3 bucket policy was changed",
+        "The IAM credentials used to sign the URL expired",
+        "CloudFront invalidated the cache",
+        "The object was deleted"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Pre-signed URLs inherit the permissions of the credentials used to create them. If those credentials expire (e.g., temporary credentials from an IAM role on EC2), the pre-signed URL becomes invalid regardless of its own expiry time. This is a common issue with roles that have short credential durations.",
+      "difficulty": "hard"
+    },
+    {
+      "id": "s3-q5",
+      "type": "multiple_choice",
+      "question": "Which S3 feature allows automatic movement of objects between storage classes based on access patterns without manual intervention?",
+      "options": [
+        "S3 Lifecycle Rules",
+        "S3 Intelligent-Tiering",
+        "S3 Replication",
+        "S3 Transfer Acceleration"
+      ],
+      "correctAnswer": 1,
+      "explanation": "S3 Intelligent-Tiering automatically moves objects between frequent and infrequent access tiers based on actual access patterns. It monitors access and moves objects that haven't been accessed for 30 days to IA tier, moving them back when accessed. Lifecycle rules require you to define fixed time-based rules.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "s3-q6",
+      "type": "multiple_choice",
+      "question": "A developer accidentally deleted an object from a versioning-enabled bucket without specifying a version ID. How can they recover the object?",
+      "options": [
+        "The object is permanently deleted and cannot be recovered",
+        "Delete the delete marker that was created",
+        "Restore from S3 Glacier",
+        "Enable MFA Delete to restore the object"
+      ],
+      "correctAnswer": 1,
+      "explanation": "When you delete an object from a versioning-enabled bucket without specifying a version ID, S3 creates a delete marker instead of permanently deleting the object. To recover, you simply delete the delete marker, which restores the previous version as the current version.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "s3-q7",
+      "type": "multiple_choice",
+      "question": "Which S3 event notification destination should be used when you need to fan-out the event to multiple Lambda functions and an SQS queue?",
+      "options": [
+        "Configure multiple Lambda function notifications",
+        "Use SNS topic as destination and subscribe Lambda and SQS",
+        "Use EventBridge",
+        "You cannot send to multiple destinations"
+      ],
+      "correctAnswer": 1,
+      "explanation": "SNS is ideal for fan-out scenarios. You configure S3 to send events to an SNS topic, then subscribe multiple Lambda functions and SQS queues to that topic. Each subscriber receives a copy of every message. While EventBridge also works, SNS is the traditional and simpler approach for this pattern.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "s3-q8",
+      "type": "multiple_choice",
+      "question": "What is the primary difference between SSE-S3 and SSE-KMS encryption?",
+      "options": [
+        "SSE-S3 is stronger encryption than SSE-KMS",
+        "SSE-KMS provides audit trail through CloudTrail and key rotation capabilities",
+        "SSE-S3 requires you to manage the keys",
+        "SSE-KMS can only encrypt objects larger than 5 GB"
+      ],
+      "correctAnswer": 1,
+      "explanation": "SSE-KMS provides additional benefits over SSE-S3: audit trail of key usage through CloudTrail, ability to rotate keys, and fine-grained access control through KMS key policies. Both use AES-256 encryption. SSE-S3 is simpler but lacks these management and compliance features.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "s3-q9",
+      "type": "multiple_choice",
+      "question": "A web application needs to allow users to upload files directly to S3 from their browser without routing through the application server. What is required?",
+      "options": [
+        "Make the bucket public",
+        "Generate pre-signed URLs or pre-signed POST and configure CORS",
+        "Create IAM users for each website user",
+        "Enable S3 Transfer Acceleration"
+      ],
+      "correctAnswer": 1,
+      "explanation": "For direct browser uploads to S3, you need pre-signed URLs (or pre-signed POST for form uploads) to grant temporary upload permission, and CORS configuration on the bucket to allow cross-origin requests from your domain. The bucket should remain private, with pre-signed URLs providing controlled access.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "s3-q10",
+      "type": "multiple_choice",
+      "question": "Alex wants to host a React single-page application on S3. Users report 404 errors when refreshing pages with paths like /users/123. What should be configured?",
+      "options": [
+        "Enable S3 versioning",
+        "Configure index.html as both the index document and error document",
+        "Enable S3 Transfer Acceleration",
+        "Configure server-side rendering"
+      ],
+      "correctAnswer": 1,
+      "explanation": "For SPAs with client-side routing, when users navigate to /users/123 and refresh, S3 looks for a file at that path which doesn't exist. By setting index.html as the error document, S3 returns index.html for all 404s, allowing the React router to handle the route. This is a common SPA hosting pattern.",
+      "difficulty": "medium"
+    }
+  ]
+}

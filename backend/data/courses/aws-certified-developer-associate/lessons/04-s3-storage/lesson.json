@@ -1,0 +1,79 @@
+{
+  "id": "04-s3-storage",
+  "title": "S3 Storage",
+  "slug": "s3-storage",
+  "description": "Master Amazon S3 for scalable, durable object storage. Learn storage classes, security, versioning, and integration patterns.",
+  "order": 4,
+  "estimatedMinutes": 200,
+  "objectives": [
+    "Create and configure S3 buckets securely",
+    "Implement appropriate storage classes for cost optimization",
+    "Secure objects with bucket policies and encryption",
+    "Generate pre-signed URLs for temporary access",
+    "Configure event notifications and Lambda triggers",
+    "Set up versioning and lifecycle management"
+  ],
+  "keywords": ["s3", "storage", "buckets", "objects", "glacier", "encryption", "pre-signed-urls", "lifecycle"],
+  "sublessons": [
+    {
+      "id": "00-alexs-challenge",
+      "title": "Alex's Challenge: Image Storage Crisis",
+      "order": 0
+    },
+    {
+      "id": "01-s3-fundamentals",
+      "title": "S3 Fundamentals",
+      "order": 1
+    },
+    {
+      "id": "02-bucket-operations",
+      "title": "Bucket Operations",
+      "order": 2
+    },
+    {
+      "id": "03-object-operations",
+      "title": "Object Operations",
+      "order": 3
+    },
+    {
+      "id": "04-storage-classes",
+      "title": "Storage Classes",
+      "order": 4
+    },
+    {
+      "id": "05-bucket-policies",
+      "title": "Bucket Policies and Security",
+      "order": 5
+    },
+    {
+      "id": "06-encryption",
+      "title": "S3 Encryption",
+      "order": 6
+    },
+    {
+      "id": "07-presigned-urls",
+      "title": "Pre-signed URLs",
+      "order": 7
+    },
+    {
+      "id": "08-versioning-lifecycle",
+      "title": "Versioning and Lifecycle Rules",
+      "order": 8
+    },
+    {
+      "id": "09-event-notifications",
+      "title": "Event Notifications",
+      "order": 9
+    },
+    {
+      "id": "10-static-website-hosting",
+      "title": "Static Website Hosting",
+      "order": 10
+    },
+    {
+      "id": "11-chapter-summary",
+      "title": "Alex's Solution: Scalable Image Storage",
+      "order": 11
+    }
+  ]
+}

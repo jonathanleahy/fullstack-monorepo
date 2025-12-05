@@ -1,0 +1,144 @@
+{
+  "questions": [
+    {
+      "id": "ec2-q1",
+      "type": "multiple_choice",
+      "question": "Alex is running a T3.medium instance for development. After 2 hours of heavy CPU usage, the instance starts running slowly. What is the most likely cause?",
+      "options": [
+        "The instance has reached its memory limit",
+        "The instance has exhausted its CPU burst credits",
+        "The security group is throttling traffic",
+        "The EBS volume has reached its IOPS limit"
+      ],
+      "correctAnswer": 1,
+      "explanation": "T series instances are burstable and use CPU credits for bursting above baseline performance. When credits are exhausted, performance is throttled to baseline. For consistent CPU performance, use M or C series instances instead.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ec2-q2",
+      "type": "multiple_choice",
+      "question": "A developer needs to ensure their EC2 instance automatically recovers if the underlying hardware fails. Which AWS feature should they configure?",
+      "options": [
+        "EBS snapshots scheduled every hour",
+        "CloudWatch alarm with EC2 recover action on StatusCheckFailed_System",
+        "Auto Scaling Group with minimum capacity of 1",
+        "Elastic IP address attached to the instance"
+      ],
+      "correctAnswer": 1,
+      "explanation": "A CloudWatch alarm monitoring StatusCheckFailed_System can trigger an automatic EC2 recovery action, which moves the instance to new hardware while maintaining the same instance ID, private IP, Elastic IP, and EBS volumes. Auto Scaling would launch a new instance rather than recover the existing one.",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ec2-q3",
+      "type": "multiple_choice",
+      "question": "Which instance metadata endpoint and method provides the most secure way to retrieve instance metadata using IMDSv2?",
+      "options": [
+        "GET http://169.254.169.254/latest/meta-data/",
+        "PUT to get a token, then GET with X-aws-ec2-metadata-token header",
+        "POST http://169.254.169.254/latest/api/credentials",
+        "GET with X-aws-ec2-metadata-version: 2 header"
+      ],
+      "correctAnswer": 1,
+      "explanation": "IMDSv2 requires a session token obtained via a PUT request to /latest/api/token, then subsequent GET requests must include the X-aws-ec2-metadata-token header with this token. This protects against SSRF attacks that could expose credentials.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ec2-q4",
+      "type": "multiple_choice",
+      "question": "Alex needs to encrypt an existing unencrypted EBS volume attached to a running instance. What is the correct process?",
+      "options": [
+        "Enable encryption on the volume using modify-volume command",
+        "Create a snapshot, copy the snapshot with encryption, create a new volume from the encrypted snapshot",
+        "Detach the volume, enable encryption, reattach the volume",
+        "Create an encrypted AMI from the instance"
+      ],
+      "correctAnswer": 1,
+      "explanation": "You cannot enable encryption on an existing unencrypted volume. The correct process is to create a snapshot, copy that snapshot with encryption enabled, then create a new encrypted volume from the encrypted snapshot. You would then swap the volumes on the instance.",
+      "difficulty": "hard"
+    },
+    {
+      "id": "ec2-q5",
+      "type": "multiple_choice",
+      "question": "A company wants to reduce EC2 costs for a consistent 24/7 production workload. They are confident the workload will continue for at least 3 years. Which pricing option provides the maximum savings?",
+      "options": [
+        "On-Demand instances",
+        "1-year Standard Reserved Instance with No Upfront payment",
+        "3-year Standard Reserved Instance with All Upfront payment",
+        "Spot Instances with persistent request"
+      ],
+      "correctAnswer": 2,
+      "explanation": "3-year Standard Reserved Instances with All Upfront payment provide the maximum discount (up to 72%). For consistent 24/7 workloads with long-term commitment certainty, this offers the best savings. Spot instances wouldn't be appropriate for production workloads that can't tolerate interruption.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ec2-q6",
+      "type": "multiple_choice",
+      "question": "Which of the following is TRUE about EC2 security groups?",
+      "options": [
+        "Security groups are stateless - you must configure both inbound and outbound rules for return traffic",
+        "Security groups support both Allow and Deny rules",
+        "Security groups are stateful - return traffic is automatically allowed",
+        "Security group changes require an instance reboot to take effect"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Security groups are stateful, meaning if you allow inbound traffic on a port, the response traffic is automatically allowed regardless of outbound rules. Security groups only support Allow rules (no Deny), and changes take effect immediately without requiring a reboot.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ec2-q7",
+      "type": "multiple_choice",
+      "question": "Alex needs to launch EC2 instances that require the lowest possible network latency between them for a high-performance computing workload. Which placement strategy should be used?",
+      "options": [
+        "Spread placement group",
+        "Partition placement group",
+        "Cluster placement group",
+        "Default placement (no placement group)"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Cluster placement groups place instances close together in a single Availability Zone, providing the lowest network latency and highest network throughput between instances. This is ideal for HPC workloads. Spread placement groups do the opposite - they ensure instances are on different hardware.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ec2-q8",
+      "type": "multiple_choice",
+      "question": "A developer notices that their EC2 instance's public IP address changed after stopping and starting the instance. How can they prevent this from happening?",
+      "options": [
+        "Use a private IP address instead",
+        "Allocate and associate an Elastic IP address",
+        "Configure the instance in a private subnet",
+        "Enable instance tenancy"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Public IP addresses assigned automatically to EC2 instances change when the instance is stopped and started. To maintain a static public IP address, you should allocate an Elastic IP and associate it with the instance. Elastic IPs persist across stop/start cycles.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ec2-q9",
+      "type": "multiple_choice",
+      "question": "Which EBS volume type is recommended for a general-purpose workload that requires consistent baseline performance of 3,000 IOPS?",
+      "options": [
+        "gp2 - General Purpose SSD",
+        "gp3 - General Purpose SSD",
+        "io2 - Provisioned IOPS SSD",
+        "st1 - Throughput Optimized HDD"
+      ],
+      "correctAnswer": 1,
+      "explanation": "gp3 volumes provide a baseline of 3,000 IOPS regardless of volume size (unlike gp2 which scales IOPS with size). gp3 is the recommended choice for most workloads as it offers better price/performance than gp2 and doesn't require the expense of io2 for consistent moderate IOPS needs.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ec2-q10",
+      "type": "multiple_choice",
+      "question": "Alex's user data script runs successfully on the first boot but doesn't run when the instance is stopped and started again. What is the expected behavior?",
+      "options": [
+        "This is a bug - user data should run on every boot",
+        "This is expected - user data only runs on first boot by default",
+        "The user data script must have an error",
+        "User data only runs when launched from a launch template"
+      ],
+      "correctAnswer": 1,
+      "explanation": "By default, EC2 user data scripts only run on the first boot of an instance. This is the expected behavior managed by cloud-init. If you need scripts to run on every boot, you need to configure them as cloud-init 'per-boot' scripts or use a different mechanism like systemd services.",
+      "difficulty": "medium"
+    }
+  ]
+}

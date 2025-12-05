@@ -1,0 +1,138 @@
+{
+  "chapterId": "00-aws-fundamentals-and-developer-tools",
+  "title": "AWS Fundamentals and Developer Tools Quiz",
+  "description": "Test your knowledge of AWS infrastructure, CLI, SDKs, and developer tools",
+  "passingScore": 80,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Alex needs to deploy PetTracker closer to users in Europe. Which component of AWS infrastructure should Alex consider first?",
+      "options": [
+        "Availability Zone",
+        "Region",
+        "Edge Location",
+        "Local Zone"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Regions are the primary way to deploy applications closer to users. Regions are geographic locations containing multiple Availability Zones. For European users, Alex would choose a European region like eu-west-1 (Ireland) or eu-central-1 (Frankfurt)."
+    },
+    {
+      "id": "q2",
+      "type": "multiple_choice",
+      "question": "Alex configured AWS CLI with credentials stored in ~/.aws/credentials. Later, Alex sets AWS_ACCESS_KEY_ID environment variable. Which credentials will the AWS CLI use?",
+      "options": [
+        "The credentials file always takes priority",
+        "The environment variable takes priority over the credentials file",
+        "Both will be used simultaneously",
+        "An error will occur due to conflicting credentials"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Environment variables take priority over the credentials file in the AWS credential resolution chain. The order is: command line options > environment variables > credentials file > config file > container credentials > instance profile."
+    },
+    {
+      "id": "q3",
+      "type": "multiple_choice",
+      "question": "PetTracker users in Australia report slow image loading. The images are stored in S3 in us-east-1. What AWS service would best help reduce latency for Australian users?",
+      "options": [
+        "S3 Transfer Acceleration",
+        "CloudFront",
+        "Global Accelerator",
+        "Route 53"
+      ],
+      "correctAnswer": 1,
+      "explanation": "CloudFront is a Content Delivery Network (CDN) that caches content at edge locations worldwide. By setting up CloudFront with the S3 bucket as the origin, images will be cached at edge locations close to Australian users, dramatically reducing latency."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Alex wants to test Lambda functions locally without deploying to AWS. Which browser-based development environment provides this capability?",
+      "options": [
+        "CloudShell",
+        "Cloud9",
+        "Both CloudShell and Cloud9",
+        "Neither - local testing requires local installation"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Cloud9 is a full IDE that runs on EC2 and supports local Lambda testing via SAM CLI. CloudShell is a terminal-only environment that doesn't support running local servers or Lambda emulation."
+    },
+    {
+      "id": "q5",
+      "type": "multiple_choice",
+      "question": "Alex's application needs to survive the failure of a single data center. What is the minimum deployment configuration?",
+      "options": [
+        "Single Availability Zone in any region",
+        "Multiple Availability Zones within a single region",
+        "Multiple Regions",
+        "Edge Locations with CloudFront"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Availability Zones are physically separate data centers within a region. Deploying across multiple AZs within a single region provides fault tolerance against single data center failures. Each AZ has independent power, cooling, and networking."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "question": "Which of the following correctly describes the AWS SDK credential resolution chain order?",
+      "options": [
+        "Config file → Credentials file → Environment variables → Instance profile",
+        "Environment variables → Credentials file → Config file → Instance profile",
+        "Instance profile → Environment variables → Credentials file → Config file",
+        "Code/Constructor → Environment variables → Credentials file → Instance profile"
+      ],
+      "correctAnswer": 3,
+      "explanation": "The SDK credential resolution chain follows this order: Explicitly passed credentials (code/constructor) → Environment variables → Credentials file (~/.aws/credentials) → Config file (~/.aws/config) → Container credentials → Instance profile. Earlier sources take priority."
+    },
+    {
+      "id": "q7",
+      "type": "multiple_choice",
+      "question": "Alex receives a surprise $50 AWS bill and wants to prevent this from happening again. What should Alex do FIRST?",
+      "options": [
+        "Contact AWS Support for a refund",
+        "Set up AWS Budgets with alerts",
+        "Switch to a smaller instance type",
+        "Enable AWS Trusted Advisor"
+      ],
+      "correctAnswer": 1,
+      "explanation": "AWS Budgets allows you to set cost thresholds and receive alerts before charges accumulate. This should be set up BEFORE using any AWS resources to prevent surprise bills. Trusted Advisor helps find optimization opportunities but doesn't provide real-time billing alerts."
+    },
+    {
+      "id": "q8",
+      "type": "multiple_choice",
+      "question": "Alex needs 24/7 phone support for production issues with response time under 1 hour. Which AWS Support plan is required?",
+      "options": [
+        "Basic Support",
+        "Developer Support",
+        "Business Support",
+        "Enterprise Support"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Business Support provides 24/7 phone, email, and chat support with < 1 hour response time for production system down situations. Developer Support only offers business hours support via email with 12-24 hour response time."
+    },
+    {
+      "id": "q9",
+      "type": "multiple_choice",
+      "question": "Which AWS CLI command shows Alex the AWS account and IAM identity currently configured?",
+      "options": [
+        "aws iam get-user",
+        "aws sts get-caller-identity",
+        "aws configure list",
+        "aws whoami"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The 'aws sts get-caller-identity' command returns the AWS account, IAM user ARN, and user ID for the credentials being used. This works regardless of whether using IAM user credentials or assumed role credentials."
+    },
+    {
+      "id": "q10",
+      "type": "multiple_choice",
+      "question": "Alex notices that AZ names differ between their AWS account and a colleague's account (Alex's us-east-1a maps to a different physical location than their colleague's us-east-1a). Why is this?",
+      "options": [
+        "This is a bug in AWS",
+        "AWS randomizes AZ names per account to distribute load",
+        "Different AWS regions have different AZ mappings",
+        "Only root accounts get consistent AZ names"
+      ],
+      "correctAnswer": 1,
+      "explanation": "AWS randomizes the mapping of AZ names to physical AZ IDs per account. This prevents all users from choosing 'a' and overloading one physical AZ. To coordinate between accounts, use AZ IDs (like use1-az1) instead of AZ names."
+    }
+  ]
+}

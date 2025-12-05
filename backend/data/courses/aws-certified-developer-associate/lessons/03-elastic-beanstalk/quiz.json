@@ -1,0 +1,144 @@
+{
+  "questions": [
+    {
+      "id": "eb-q1",
+      "type": "multiple_choice",
+      "question": "Alex needs to run database migrations that should only execute once during deployment, not on every instance. Which .ebextensions section should be used?",
+      "options": [
+        "commands section with leader_only: true",
+        "container_commands section with leader_only: true",
+        "files section with once: true",
+        "services section with single: true"
+      ],
+      "correctAnswer": 1,
+      "explanation": "container_commands run after the application is extracted but before it starts, and support the leader_only option which ensures the command runs on only one instance. The commands section does not support leader_only. This is ideal for database migrations that should only run once.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "eb-q2",
+      "type": "multiple_choice",
+      "question": "A developer wants to deploy a new version to Elastic Beanstalk with the ability to instantly rollback if issues are detected. Which deployment strategy should they use?",
+      "options": [
+        "All at Once deployment",
+        "Rolling deployment",
+        "Rolling with Additional Batch deployment",
+        "Immutable deployment"
+      ],
+      "correctAnswer": 3,
+      "explanation": "Immutable deployment creates an entirely new Auto Scaling Group with the new version. If issues are detected, the new ASG can be terminated instantly, leaving the original instances untouched. Rolling deployments modify existing instances, making rollback slower as you'd need to redeploy the previous version.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "eb-q3",
+      "type": "multiple_choice",
+      "question": "An Elastic Beanstalk environment has an RDS database instance created through the EB console as part of the environment. What happens to the database when the environment is terminated?",
+      "options": [
+        "The database is preserved with a final snapshot",
+        "The database is deleted along with the environment",
+        "The database is stopped but can be restarted",
+        "The database is automatically backed up to S3"
+      ],
+      "correctAnswer": 1,
+      "explanation": "When RDS is created as part of an Elastic Beanstalk environment, its lifecycle is tied to the environment. Terminating the environment will delete the RDS instance and all its data. This is why production databases should always be created outside of Elastic Beanstalk.",
+      "difficulty": "hard"
+    },
+    {
+      "id": "eb-q4",
+      "type": "multiple_choice",
+      "question": "Which environment tier should be used for an application that processes messages from an SQS queue?",
+      "options": [
+        "Web Server tier with SQS integration enabled",
+        "Worker tier",
+        "Background Processing tier",
+        "Web Server tier with a cron.yaml file"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The Worker tier is specifically designed for processing background jobs from SQS queues. It includes an SQS daemon that automatically polls the queue and POSTs messages to your application. Web Server tier is for handling HTTP requests from clients.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "eb-q5",
+      "type": "multiple_choice",
+      "question": "A developer needs to install system packages like gcc before deploying their Python application on Elastic Beanstalk. Which section of .ebextensions should they use?",
+      "options": [
+        "commands",
+        "container_commands",
+        "packages",
+        "sources"
+      ],
+      "correctAnswer": 2,
+      "explanation": "The packages section is used to install OS-level packages using yum, apt, or other package managers. The packages section is processed before commands and container_commands, ensuring dependencies are available when needed.",
+      "difficulty": "easy"
+    },
+    {
+      "id": "eb-q6",
+      "type": "multiple_choice",
+      "question": "Alex wants to perform a zero-downtime deployment where traffic can be instantly switched back to the previous version. Which approach should be used?",
+      "options": [
+        "Use Rolling deployment with batch size of 50%",
+        "Use Immutable deployment",
+        "Create a new environment and use eb swap to exchange URLs",
+        "Use All at Once with auto-rollback enabled"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Blue/Green deployment using eb swap exchanges the CNAME records between two environments instantly. This allows full testing of the new version before swap, and instant rollback by swapping back. While Immutable is safe, rollback still requires time to restore the original ASG.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "eb-q7",
+      "type": "multiple_choice",
+      "question": "Which of the following correctly describes the execution order in Elastic Beanstalk deployments?",
+      "options": [
+        "commands → packages → container_commands → application starts",
+        "packages → commands → application extracted → container_commands → application starts",
+        "container_commands → packages → commands → application starts",
+        "packages → container_commands → commands → application starts"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The correct order is: packages (install system packages) → commands (run during provisioning) → application is extracted → container_commands (run with access to app code) → application starts. This order ensures dependencies are available when needed.",
+      "difficulty": "hard"
+    },
+    {
+      "id": "eb-q8",
+      "type": "multiple_choice",
+      "question": "A company wants to run scheduled tasks every hour on their Elastic Beanstalk Worker environment. How should this be configured?",
+      "options": [
+        "Add a cron entry in .ebextensions/cron.config",
+        "Create a cron.yaml file in the application root",
+        "Configure scheduled scaling in the Auto Scaling group",
+        "Use CloudWatch Events to trigger the worker"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Worker environments support periodic tasks through a cron.yaml file in the application root. This file defines scheduled tasks with their URLs and cron expressions. The SQS daemon handles scheduling and execution of these tasks.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "eb-q9",
+      "type": "multiple_choice",
+      "question": "What is the correct location for custom nginx configuration files in an Elastic Beanstalk application using Amazon Linux 2?",
+      "options": [
+        ".ebextensions/nginx/conf.d/",
+        ".platform/nginx/conf.d/",
+        "/etc/nginx/conf.d/ via files section",
+        "nginx.config in the application root"
+      ],
+      "correctAnswer": 1,
+      "explanation": "On Amazon Linux 2 platforms, custom nginx configuration should be placed in .platform/nginx/conf.d/. This is the modern approach using platform hooks. While you can use .ebextensions files section to write to /etc/nginx/, the .platform directory is the recommended approach.",
+      "difficulty": "medium"
+    },
+    {
+      "id": "eb-q10",
+      "type": "multiple_choice",
+      "question": "A developer's Elastic Beanstalk deployment is failing with errors in .ebextensions configuration. Where should they look for detailed error logs?",
+      "options": [
+        "/var/log/eb-activity.log",
+        "/var/log/nginx/error.log",
+        "/var/log/cfn-init.log",
+        "/var/log/web.stdout.log"
+      ],
+      "correctAnswer": 2,
+      "explanation": "/var/log/cfn-init.log contains detailed logs about .ebextensions processing, including errors in configuration files. This is where you'll find information about failed commands, package installations, and file creation issues.",
+      "difficulty": "medium"
+    }
+  ]
+}
