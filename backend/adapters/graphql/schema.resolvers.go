@@ -85,6 +85,151 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 	}, nil
 }
 
+// CreateLibraryCourse is the resolver for the createLibraryCourse field.
+func (r *mutationResolver) CreateLibraryCourse(ctx context.Context, input CreateLibraryCourseInput) (*entities.LibraryCourse, error) {
+	lessons := make([]entities.Lesson, len(input.Lessons))
+	for i, l := range input.Lessons {
+		lessons[i] = entities.Lesson{
+			Title:   l.Title,
+			Content: l.Content,
+			Order:   l.Order,
+		}
+	}
+
+	course, err := entities.NewLibraryCourse(
+		input.Title,
+		input.Description,
+		lessons,
+		input.Author,
+		input.Difficulty,
+		input.EstimatedHours,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.LibraryCourseRepo.Create(ctx, course)
+}
+
+// UpdateLibraryCourse is the resolver for the updateLibraryCourse field.
+func (r *mutationResolver) UpdateLibraryCourse(ctx context.Context, id string, input UpdateLibraryCourseInput) (*entities.LibraryCourse, error) {
+	course, err := r.LibraryCourseRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if input.Title != nil {
+		course.Title = *input.Title
+	}
+	if input.Description != nil {
+		course.Description = *input.Description
+	}
+	if input.Author != nil {
+		course.Author = *input.Author
+	}
+	if input.Difficulty != nil {
+		course.Difficulty = *input.Difficulty
+	}
+	if input.EstimatedHours != nil {
+		course.EstimatedHours = *input.EstimatedHours
+	}
+	if input.Lessons != nil {
+		lessons := make([]entities.Lesson, len(input.Lessons))
+		for i, l := range input.Lessons {
+			lessons[i] = entities.Lesson{
+				Title:   l.Title,
+				Content: l.Content,
+				Order:   l.Order,
+			}
+		}
+		course.Lessons = lessons
+	}
+
+	return r.LibraryCourseRepo.Update(ctx, course)
+}
+
+// DeleteLibraryCourse is the resolver for the deleteLibraryCourse field.
+func (r *mutationResolver) DeleteLibraryCourse(ctx context.Context, id string) (bool, error) {
+	err := r.LibraryCourseRepo.Delete(ctx, id)
+	return err == nil, err
+}
+
+// StartCourse is the resolver for the startCourse field.
+func (r *mutationResolver) StartCourse(ctx context.Context, input StartCourseInput) (*entities.UserCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	// Verify the library course exists
+	_, err := r.LibraryCourseRepo.GetByID(ctx, input.LibraryCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if user already has this course
+	existing, err := r.UserCourseRepo.GetByUserAndCourse(ctx, userID, input.LibraryCourseID)
+	if err == nil && existing != nil {
+		return existing, nil // Return existing enrollment
+	}
+
+	userCourse, err := entities.NewUserCourse(userID, input.LibraryCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.UserCourseRepo.Create(ctx, userCourse)
+}
+
+// UpdateProgress is the resolver for the updateProgress field.
+func (r *mutationResolver) UpdateProgress(ctx context.Context, input UpdateProgressInput) (*entities.UserCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	userCourse, err := r.UserCourseRepo.GetByID(ctx, input.UserCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify ownership
+	if userCourse.UserID != userID {
+		return nil, errors.New("not authorized to update this course")
+	}
+
+	if err := userCourse.UpdateProgress(input.Progress); err != nil {
+		return nil, err
+	}
+
+	if input.CurrentLessonIndex != nil {
+		userCourse.CurrentLessonIndex = *input.CurrentLessonIndex
+	}
+
+	return r.UserCourseRepo.Update(ctx, userCourse)
+}
+
+// DropCourse is the resolver for the dropCourse field.
+func (r *mutationResolver) DropCourse(ctx context.Context, id string) (bool, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return false, errors.New("authentication required")
+	}
+
+	userCourse, err := r.UserCourseRepo.GetByID(ctx, id)
+	if err != nil {
+		return false, err
+	}
+
+	// Verify ownership
+	if userCourse.UserID != userID {
+		return false, errors.New("not authorized to drop this course")
+	}
+
+	err = r.UserCourseRepo.Delete(ctx, id)
+	return err == nil, err
+}
+
 // User returns a single user by ID
 func (r *queryResolver) User(ctx context.Context, id string) (*entities.User, error) {
 	return r.UserUseCase.GetUser(ctx, id)
@@ -126,25 +271,204 @@ func (r *queryResolver) Me(ctx context.Context) (*entities.User, error) {
 	return r.AuthUseCase.GetCurrentUser(ctx, userID)
 }
 
+// LibraryCourse is the resolver for the libraryCourse field.
+func (r *queryResolver) LibraryCourse(ctx context.Context, id string) (*entities.LibraryCourse, error) {
+	return r.LibraryCourseRepo.GetByID(ctx, id)
+}
+
+// LibraryCourses is the resolver for the libraryCourses field.
+func (r *queryResolver) LibraryCourses(ctx context.Context, pagination *PaginationInput, difficulty *entities.Difficulty) (*LibraryCourseConnection, error) {
+	page, limit := 1, 20
+	if pagination != nil {
+		if pagination.Page != nil {
+			page = *pagination.Page
+		}
+		if pagination.Limit != nil {
+			limit = *pagination.Limit
+		}
+	}
+	offset := (page - 1) * limit
+
+	var courses []*entities.LibraryCourse
+	var total int
+	var err error
+
+	if difficulty != nil {
+		courses, total, err = r.LibraryCourseRepo.ListByDifficulty(ctx, *difficulty, limit, offset)
+	} else {
+		courses, total, err = r.LibraryCourseRepo.List(ctx, limit, offset)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &LibraryCourseConnection{
+		Courses: courses,
+		Total:   total,
+		Page:    page,
+		Limit:   limit,
+		HasMore: offset+len(courses) < total,
+	}, nil
+}
+
+// SearchLibraryCourses is the resolver for the searchLibraryCourses field.
+func (r *queryResolver) SearchLibraryCourses(ctx context.Context, query string, pagination *PaginationInput) (*LibraryCourseConnection, error) {
+	page, limit := 1, 20
+	if pagination != nil {
+		if pagination.Page != nil {
+			page = *pagination.Page
+		}
+		if pagination.Limit != nil {
+			limit = *pagination.Limit
+		}
+	}
+	offset := (page - 1) * limit
+
+	courses, total, err := r.LibraryCourseRepo.Search(ctx, query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LibraryCourseConnection{
+		Courses: courses,
+		Total:   total,
+		Page:    page,
+		Limit:   limit,
+		HasMore: offset+len(courses) < total,
+	}, nil
+}
+
+// MyCourses is the resolver for the myCourses field.
+func (r *queryResolver) MyCourses(ctx context.Context, pagination *PaginationInput) (*UserCourseConnection, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	page, limit := 1, 20
+	if pagination != nil {
+		if pagination.Page != nil {
+			page = *pagination.Page
+		}
+		if pagination.Limit != nil {
+			limit = *pagination.Limit
+		}
+	}
+	offset := (page - 1) * limit
+
+	courses, total, err := r.UserCourseRepo.ListByUser(ctx, userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserCourseConnection{
+		Courses: courses,
+		Total:   total,
+		Page:    page,
+		Limit:   limit,
+		HasMore: offset+len(courses) < total,
+	}, nil
+}
+
+// MyCompletedCourses is the resolver for the myCompletedCourses field.
+func (r *queryResolver) MyCompletedCourses(ctx context.Context, pagination *PaginationInput) (*UserCourseConnection, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	page, limit := 1, 20
+	if pagination != nil {
+		if pagination.Page != nil {
+			page = *pagination.Page
+		}
+		if pagination.Limit != nil {
+			limit = *pagination.Limit
+		}
+	}
+	offset := (page - 1) * limit
+
+	courses, total, err := r.UserCourseRepo.ListCompleted(ctx, userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserCourseConnection{
+		Courses: courses,
+		Total:   total,
+		Page:    page,
+		Limit:   limit,
+		HasMore: offset+len(courses) < total,
+	}, nil
+}
+
+// MyInProgressCourses is the resolver for the myInProgressCourses field.
+func (r *queryResolver) MyInProgressCourses(ctx context.Context, pagination *PaginationInput) (*UserCourseConnection, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	page, limit := 1, 20
+	if pagination != nil {
+		if pagination.Page != nil {
+			page = *pagination.Page
+		}
+		if pagination.Limit != nil {
+			limit = *pagination.Limit
+		}
+	}
+	offset := (page - 1) * limit
+
+	courses, total, err := r.UserCourseRepo.ListInProgress(ctx, userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserCourseConnection{
+		Courses: courses,
+		Total:   total,
+		Page:    page,
+		Limit:   limit,
+		HasMore: offset+len(courses) < total,
+	}, nil
+}
+
+// UserCourse is the resolver for the userCourse field.
+func (r *queryResolver) UserCourse(ctx context.Context, id string) (*entities.UserCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	userCourse, err := r.UserCourseRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify ownership
+	if userCourse.UserID != userID {
+		return nil, errors.New("not authorized to view this course")
+	}
+
+	return userCourse, nil
+}
+
+// LibraryCourse is the resolver for the libraryCourse field on UserCourse.
+func (r *userCourseResolver) LibraryCourse(ctx context.Context, obj *entities.UserCourse) (*entities.LibraryCourse, error) {
+	return r.LibraryCourseRepo.GetByID(ctx, obj.LibraryCourseID)
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// UserCourse returns UserCourseResolver implementation.
+func (r *Resolver) UserCourse() UserCourseResolver { return &userCourseResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *userConnectionResolver) Users(ctx context.Context, obj *UserConnection) ([]*entities.User, error) {
-	return obj.Users, nil
-}
-func (r *Resolver) UserConnection() UserConnectionResolver { return &userConnectionResolver{r} }
-type userConnectionResolver struct{ *Resolver }
-*/
+type userCourseResolver struct{ *Resolver }

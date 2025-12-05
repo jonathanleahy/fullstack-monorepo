@@ -12,10 +12,33 @@ type AuthPayload struct {
 	RefreshToken string         `json:"refreshToken"`
 }
 
+type CreateLibraryCourseInput struct {
+	Title          string              `json:"title"`
+	Description    string              `json:"description"`
+	Lessons        []*LessonInput      `json:"lessons"`
+	Author         string              `json:"author"`
+	Difficulty     entities.Difficulty `json:"difficulty"`
+	EstimatedHours int                 `json:"estimatedHours"`
+}
+
 type CreateUserInput struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
+}
+
+type LessonInput struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+	Order   int    `json:"order"`
+}
+
+type LibraryCourseConnection struct {
+	Courses []*entities.LibraryCourse `json:"courses"`
+	Total   int                       `json:"total"`
+	Page    int                       `json:"page"`
+	Limit   int                       `json:"limit"`
+	HasMore bool                      `json:"hasMore"`
 }
 
 type LoginInput struct {
@@ -40,9 +63,28 @@ type RegisterInput struct {
 	Password string `json:"password"`
 }
 
+type StartCourseInput struct {
+	LibraryCourseID string `json:"libraryCourseId"`
+}
+
 type TokenPayload struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
+}
+
+type UpdateLibraryCourseInput struct {
+	Title          *string              `json:"title,omitempty"`
+	Description    *string              `json:"description,omitempty"`
+	Lessons        []*LessonInput       `json:"lessons,omitempty"`
+	Author         *string              `json:"author,omitempty"`
+	Difficulty     *entities.Difficulty `json:"difficulty,omitempty"`
+	EstimatedHours *int                 `json:"estimatedHours,omitempty"`
+}
+
+type UpdateProgressInput struct {
+	UserCourseID       string `json:"userCourseId"`
+	Progress           int    `json:"progress"`
+	CurrentLessonIndex *int   `json:"currentLessonIndex,omitempty"`
 }
 
 type UpdateUserInput struct {
@@ -56,4 +98,12 @@ type UserConnection struct {
 	Page    int              `json:"page"`
 	Limit   int              `json:"limit"`
 	HasMore bool             `json:"hasMore"`
+}
+
+type UserCourseConnection struct {
+	Courses []*entities.UserCourse `json:"courses"`
+	Total   int                    `json:"total"`
+	Page    int                    `json:"page"`
+	Limit   int                    `json:"limit"`
+	HasMore bool                   `json:"hasMore"`
 }
