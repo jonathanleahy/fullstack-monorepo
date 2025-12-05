@@ -8,9 +8,11 @@ require (
 	github.com/99designs/gqlgen v0.17.84
 	github.com/go-chi/chi/v5 v5.0.11
 	github.com/go-chi/cors v1.2.1
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/vektah/gqlparser/v2 v2.5.31
+	golang.org/x/crypto v0.44.0
 )
 
 require (

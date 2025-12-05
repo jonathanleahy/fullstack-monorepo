@@ -10,6 +10,29 @@ type User {
   updatedAt: DateTime!
 }
 
+# Auth types
+type AuthPayload {
+  user: User!
+  accessToken: String!
+  refreshToken: String!
+}
+
+type TokenPayload {
+  accessToken: String!
+  refreshToken: String!
+}
+
+input RegisterInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
 type UserConnection {
   users: [User!]!
   total: Int!
@@ -37,10 +60,16 @@ input PaginationInput {
 type Query {
   user(id: ID!): User
   users(pagination: PaginationInput): UserConnection!
+  # Auth queries
+  me: User
 }
 
 type Mutation {
   createUser(input: CreateUserInput!): User!
   updateUser(id: ID!, input: UpdateUserInput!): User!
   deleteUser(id: ID!): Boolean!
+  # Auth mutations
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+  refreshToken(refreshToken: String!): TokenPayload!
 }

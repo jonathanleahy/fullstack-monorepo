@@ -15,6 +15,7 @@ type Config struct {
 	AllowedOrigins   []string
 	RequestTimeout   time.Duration
 	LogLevel         string
+	JWTSecret        string
 }
 
 // Load reads configuration from environment variables with sensible defaults
@@ -26,6 +27,7 @@ func Load() *Config {
 		AllowedOrigins:   getEnvSlice("ALLOWED_ORIGINS", []string{"http://localhost:3001", "http://localhost:3000"}),
 		RequestTimeout:   getEnvDuration("REQUEST_TIMEOUT", 30*time.Second),
 		LogLevel:         getEnv("LOG_LEVEL", "info"),
+		JWTSecret:        getEnv("JWT_SECRET", "development-secret-change-in-production-32chars!"),
 	}
 }
 
