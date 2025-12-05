@@ -37,6 +37,7 @@ type LessonInput struct {
 	Content    string         `json:"content"`
 	Order      int            `json:"order"`
 	Sublessons []*LessonInput `json:"sublessons,omitempty"`
+	Quiz       *QuizInput     `json:"quiz,omitempty"`
 }
 
 type LibraryCourseConnection struct {
@@ -61,6 +62,17 @@ type PaginationInput struct {
 }
 
 type Query struct {
+}
+
+type QuizInput struct {
+	Questions []*QuizQuestionInput `json:"questions"`
+}
+
+type QuizQuestionInput struct {
+	Question     string   `json:"question"`
+	Options      []string `json:"options"`
+	CorrectIndex int      `json:"correctIndex"`
+	Explanation  *string  `json:"explanation,omitempty"`
 }
 
 type RegisterInput struct {

@@ -12,12 +12,26 @@ import type {
   UpdateLibraryCourseInput,
 } from '../types/course';
 
+// Query fragments for quiz support
+const QUIZ_FIELDS = `
+  quiz {
+    questions {
+      id
+      question
+      options
+      correctIndex
+      explanation
+    }
+  }
+`;
+
 // Query fragments - recursive lesson fragment for sublessons support
 const SUBLESSON_FIELDS = `
   title
   content
   order
   hasSublessons
+  ${QUIZ_FIELDS}
 `;
 
 const LESSON_FRAGMENT = `
@@ -25,6 +39,7 @@ const LESSON_FRAGMENT = `
   content
   order
   hasSublessons
+  ${QUIZ_FIELDS}
   sublessons {
     ${SUBLESSON_FIELDS}
     sublessons {

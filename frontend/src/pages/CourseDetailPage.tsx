@@ -9,7 +9,8 @@ import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { EnrollButton } from '../components/EnrollButton';
 import { LessonProgress } from '../components/LessonProgress';
-import { Card, CardHeader, CardTitle, CardContent, Badge, Progress } from '@repo/playbook';
+import { Quiz } from '../components/Quiz';
+import { Card, CardHeader, CardTitle, CardContent, Badge, Progress, Button } from '@repo/playbook';
 
 const difficultyColors: Record<Difficulty, string> = {
   BEGINNER: 'bg-green-100 text-green-800',
@@ -130,6 +131,7 @@ export function CourseDetailPage() {
   const [selectedLesson, setSelectedLesson] = useState(0);
   const [analytics, setAnalytics] = useState<CourseAnalytics | null>(null);
   const [expandedLessons, setExpandedLessons] = useState<Set<number>>(new Set());
+  const [showQuiz, setShowQuiz] = useState(false);
 
   // Flatten lessons for navigation - memoize to prevent infinite loops
   const flatLessons = useMemo(() => {
@@ -242,6 +244,7 @@ export function CourseDetailPage() {
 
   const handleSelectLesson = useCallback(async (index: number) => {
     setSelectedLesson(index);
+    setShowQuiz(false); // Reset quiz when changing lessons
 
     // Update current lesson index if enrolled
     if (userCourse && course) {
@@ -467,6 +470,30 @@ export function CourseDetailPage() {
               <div className="prose max-w-none">
                 <MarkdownRenderer content={currentLesson.content} />
               </div>
+
+              {/* Quiz section */}
+              {currentLesson.quiz && currentLesson.quiz.questions.length > 0 && (
+                <div className="mt-8 pt-6 border-t">
+                  {!showQuiz ? (
+                    <div className="text-center">
+                      <p className="text-muted-foreground mb-4">
+                        Test your understanding with a quick quiz!
+                      </p>
+                      <Button onClick={() => setShowQuiz(true)}>
+                        Take Quiz
+                      </Button>
+                    </div>
+                  ) : (
+                    <Quiz
+                      quiz={currentLesson.quiz}
+                      onComplete={(score, total) => {
+                        console.log(`Quiz completed: ${score}/${total}`);
+                      }}
+                      onClose={() => setShowQuiz(false)}
+                    />
+                  )}
+                </div>
+              )}
 
               <div className="mt-4 text-xs text-muted-foreground text-center">
                 <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">←</kbd> or <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">j</kbd> Previous lesson &nbsp;|&nbsp;

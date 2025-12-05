@@ -30,13 +30,13 @@ export default defineConfig({
     {
       command: 'cd ../backend && go run ./cmd/api',
       url: 'http://localhost:8082/health',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120000,
     },
     {
       command: 'pnpm dev',
       url: 'http://localhost:3001',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 60000,
     },
   ],
