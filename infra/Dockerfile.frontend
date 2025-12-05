@@ -1,4 +1,4 @@
-# Frontend Dockerfile with hot reload
+# Frontend Dockerfile with hot reload for pnpm monorepo
 FROM node:20-alpine
 
 WORKDIR /app
@@ -6,14 +6,24 @@ WORKDIR /app
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy workspace root files
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 
-# Install dependencies
-RUN pnpm install
+# Copy all workspace packages
+COPY design-tokens/ ./design-tokens/
+COPY shared/ ./shared/
+COPY playbook/ ./playbook/
+COPY frontend/ ./frontend/
 
-# Copy source code
-COPY . .
+# Install dependencies from workspace root
+RUN pnpm install --frozen-lockfile
+
+# Build dependent packages
+RUN pnpm --filter @repo/design-tokens build
+RUN pnpm --filter @repo/shared build
+RUN pnpm --filter @repo/playbook build
+
+WORKDIR /app/frontend
 
 # Expose port
 EXPOSE 3001
