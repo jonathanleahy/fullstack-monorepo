@@ -46,9 +46,14 @@ export function CoursesPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Course Library</h1>
-        <p className="text-muted-foreground">Browse and enroll in courses to start learning</p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Course Library</h1>
+          <p className="text-muted-foreground">Browse and enroll in courses to start learning</p>
+        </div>
+        <Link to="/courses/new">
+          <Button>Create Course</Button>
+        </Link>
       </div>
 
       {/* Filters */}

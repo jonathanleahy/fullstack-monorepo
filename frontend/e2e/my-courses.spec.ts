@@ -119,12 +119,12 @@ test.describe('Course Enrollment Flow', () => {
     await page.goto('/courses');
     await page.waitForTimeout(1000);
 
-    // Find and click first course
-    const courseLink = page.locator('a[href^="/courses/"]').first();
-    const count = await courseLink.count();
+    // Find course cards in the grid (not the Create Course button)
+    const courseCards = page.locator('.grid a[href^="/courses/"]');
+    const count = await courseCards.count();
 
     if (count > 0) {
-      await courseLink.click();
+      await courseCards.first().click();
       await page.waitForTimeout(500);
 
       // Should see enroll button or "Start Learning" text
@@ -141,12 +141,12 @@ test.describe('Course Enrollment Flow', () => {
     await page.goto('/courses');
     await page.waitForTimeout(1000);
 
-    // Find and click first course
-    const courseLink = page.locator('a[href^="/courses/"]').first();
-    const count = await courseLink.count();
+    // Find course cards in the grid (not the Create Course button)
+    const courseCards = page.locator('.grid a[href^="/courses/"]');
+    const count = await courseCards.count();
 
     if (count > 0) {
-      await courseLink.click();
+      await courseCards.first().click();
       await page.waitForTimeout(500);
 
       // Should see sign in prompt

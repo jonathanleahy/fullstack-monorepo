@@ -36,15 +36,16 @@ test.describe('Courses Page', () => {
     // Wait for courses to load
     await page.waitForTimeout(1000);
 
-    // Find first course link
-    const courseLink = page.locator('a[href^="/courses/"]').first();
+    // Find course card links (not the Create Course button which links to /courses/new)
+    // Course cards have links like /courses/{uuid} where uuid is a specific ID
+    const courseCards = page.locator('.grid a[href^="/courses/"]');
 
-    // If there are courses, click the first one
-    const count = await courseLink.count();
+    // If there are course cards, click the first one
+    const count = await courseCards.count();
     if (count > 0) {
-      await courseLink.click();
-      // Should navigate to course detail page
-      await expect(page).toHaveURL(/\/courses\/[a-zA-Z0-9-]+/);
+      await courseCards.first().click();
+      // Should navigate to course detail page (UUID pattern)
+      await expect(page).toHaveURL(/\/courses\/[a-f0-9-]+$/);
     }
   });
 
