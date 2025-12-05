@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { HomePage } from './pages/HomePage';
+import { HomePageSelector } from './pages/HomePageSelector';
 import { UsersPage } from './pages/UsersPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -27,7 +27,7 @@ function App() {
         path="/"
         element={
           <Layout>
-            <HomePage />
+            <HomePageSelector />
           </Layout>
         }
       />
