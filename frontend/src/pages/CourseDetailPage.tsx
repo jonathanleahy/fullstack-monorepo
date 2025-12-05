@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLibraryCourse } from '../hooks/useCourses';
 import { courseService } from '../services/courseService';
@@ -75,9 +75,17 @@ function LessonItem({
   const paddingLeft = depth * 16 + 16; // 16px base + 16px per depth level
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
-      className={`w-full text-left p-3 hover:bg-gray-50 transition-colors ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+      className={`w-full text-left p-3 hover:bg-gray-50 transition-colors cursor-pointer ${
         isSelected ? 'bg-primary/5 border-l-4 border-primary' : ''
       }`}
       style={{ paddingLeft: `${paddingLeft}px` }}
@@ -109,7 +117,7 @@ function LessonItem({
           {lesson.title}
         </span>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -123,8 +131,10 @@ export function CourseDetailPage() {
   const [analytics, setAnalytics] = useState<CourseAnalytics | null>(null);
   const [expandedLessons, setExpandedLessons] = useState<Set<number>>(new Set());
 
-  // Flatten lessons for navigation
-  const flatLessons = course ? flattenLessons(course.lessons.sort((a, b) => a.order - b.order)) : [];
+  // Flatten lessons for navigation - memoize to prevent infinite loops
+  const flatLessons = useMemo(() => {
+    return course ? flattenLessons([...course.lessons].sort((a, b) => a.order - b.order)) : [];
+  }, [course]);
 
   // Toggle lesson expansion
   const toggleExpand = useCallback((flatIndex: number) => {
@@ -181,6 +191,10 @@ export function CourseDetailPage() {
 
     if (parentsToExpand.length > 0) {
       setExpandedLessons(prev => {
+        // Only update if there are new parents to expand
+        const needsUpdate = parentsToExpand.some(idx => !prev.has(idx));
+        if (!needsUpdate) return prev;
+
         const next = new Set(prev);
         parentsToExpand.forEach(idx => next.add(idx));
         return next;

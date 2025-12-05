@@ -20,7 +20,7 @@ type Lesson struct {
 
 func main() {
 	// Open database - use absolute path or relative from scripts directory
-	dbPath := "/home/jon/personal/study/project/backend/data/app.db"
+	dbPath := "/app/data/app.db"
 
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
