@@ -1,0 +1,302 @@
+{
+  "title": "Hexagonal Architecture Final Exam",
+  "description": "Comprehensive assessment covering all 10 chapters of the course",
+  "passing_score": 70,
+  "time_limit_minutes": 45,
+  "questions": [
+    {
+      "id": "final-01",
+      "type": "multiple-choice",
+      "question": "According to the course, what is the PRIMARY problem that Hexagonal Architecture solves?",
+      "options": [
+        "Slow database queries",
+        "Tight coupling between business logic and infrastructure",
+        "Lack of microservices",
+        "Poor user interface design"
+      ],
+      "correctIndex": 1,
+      "explanation": "Chapter 1 explains that Hexagonal Architecture primarily addresses tight coupling between business logic and infrastructure, making code hard to test and change.",
+      "difficulty": "easy",
+      "chapter": 1,
+      "points": 1
+    },
+    {
+      "id": "final-02",
+      "type": "multiple-choice",
+      "question": "In Sam's BookShelf application, the `BookRepository` interface is an example of:",
+      "options": [
+        "A driving port",
+        "A driven port",
+        "A driving adapter",
+        "A domain service"
+      ],
+      "correctIndex": 1,
+      "explanation": "The BookRepository is a driven (secondary) port - an interface that the application needs from the outside world for data persistence.",
+      "difficulty": "easy",
+      "chapter": 2,
+      "points": 1
+    },
+    {
+      "id": "final-03",
+      "type": "true-false",
+      "question": "According to the course, domain entities should import database packages like 'database/sql' for persistence.",
+      "correctAnswer": false,
+      "explanation": "Chapter 4 emphasizes that the domain layer must be completely pure with NO infrastructure imports. Persistence is handled by adapters.",
+      "difficulty": "easy",
+      "chapter": 4,
+      "points": 1
+    },
+    {
+      "id": "final-04",
+      "type": "multiple-select",
+      "question": "Which of the following are examples of DRIVING (primary) adapters? Select all that apply.",
+      "options": [
+        "HTTP REST handler",
+        "PostgreSQL repository",
+        "CLI command handler",
+        "Email sender service",
+        "GraphQL resolver"
+      ],
+      "correctIndices": [0, 2, 4],
+      "explanation": "Driving adapters are entry points that drive the application: HTTP handlers, CLI commands, and GraphQL resolvers. Database repositories and email senders are driven adapters.",
+      "difficulty": "medium",
+      "chapter": 3,
+      "points": 2
+    },
+    {
+      "id": "final-05",
+      "type": "multiple-choice",
+      "question": "When Sam needed to support both PostgreSQL for cloud deployment and SQLite for Chen's on-premise installation, the solution was to:",
+      "options": [
+        "Add if-statements throughout the codebase",
+        "Create two separate applications",
+        "Implement two different adapters for the same BookRepository port",
+        "Use an ORM that abstracts the database"
+      ],
+      "correctIndex": 2,
+      "explanation": "The power of Hexagonal Architecture is creating different adapters for the same port. PostgresBookRepository and SQLiteBookRepository both implement the BookRepository interface.",
+      "difficulty": "medium",
+      "chapter": 3,
+      "points": 2
+    },
+    {
+      "id": "final-06",
+      "type": "fill-blank",
+      "question": "In Hexagonal Architecture, dependencies always point _______ toward the domain.",
+      "correctAnswers": ["inward", "inwards", "in"],
+      "explanation": "The dependency rule states that outer layers depend on inner layers. Adapters depend on ports, which depend on domain. Never the reverse.",
+      "difficulty": "medium",
+      "chapter": 6,
+      "points": 2
+    },
+    {
+      "id": "final-07",
+      "type": "multiple-choice",
+      "question": "According to the testing chapter, which layer can be tested with pure unit tests requiring NO mocks?",
+      "options": [
+        "HTTP handlers",
+        "Domain layer",
+        "Database repositories",
+        "Use cases"
+      ],
+      "correctIndex": 1,
+      "explanation": "The domain layer is pure business logic with no external dependencies, so it can be tested with simple unit tests without any mocking.",
+      "difficulty": "medium",
+      "chapter": 7,
+      "points": 2
+    },
+    {
+      "id": "final-08",
+      "type": "true-false",
+      "question": "According to the course, you should create a separate port (interface) for every single method to follow the Single Responsibility Principle.",
+      "correctAnswer": false,
+      "explanation": "The pitfalls section warns against 'Port Explosion'. You should group related operations into cohesive interfaces, not create one interface per method.",
+      "difficulty": "medium",
+      "chapter": 3,
+      "points": 2
+    },
+    {
+      "id": "final-09",
+      "type": "multiple-select",
+      "question": "Which of the following belong in the DOMAIN layer? Select all that apply.",
+      "options": [
+        "Book entity with Borrow() method",
+        "HTTP error responses",
+        "LoanPolicy value object",
+        "PostgresBookRepository",
+        "OverdueLoanError domain error"
+      ],
+      "correctIndices": [0, 2, 4],
+      "explanation": "Domain contains entities (Book), value objects (LoanPolicy), and domain errors (OverdueLoanError). HTTP responses and database repositories are adapter concerns.",
+      "difficulty": "medium",
+      "chapter": 4,
+      "points": 2
+    },
+    {
+      "id": "final-10",
+      "type": "multiple-choice",
+      "question": "In the BorrowBookUseCase, where should the logic 'users cannot borrow more than 5 books' be implemented?",
+      "options": [
+        "In the HTTP handler as request validation",
+        "In the database query as a constraint",
+        "In the domain entity or use case",
+        "In the frontend before the API call"
+      ],
+      "correctIndex": 2,
+      "explanation": "Business rules like borrowing limits belong in the domain layer (entity method) or application layer (use case), not in adapters or frontend.",
+      "difficulty": "medium",
+      "chapter": 5,
+      "points": 2
+    },
+    {
+      "id": "final-11",
+      "type": "multiple-choice",
+      "question": "What migration strategy did the course recommend for gradually replacing legacy code with Hexagonal Architecture?",
+      "options": [
+        "Big Bang Rewrite",
+        "Strangler Fig Pattern",
+        "Feature Toggle Pattern",
+        "Blue-Green Deployment"
+      ],
+      "correctIndex": 1,
+      "explanation": "Chapter 10 recommends the Strangler Fig Pattern, where new hexagonal code gradually replaces old code, like a strangler fig tree enveloping its host.",
+      "difficulty": "easy",
+      "chapter": 10,
+      "points": 1
+    },
+    {
+      "id": "final-12",
+      "type": "fill-blank",
+      "question": "A _______ object is defined by its attributes (like Money or Address), while an _______ is defined by its unique identity (like User or Book).",
+      "correctAnswers": ["value, entity", "Value, Entity", "value,entity"],
+      "explanation": "Value objects are immutable and compared by attributes. Entities have identity that persists regardless of attribute changes.",
+      "difficulty": "medium",
+      "chapter": 4,
+      "points": 2
+    },
+    {
+      "id": "final-13",
+      "type": "multiple-choice",
+      "question": "According to the real-world patterns chapter, where should cross-cutting concerns like logging be implemented?",
+      "options": [
+        "Directly in domain entities",
+        "In the use cases",
+        "As decorators or middleware in the adapter layer",
+        "In a global singleton"
+      ],
+      "correctIndex": 2,
+      "explanation": "Cross-cutting concerns like logging, metrics, and tracing should be implemented in the adapter layer as decorators or middleware, keeping the domain pure.",
+      "difficulty": "hard",
+      "chapter": 9,
+      "points": 3
+    },
+    {
+      "id": "final-14",
+      "type": "true-false",
+      "question": "According to the course, Hexagonal Architecture should ALWAYS be used, even for simple CRUD applications with no complex business logic.",
+      "correctAnswer": false,
+      "explanation": "Chapter 1 and the pitfalls section warn against over-engineering. For simple CRUD apps with no complex business rules, the overhead isn't worth it.",
+      "difficulty": "easy",
+      "chapter": 1,
+      "points": 1
+    },
+    {
+      "id": "final-15",
+      "type": "multiple-select",
+      "question": "According to the case studies, which companies use patterns similar to Hexagonal Architecture? Select all that apply.",
+      "options": [
+        "Netflix",
+        "Spotify",
+        "MedSchedule (healthcare startup)",
+        "ShopFlow (e-commerce)"
+      ],
+      "correctIndices": [0, 1, 2, 3],
+      "explanation": "All four case studies demonstrate real-world use of Hexagonal Architecture patterns, from large companies (Netflix, Spotify) to startups (MedSchedule, ShopFlow).",
+      "difficulty": "easy",
+      "chapter": 0,
+      "points": 1
+    },
+    {
+      "id": "final-16",
+      "type": "multiple-choice",
+      "question": "When testing a use case like BorrowBookUseCase, you should:",
+      "options": [
+        "Use a real PostgreSQL database for accuracy",
+        "Skip testing use cases since domain is tested",
+        "Inject mock adapters that implement the port interfaces",
+        "Only test through the HTTP endpoint"
+      ],
+      "correctIndex": 2,
+      "explanation": "Use cases should be tested with mock adapters (e.g., InMemoryBookRepository) injected through the constructor, enabling fast, isolated tests.",
+      "difficulty": "medium",
+      "chapter": 7,
+      "points": 2
+    },
+    {
+      "id": "final-17",
+      "type": "fill-blank",
+      "question": "In the recommended project structure, the _______ directory contains the application entry points where dependency injection is wired up.",
+      "correctAnswers": ["cmd", "cmd/", "/cmd"],
+      "explanation": "The cmd directory contains main packages that wire up all dependencies. This is where concrete adapters are instantiated and injected into the application.",
+      "difficulty": "medium",
+      "chapter": 6,
+      "points": 2
+    },
+    {
+      "id": "final-18",
+      "type": "multiple-choice",
+      "question": "According to the course, an 'Anemic Domain Model' is a problem because:",
+      "options": [
+        "Entities have too many methods",
+        "Business logic is scattered in services instead of entities",
+        "The domain uses too much memory",
+        "Entities depend on infrastructure"
+      ],
+      "correctIndex": 1,
+      "explanation": "An anemic domain model has entities that are just data containers, with all logic in services. This scatters business rules and breaks encapsulation.",
+      "difficulty": "hard",
+      "chapter": 4,
+      "points": 3
+    },
+    {
+      "id": "final-19",
+      "type": "multiple-choice",
+      "question": "Sam's investor Maya required mobile app support. The architectural solution was to:",
+      "options": [
+        "Rewrite BookShelf as a mobile app",
+        "Add a mobile-specific driving adapter (API) that calls the same use cases",
+        "Duplicate the business logic for mobile",
+        "Use a cross-platform framework"
+      ],
+      "correctIndex": 1,
+      "explanation": "Multiple driving adapters (web API, mobile API, GraphQL) can all call the same use cases. The business logic stays in one place.",
+      "difficulty": "medium",
+      "chapter": 3,
+      "points": 2
+    },
+    {
+      "id": "final-20",
+      "type": "synthesis",
+      "question": "Sam's BookShelf journey demonstrates the transformation from tightly-coupled code to Hexagonal Architecture. In 2-3 sentences, explain the MAIN benefit Sam gained that made supporting both Maya's mobile requirement AND Chen's on-premise requirement possible with minimal code changes.",
+      "rubric": {
+        "full_credit": "Mentions that ports/interfaces allow swappable adapters, enabling different driving adapters (mobile API) and driven adapters (SQLite vs PostgreSQL) without changing business logic",
+        "partial_credit": "Mentions adapters or separation of concerns but doesn't connect to both requirements",
+        "no_credit": "Doesn't demonstrate understanding of how the architecture enabled flexibility"
+      },
+      "explanation": "The key benefit is that ports define contracts that can have multiple adapter implementations. Maya's mobile app needs a different driving adapter (mobile API), while Chen's on-premise needs different driven adapters (SQLite instead of PostgreSQL). The use cases and domain remain unchanged.",
+      "difficulty": "hard",
+      "chapter": 0,
+      "points": 5
+    }
+  ],
+  "scoring": {
+    "total_points": 40,
+    "passing_points": 28,
+    "grade_scale": {
+      "A": 36,
+      "B": 32,
+      "C": 28,
+      "D": 24
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "a1b2c3d4-5e6f-7890-abcd-ef1234567890",
+  "title": "AWS Certified Developer Associate",
+  "subtitle": "Master AWS services and pass the DVA-C02 certification exam with Alex's PetTracker journey",
+  "description": "Comprehensive preparation for the AWS Certified Developer Associate (DVA-C02) exam. Follow Alex, a developer building PetTracker - a pet health and tracking startup - as you learn to develop, deploy, and debug cloud-based applications using AWS services. This course covers all exam domains including development with AWS services, security, deployment, troubleshooting, and optimization. Each chapter follows Alex solving real-world problems, making concepts stick through storytelling. Includes hands-on labs, practice questions, and exam strategies.",
+  "author": "Cloud Academy",
+  "author_bio": "Our instructors are AWS certified professionals with years of experience building production systems on AWS. They've helped thousands of developers pass their AWS certifications.",
+  "difficulty": "intermediate",
+  "estimated_hours": 70,
+  "chapter_count": 20,
+  "subchapter_count": 240,
+  "tags": ["aws", "cloud", "certification", "serverless", "lambda", "dynamodb", "api-gateway", "s3", "cloudfront", "cognito", "ecs", "devops", "containers", "kinesis", "sqs", "sns", "step-functions", "cloudformation", "cicd"],
+  "language": "en",
+  "last_updated": "2024-12-05"
+}

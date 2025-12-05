@@ -190,4 +190,4 @@ type QuizAttempt {
 - [ ] Quiz analytics for course authors
 - [ ] Randomize option order
 - [ ] Time limits (optional)
-- [ ] Different question types (true/false, multiple select)
+- [x] Different question types (true/false, multiple select) - **Done in PR #15**

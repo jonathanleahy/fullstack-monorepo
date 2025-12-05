@@ -75,383 +75,332 @@ func main() {
 }
 
 func addQuizzesToLessons(lessons []Lesson) []Lesson {
-	// Define quizzes for each lesson based on content
+	// Define quizzes for each lesson based on ACTUAL lesson content
+	// Each quiz tests what that specific lesson teaches
 
-	// Lesson 1: Introduction to Hexagonal Architecture
+	// Lesson 0: Introduction to Hexagonal Architecture
+	// Content: Just overview mindmap + prerequisites - NO TEACHABLE CONTENT
+	// Therefore: NO QUIZ for introduction
 	if len(lessons) > 0 {
-		lessons[0].Quiz = &Quiz{
-			Questions: []QuizQuestion{
-				{
-					ID:       "intro-1",
-					Question: "What is the main goal of Hexagonal Architecture?",
-					Options: []string{
-						"To make the application run faster",
-						"To isolate business logic from external dependencies",
-						"To reduce the number of files in a project",
-						"To eliminate the need for databases",
-					},
-					CorrectIndex: 1,
-					Explanation:  "Hexagonal Architecture's core principle is that business logic should not know or care about the outside world. This isolation makes the system more maintainable and testable.",
-				},
-				{
-					ID:       "intro-2",
-					Question: "Who invented Hexagonal Architecture and in what year?",
-					Options: []string{
-						"Martin Fowler in 2003",
-						"Robert C. Martin in 2008",
-						"Alistair Cockburn in 2005",
-						"Eric Evans in 2004",
-					},
-					CorrectIndex: 2,
-					Explanation:  "Hexagonal Architecture was invented by Alistair Cockburn in 2005, also known as 'Ports and Adapters' architecture.",
-				},
-				{
-					ID:       "intro-3",
-					Question: "What are the main components of Hexagonal Architecture?",
-					Options: []string{
-						"Models, Views, and Controllers",
-						"Ports, Adapters, and Domain",
-						"Services, Repositories, and Entities",
-						"Layers, Modules, and Components",
-					},
-					CorrectIndex: 1,
-					Explanation:  "The three main components of Hexagonal Architecture are Ports (interfaces), Adapters (implementations), and the Domain (core business logic).",
-				},
-			},
-		}
-
-		// Add quizzes to sublessons
-		if len(lessons[0].Sublessons) > 0 {
-			// Sublesson 1: The Problem
-			lessons[0].Sublessons[0].Quiz = &Quiz{
-				Questions: []QuizQuestion{
-					{
-						ID:       "problem-1",
-						Question: "What is a major problem with traditional architecture where business logic is mixed with database calls?",
-						Options: []string{
-							"The code runs slower",
-							"Testing requires real databases and external services",
-							"The application uses more memory",
-							"It's harder to write documentation",
-						},
-						CorrectIndex: 1,
-						Explanation:  "When business logic is tightly coupled with databases and external services, testing becomes painful because you need real instances of these dependencies.",
-					},
-					{
-						ID:       "problem-2",
-						Question: "In the example e-commerce code, why is placing database calls directly in HTTP handlers problematic?",
-						Options: []string{
-							"HTTP handlers can't access databases",
-							"Database calls are too slow for HTTP",
-							"Changes to the database affect HTTP handling code",
-							"HTTP handlers should only return HTML",
-						},
-						CorrectIndex: 2,
-						Explanation:  "When database calls are directly in HTTP handlers, any change to the database implementation requires modifying the HTTP handler, violating the principle of separation of concerns.",
-					},
-				},
-			}
-
-			// Sublesson 2: The Big Picture
-			if len(lessons[0].Sublessons) > 1 {
-				lessons[0].Sublessons[1].Quiz = &Quiz{
-					Questions: []QuizQuestion{
-						{
-							ID:       "bigpic-1",
-							Question: "In Hexagonal Architecture, what are 'Driving Adapters'?",
-							Options: []string{
-								"Adapters that connect to databases",
-								"Adapters that receive input and call the application",
-								"Adapters that send emails",
-								"Adapters that handle caching",
-							},
-							CorrectIndex: 1,
-							Explanation:  "Driving Adapters (primary adapters) are those that drive the application - they receive input from the outside world (HTTP requests, CLI commands, queue messages) and call the application's use cases.",
-						},
-						{
-							ID:       "bigpic-2",
-							Question: "In Hexagonal Architecture, what are 'Driven Adapters'?",
-							Options: []string{
-								"Adapters that receive HTTP requests",
-								"Adapters that handle user input",
-								"Adapters that the application calls to interact with external systems",
-								"Adapters that drive performance improvements",
-							},
-							CorrectIndex: 2,
-							Explanation:  "Driven Adapters (secondary adapters) are called by the application to interact with the outside world - like databases, email services, payment gateways, etc.",
-						},
-						{
-							ID:       "bigpic-3",
-							Question: "Why is it called 'Hexagonal' Architecture?",
-							Options: []string{
-								"Because it requires exactly 6 adapters",
-								"Because the diagram is drawn as a hexagon to represent multiple ports",
-								"Because it has 6 layers",
-								"Because it was developed in the 6th month of 2005",
-							},
-							CorrectIndex: 1,
-							Explanation:  "The hexagon shape represents that there can be multiple ports around the domain core. The specific shape doesn't have mathematical significance - it's just a convenient way to visualize the architecture.",
-						},
-					},
-				}
-			}
-		}
+		lessons[0].Quiz = nil // Introduction has no quiz
 	}
 
-	// Lesson 2: Core Concepts (Ports)
+	// Lesson 1: Core Concepts: Ports
+	// Content teaches: Ports overview diagram showing Driving Ports (UserService, OrderService, PaymentService)
+	// and Driven Ports (UserRepository, OrderRepository, EmailSender)
 	if len(lessons) > 1 {
 		lessons[1].Quiz = &Quiz{
 			Questions: []QuizQuestion{
 				{
 					ID:       "ports-1",
-					Question: "What is a 'Port' in Hexagonal Architecture?",
+					Question: "According to the diagram, what are examples of Driving Ports?",
 					Options: []string{
-						"A network port number like 8080",
-						"An interface that defines how the domain communicates with the outside world",
-						"A physical connection point",
-						"A type of database connection",
+						"UserRepository, OrderRepository, EmailSender",
+						"UserService, OrderService, PaymentService",
+						"Database, Cache, Queue",
+						"HTTP, GraphQL, gRPC",
 					},
 					CorrectIndex: 1,
-					Explanation:  "A Port is an interface that defines how communication happens between the domain and the outside world. It's a contract that adapters implement.",
+					Explanation:  "The diagram shows UserService, OrderService, and PaymentService as examples of Driving Ports. These are the interfaces that external systems call to drive the application.",
 				},
 				{
 					ID:       "ports-2",
-					Question: "What is a 'Driving Port' also known as?",
+					Question: "According to the diagram, what are examples of Driven Ports?",
 					Options: []string{
-						"Secondary Port",
-						"Output Port",
-						"Primary Port or Input Port",
-						"Database Port",
+						"UserService, OrderService, PaymentService",
+						"HTTP Handler, CLI, GraphQL Resolver",
+						"UserRepository, OrderRepository, EmailSender",
+						"React, Vue, Angular",
 					},
 					CorrectIndex: 2,
-					Explanation:  "Driving Ports (Primary Ports/Input Ports) define the API that the application exposes to the outside world. They are called by driving adapters to trigger use cases.",
+					Explanation:  "The diagram shows UserRepository, OrderRepository, and EmailSender as examples of Driven Ports. These are interfaces that the application calls to interact with external systems.",
 				},
 				{
 					ID:       "ports-3",
-					Question: "What is a 'Driven Port' also known as?",
+					Question: "In the diagram, what direction do Driving Ports flow?",
 					Options: []string{
-						"Primary Port",
-						"Input Port",
-						"Secondary Port or Output Port",
-						"HTTP Port",
+						"Driving Ports call Use Cases",
+						"Use Cases call Driving Ports",
+						"Driving Ports call Driven Ports directly",
+						"Driven Ports call Driving Ports",
 					},
-					CorrectIndex: 2,
-					Explanation:  "Driven Ports (Secondary Ports/Output Ports) define the interfaces that the application needs from the outside world (like repositories, notification services, etc.).",
+					CorrectIndex: 0,
+					Explanation:  "The diagram shows arrows from Driving Ports to Use Cases with the label 'calls'. Driving Ports receive external input and call the application's use cases.",
 				},
 			},
 		}
-
-		// Sublessons for Ports
-		if len(lessons[1].Sublessons) > 0 {
-			lessons[1].Sublessons[0].Quiz = &Quiz{
-				Questions: []QuizQuestion{
-					{
-						ID:       "driving-port-1",
-						Question: "Which component is typically responsible for implementing a Driving Port interface?",
-						Options: []string{
-							"The database repository",
-							"The domain service or use case",
-							"The email service",
-							"The external API client",
-						},
-						CorrectIndex: 1,
-						Explanation:  "Driving Ports are implemented by domain services or use cases. The port defines the API, and the use case provides the actual business logic implementation.",
-					},
-				},
-			}
-
-			if len(lessons[1].Sublessons) > 1 {
-				lessons[1].Sublessons[1].Quiz = &Quiz{
-					Questions: []QuizQuestion{
-						{
-							ID:       "driven-port-1",
-							Question: "In the OrderRepository interface example, what is the purpose of defining this as an interface rather than a concrete implementation?",
-							Options: []string{
-								"It makes the code run faster",
-								"It allows swapping database implementations without changing business logic",
-								"It reduces memory usage",
-								"It's required by Go syntax",
-							},
-							CorrectIndex: 1,
-							Explanation:  "By defining OrderRepository as an interface (driven port), the business logic depends only on the interface, not the implementation. This allows you to use a real database in production and a mock in tests.",
-						},
-					},
-				}
-			}
-		}
 	}
 
-	// Lesson 3: Adapters
+	// Lesson 2: Core Concepts: Adapters
+	// Content teaches: Adapter architecture diagram showing Driving Adapters (HTTP/REST, GraphQL, gRPC, CLI)
+	// and Driven Adapters (PostgreSQL, MongoDB, Redis, AWS SES)
 	if len(lessons) > 2 {
 		lessons[2].Quiz = &Quiz{
 			Questions: []QuizQuestion{
 				{
 					ID:       "adapters-1",
-					Question: "What is the primary responsibility of an Adapter in Hexagonal Architecture?",
+					Question: "According to the diagram, which of these are Driving Adapters (Inbound)?",
 					Options: []string{
-						"To contain business logic",
-						"To translate between external systems and domain ports",
-						"To store data in memory",
-						"To generate documentation",
+						"PostgreSQL, MongoDB, Redis, AWS SES",
+						"HTTP/REST, GraphQL, gRPC, CLI",
+						"UserRepository, OrderRepository",
+						"Entities, Value Objects, Services",
 					},
 					CorrectIndex: 1,
-					Explanation:  "Adapters translate between the outside world and the domain. They implement ports and handle the technical details of communication with external systems.",
+					Explanation:  "The diagram shows HTTP/REST, GraphQL, gRPC, and CLI as Driving Adapters. These handle inbound requests and translate them for the application.",
 				},
 				{
 					ID:       "adapters-2",
-					Question: "Which of the following is an example of a Driving Adapter?",
+					Question: "According to the diagram, which of these are Driven Adapters (Outbound)?",
 					Options: []string{
-						"PostgreSQL repository implementation",
-						"HTTP REST controller",
-						"SMTP email sender",
-						"Redis cache client",
+						"HTTP/REST, GraphQL, gRPC, CLI",
+						"UserService, OrderService, PaymentService",
+						"PostgreSQL, MongoDB, Redis, AWS SES",
+						"Ports, Use Cases, Domain",
 					},
-					CorrectIndex: 1,
-					Explanation:  "An HTTP REST controller is a Driving Adapter - it receives requests from the outside world and drives the application by calling use cases.",
+					CorrectIndex: 2,
+					Explanation:  "The diagram shows PostgreSQL, MongoDB, Redis, and AWS SES as Driven Adapters. These are the concrete implementations that the application drives for external operations.",
 				},
 				{
 					ID:       "adapters-3",
-					Question: "Which of the following is an example of a Driven Adapter?",
+					Question: "What is the relationship between adapters and ports shown in the diagram?",
 					Options: []string{
-						"gRPC server",
-						"CLI command handler",
-						"GraphQL resolver",
-						"PostgreSQL repository implementation",
+						"Adapters contain ports",
+						"Driving Adapters implement Driving Ports; Driven Ports are implemented by Driven Adapters",
+						"Ports and adapters are the same thing",
+						"Adapters bypass ports entirely",
 					},
-					CorrectIndex: 3,
-					Explanation:  "A PostgreSQL repository implementation is a Driven Adapter - the application drives it when it needs to persist or retrieve data.",
+					CorrectIndex: 1,
+					Explanation:  "The diagram shows arrows indicating that Driving Adapters 'implement' Driving Ports, and Driven Ports are 'implemented by' Driven Adapters.",
 				},
 			},
 		}
 	}
 
-	// Lesson 4: Dependency Rule
+	// Lesson 3: The Domain Layer
+	// Content teaches: Domain layer structure with Entities (User, Order, Product),
+	// Value Objects (Money, Email, Address), Domain Services (AuthService, PricingService),
+	// Domain Errors (ErrUserNotFound, ErrInvalidEmail, ErrInsufficientFunds)
 	if len(lessons) > 3 {
 		lessons[3].Quiz = &Quiz{
 			Questions: []QuizQuestion{
 				{
-					ID:       "deprule-1",
-					Question: "According to the Dependency Rule, which direction should dependencies point?",
+					ID:       "domain-1",
+					Question: "According to the diagram, what are examples of Entities in the Domain Layer?",
 					Options: []string{
-						"From domain towards adapters",
-						"From adapters towards the domain core",
-						"In any direction, as long as it's consistent",
-						"From newer code to older code",
+						"Money, Email, Address",
+						"AuthService, PricingService",
+						"User, Order, Product",
+						"ErrUserNotFound, ErrInvalidEmail",
 					},
-					CorrectIndex: 1,
-					Explanation:  "The Dependency Rule states that dependencies must point inward - adapters depend on ports, ports belong to the domain. The domain never depends on adapters.",
+					CorrectIndex: 2,
+					Explanation:  "The diagram shows User, Order, and Product as examples of Entities in the Domain Layer. Entities are the core business objects.",
 				},
 				{
-					ID:       "deprule-2",
-					Question: "Why should the domain core never import adapter packages?",
+					ID:       "domain-2",
+					Question: "According to the diagram, what are examples of Value Objects?",
 					Options: []string{
-						"It would make the code slower",
-						"It would violate the Dependency Rule and create coupling to external systems",
-						"It's not allowed in Go",
-						"It would use too much memory",
+						"User, Order, Product",
+						"Money, Email, Address",
+						"AuthService, PricingService",
+						"PostgreSQL, MongoDB, Redis",
 					},
 					CorrectIndex: 1,
-					Explanation:  "If the domain imports adapter packages, it becomes coupled to specific implementations (like a specific database). This defeats the purpose of Hexagonal Architecture.",
+					Explanation:  "The diagram shows Money, Email, and Address as Value Objects. These are immutable objects defined by their attributes rather than identity.",
 				},
 				{
-					ID:       "deprule-3",
-					Question: "What is Dependency Injection and why is it important in Hexagonal Architecture?",
+					ID:       "domain-3",
+					Question: "What are the four sections of the Domain Layer shown in the diagram?",
 					Options: []string{
-						"A way to inject security vulnerabilities",
-						"A technique to pass dependencies through constructors/parameters instead of creating them internally",
-						"A method to inject code at runtime",
-						"A database optimization technique",
+						"Controllers, Services, Repositories, Views",
+						"Entities, Value Objects, Domain Services, Domain Errors",
+						"HTTP, GraphQL, gRPC, CLI",
+						"Create, Read, Update, Delete",
 					},
 					CorrectIndex: 1,
-					Explanation:  "Dependency Injection means passing dependencies (like repositories) to use cases instead of having use cases create them. This allows using different implementations (real vs mock) without changing the use case code.",
+					Explanation:  "The diagram shows the Domain Layer containing Entities, Value Objects, Domain Services, and Domain Errors as its four main sections.",
+				},
+			},
+		}
+	}
+
+	// Lesson 4: Use Cases: Orchestrating Operations
+	// Content teaches: Use cases position between Driving Adapters and Domain/Driven Adapters
+	// Examples: CreateUser, GetUser, UpdateUser
+	if len(lessons) > 4 {
+		lessons[4].Quiz = &Quiz{
+			Questions: []QuizQuestion{
+				{
+					ID:       "usecases-1",
+					Question: "According to the diagram, what are examples of Use Cases?",
+					Options: []string{
+						"HTTP Handler, GraphQL",
+						"CreateUser, GetUser, UpdateUser",
+						"Repository, Email Sender",
+						"Entities, Domain Services",
+					},
+					CorrectIndex: 1,
+					Explanation:  "The diagram shows CreateUser, GetUser, and UpdateUser as examples of Use Cases. Each use case represents a single business operation.",
+				},
+				{
+					ID:       "usecases-2",
+					Question: "In the diagram, what calls the Use Cases?",
+					Options: []string{
+						"Driven Adapters (Repository, Email Sender)",
+						"Domain Entities and Services",
+						"Driving Adapters (HTTP Handler, GraphQL)",
+						"The database directly",
+					},
+					CorrectIndex: 2,
+					Explanation:  "The diagram shows arrows from Driving Adapters (HTTP Handler, GraphQL) pointing to Use Cases. Driving adapters receive external requests and call use cases.",
+				},
+				{
+					ID:       "usecases-3",
+					Question: "In the diagram, what do Use Cases interact with?",
+					Options: []string{
+						"Only the database",
+						"Only HTTP handlers",
+						"Both Domain (Entities, Services) and Driven Adapters (Repository, Email Sender)",
+						"Only external APIs",
+					},
+					CorrectIndex: 2,
+					Explanation:  "The diagram shows Use Cases with arrows pointing to both Domain (Entities, Domain Services) and Driven Adapters (Repository, Email Sender).",
 				},
 			},
 		}
 	}
 
 	// Lesson 5: Project Structure
-	if len(lessons) > 4 {
-		lessons[4].Quiz = &Quiz{
+	// Content teaches: Directory layout (cmd, domain, application, adapters, config)
+	// Dependency direction: Adapters → Application → Domain
+	if len(lessons) > 5 {
+		lessons[5].Quiz = &Quiz{
 			Questions: []QuizQuestion{
 				{
 					ID:       "structure-1",
-					Question: "In a typical Hexagonal Architecture Go project, where should entities be placed?",
+					Question: "According to the diagram, what are the main directories in a Hexagonal Architecture project?",
 					Options: []string{
-						"adapters/http/",
-						"domain/entities/",
-						"infrastructure/",
-						"cmd/",
+						"src, lib, bin, test",
+						"cmd, domain, application, adapters, config",
+						"models, views, controllers",
+						"frontend, backend, shared",
 					},
 					CorrectIndex: 1,
-					Explanation:  "Entities belong in the domain layer (domain/entities/) as they represent the core business concepts that the entire application revolves around.",
+					Explanation:  "The diagram shows cmd/ (Entry points), domain/ (THE CORE), application/ (Use cases), adapters/ (Infrastructure), and config/ (Configuration) as the main directories.",
 				},
 				{
 					ID:       "structure-2",
-					Question: "Where should HTTP handlers/controllers be placed in a Hexagonal Architecture project?",
+					Question: "According to the lesson, what is the dependency direction in Hexagonal Architecture?",
 					Options: []string{
-						"domain/",
-						"application/usecases/",
-						"adapters/http/ or adapters/api/",
-						"domain/entities/",
+						"Domain → Application → Adapters",
+						"Adapters → Application → Domain",
+						"All layers depend on each other equally",
+						"Application → Domain → Adapters",
 					},
-					CorrectIndex: 2,
-					Explanation:  "HTTP handlers are driving adapters and should be placed in the adapters directory, typically under adapters/http/ or adapters/api/.",
+					CorrectIndex: 1,
+					Explanation:  "The lesson states: Dependencies always point inward: Adapters → Application → Domain. Never: Domain → Adapters.",
 				},
 				{
 					ID:       "structure-3",
-					Question: "Where should repository interfaces (ports) be defined?",
+					Question: "According to the diagram, what belongs in the domain/ directory?",
 					Options: []string{
-						"In the same package as the implementation",
-						"In the domain or application layer",
-						"In the adapters/db package",
-						"In the cmd package",
+						"HTTP handlers and GraphQL resolvers",
+						"entities/, services/, repositories/ (interfaces)",
+						"Database connection code",
+						"Configuration files",
 					},
 					CorrectIndex: 1,
-					Explanation:  "Repository interfaces (ports) should be defined in the domain or application layer because they represent the contract that the domain needs, not the implementation details.",
+					Explanation:  "The diagram shows domain/ containing entities/, services/, and repositories/ (interfaces). This is the core business logic.",
 				},
 			},
 		}
 	}
 
-	// Lesson 6: Testing
-	if len(lessons) > 5 {
-		lessons[5].Quiz = &Quiz{
+	// Lesson 6: Testing Hexagonal Applications
+	// Content teaches: Testing pyramid (E2E Tests, Integration Tests, Use Case Tests, Domain Unit Tests)
+	if len(lessons) > 6 {
+		lessons[6].Quiz = &Quiz{
 			Questions: []QuizQuestion{
 				{
 					ID:       "testing-1",
-					Question: "What is a major benefit of Hexagonal Architecture for testing?",
+					Question: "According to the Testing Pyramid diagram, which layer should have the MOST tests?",
 					Options: []string{
-						"Tests run faster because of caching",
-						"You can test business logic without real databases or external services",
-						"Tests are automatically generated",
-						"You don't need to write tests",
+						"E2E Tests",
+						"Integration Tests",
+						"Use Case Tests",
+						"Domain Unit Tests",
 					},
-					CorrectIndex: 1,
-					Explanation:  "Because business logic depends on interfaces (ports) rather than concrete implementations, you can substitute mock adapters for testing without needing real databases or external services.",
+					CorrectIndex: 3,
+					Explanation:  "The pyramid shows Domain Unit Tests at the bottom labeled '(Many)'. The base of the testing pyramid should have the most tests.",
 				},
 				{
 					ID:       "testing-2",
-					Question: "What type of test would you write to test a use case in isolation?",
+					Question: "According to the Testing Pyramid diagram, which layer should have the FEWEST tests?",
 					Options: []string{
-						"End-to-end test",
-						"UI test",
-						"Unit test with mock adapters",
-						"Load test",
+						"Domain Unit Tests",
+						"Use Case Tests",
+						"Integration Tests",
+						"E2E Tests",
 					},
-					CorrectIndex: 2,
-					Explanation:  "Use cases should be tested with unit tests using mock adapters. This tests the business logic in isolation without the complexity of real external systems.",
+					CorrectIndex: 3,
+					Explanation:  "The pyramid shows E2E Tests at the top labeled '(Few)'. End-to-end tests are expensive and should be used sparingly.",
 				},
 				{
 					ID:       "testing-3",
-					Question: "When would you use a real database in tests with Hexagonal Architecture?",
+					Question: "What are the four layers of the Testing Pyramid shown in the diagram?",
 					Options: []string{
-						"Always - mocks are unreliable",
-						"Never - always use mocks",
-						"For integration tests to verify the adapter implementation",
-						"Only in production",
+						"Unit, Integration, System, Acceptance",
+						"E2E Tests, Integration Tests, Use Case Tests, Domain Unit Tests",
+						"Frontend, Backend, Database, API",
+						"White box, Black box, Gray box, Clear box",
+					},
+					CorrectIndex: 1,
+					Explanation:  "The diagram shows four layers: E2E Tests (Few), Integration Tests (Some), Use Case Tests (More), and Domain Unit Tests (Many).",
+				},
+			},
+		}
+	}
+
+	// Lesson 7: Putting It All Together
+	// Content teaches: Complete architecture diagram, Benefits table, When to use guidance
+	if len(lessons) > 7 {
+		lessons[7].Quiz = &Quiz{
+			Questions: []QuizQuestion{
+				{
+					ID:       "summary-1",
+					Question: "According to the benefits table, how does Hex Arch achieve Testability?",
+					Options: []string{
+						"By using faster databases",
+						"Domain has no dependencies, use mocks for adapters",
+						"By generating tests automatically",
+						"By reducing code size",
+					},
+					CorrectIndex: 1,
+					Explanation:  "The benefits table states that Testability is achieved because 'Domain has no dependencies, use mocks for adapters'.",
+				},
+				{
+					ID:       "summary-2",
+					Question: "According to the lesson, when is Hexagonal Architecture a GOOD fit?",
+					Options: []string{
+						"Simple CRUD applications",
+						"Prototypes or throwaway code",
+						"Long-lived applications with complex business logic",
+						"Very small teams or solo projects",
 					},
 					CorrectIndex: 2,
-					Explanation:  "Real databases are used in integration tests to verify that adapters correctly implement the ports. Unit tests use mocks, but integration tests verify the real implementations work correctly.",
+					Explanation:  "The lesson lists 'Long-lived applications' and 'Complex business logic' as good fits for Hexagonal Architecture.",
+				},
+				{
+					ID:       "summary-3",
+					Question: "According to the lesson, when is Hexagonal Architecture OVERKILL?",
+					Options: []string{
+						"Applications with multiple interfaces (web, mobile, CLI)",
+						"Teams larger than 2-3 developers",
+						"Simple CRUD applications or prototypes",
+						"Systems with complex business logic",
+					},
+					CorrectIndex: 2,
+					Explanation:  "The lesson lists 'Simple CRUD applications', 'Prototypes or throwaway code', and 'Very small teams or solo projects' as cases where Hex Arch is overkill.",
 				},
 			},
 		}

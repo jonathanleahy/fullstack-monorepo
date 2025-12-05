@@ -1,0 +1,79 @@
+{
+  "id": "06-dynamodb",
+  "title": "DynamoDB",
+  "slug": "dynamodb",
+  "description": "Master Amazon DynamoDB for scalable NoSQL database solutions. Learn data modeling, indexes, queries, and advanced features like streams and transactions.",
+  "order": 6,
+  "estimatedMinutes": 240,
+  "objectives": [
+    "Design effective DynamoDB tables with proper key selection",
+    "Implement Global Secondary Indexes (GSI) and Local Secondary Indexes (LSI)",
+    "Write efficient queries and understand when to use Scan",
+    "Configure capacity modes and understand auto-scaling",
+    "Implement DynamoDB Streams for event-driven architectures",
+    "Use transactions and batch operations effectively"
+  ],
+  "keywords": ["dynamodb", "nosql", "partition-key", "sort-key", "gsi", "lsi", "streams", "transactions", "capacity"],
+  "sublessons": [
+    {
+      "id": "00-alexs-challenge",
+      "title": "Alex's Challenge: The Schema Flexibility Crisis",
+      "order": 0
+    },
+    {
+      "id": "01-dynamodb-fundamentals",
+      "title": "DynamoDB Fundamentals",
+      "order": 1
+    },
+    {
+      "id": "02-primary-keys",
+      "title": "Primary Keys and Data Modeling",
+      "order": 2
+    },
+    {
+      "id": "03-secondary-indexes",
+      "title": "Secondary Indexes (GSI and LSI)",
+      "order": 3
+    },
+    {
+      "id": "04-read-operations",
+      "title": "Read Operations: Query and Scan",
+      "order": 4
+    },
+    {
+      "id": "05-write-operations",
+      "title": "Write Operations and Conditional Updates",
+      "order": 5
+    },
+    {
+      "id": "06-capacity-and-pricing",
+      "title": "Capacity Modes and Pricing",
+      "order": 6
+    },
+    {
+      "id": "07-dynamodb-streams",
+      "title": "DynamoDB Streams",
+      "order": 7
+    },
+    {
+      "id": "08-transactions",
+      "title": "Transactions and Batch Operations",
+      "order": 8
+    },
+    {
+      "id": "09-dax-and-caching",
+      "title": "DAX and Caching Strategies",
+      "order": 9
+    },
+    {
+      "id": "10-best-practices",
+      "title": "Best Practices and Common Patterns",
+      "order": 10
+    },
+    {
+      "id": "11-chapter-summary",
+      "title": "Alex's Solution: Flexible Pet Data Model",
+      "order": 11
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "id": "02-ec2-fundamentals",
+  "title": "EC2 Fundamentals",
+  "slug": "ec2-fundamentals",
+  "description": "Learn the foundational compute service that powers millions of applications. Master instance types, AMIs, security groups, and storage options.",
+  "order": 2,
+  "estimatedMinutes": 200,
+  "objectives": [
+    "Launch and manage EC2 instances",
+    "Choose appropriate instance types for different workloads",
+    "Configure security groups and key pairs",
+    "Work with EBS volumes and snapshots",
+    "Understand EC2 pricing models"
+  ],
+  "keywords": ["ec2", "instances", "ami", "ebs", "security-groups", "compute", "virtual-machines"],
+  "sublessons": [
+    {
+      "id": "00-alexs-challenge",
+      "title": "Alex's Challenge: Lambda Hits Its Limits",
+      "order": 0
+    },
+    {
+      "id": "01-ec2-core-concepts",
+      "title": "EC2 Core Concepts",
+      "order": 1
+    },
+    {
+      "id": "02-instance-types",
+      "title": "Instance Types Deep Dive",
+      "order": 2
+    },
+    {
+      "id": "03-amazon-machine-images",
+      "title": "Amazon Machine Images (AMIs)",
+      "order": 3
+    },
+    {
+      "id": "04-launching-instances",
+      "title": "Launching Your First Instance",
+      "order": 4
+    },
+    {
+      "id": "05-security-groups",
+      "title": "Security Groups",
+      "order": 5
+    },
+    {
+      "id": "06-key-pairs-and-ssh",
+      "title": "Key Pairs and SSH Access",
+      "order": 6
+    },
+    {
+      "id": "07-ebs-volumes",
+      "title": "EBS Volumes and Storage",
+      "order": 7
+    },
+    {
+      "id": "08-instance-metadata",
+      "title": "Instance Metadata and User Data",
+      "order": 8
+    },
+    {
+      "id": "09-pricing-models",
+      "title": "EC2 Pricing Models",
+      "order": 9
+    },
+    {
+      "id": "10-monitoring-and-troubleshooting",
+      "title": "Monitoring and Troubleshooting",
+      "order": 10
+    },
+    {
+      "id": "11-chapter-summary",
+      "title": "Alex's Solution: ML Processing Server",
+      "order": 11
+    }
+  ]
+}
