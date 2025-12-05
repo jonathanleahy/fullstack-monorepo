@@ -40,6 +40,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Attachment() AttachmentResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	UserCourse() UserCourseResolver
@@ -49,10 +50,40 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Attachment struct {
+		DownloadURL     func(childComplexity int) int
+		Filename        func(childComplexity int) int
+		ID              func(childComplexity int) int
+		LessonIndex     func(childComplexity int) int
+		LibraryCourseID func(childComplexity int) int
+		MimeType        func(childComplexity int) int
+		OriginalName    func(childComplexity int) int
+		Size            func(childComplexity int) int
+		UploadedAt      func(childComplexity int) int
+	}
+
 	AuthPayload struct {
 		AccessToken  func(childComplexity int) int
 		RefreshToken func(childComplexity int) int
 		User         func(childComplexity int) int
+	}
+
+	Bookmark struct {
+		CreatedAt       func(childComplexity int) int
+		ID              func(childComplexity int) int
+		LessonIndex     func(childComplexity int) int
+		LibraryCourseID func(childComplexity int) int
+		Note            func(childComplexity int) int
+		UserID          func(childComplexity int) int
+	}
+
+	CourseAnalytics struct {
+		AverageProgress  func(childComplexity int) int
+		CompletionRate   func(childComplexity int) int
+		LibraryCourseID  func(childComplexity int) int
+		TotalEnrollments func(childComplexity int) int
+		TotalViews       func(childComplexity int) int
+		UniqueViews      func(childComplexity int) int
 	}
 
 	Lesson struct {
@@ -84,35 +115,50 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateLibraryCourse func(childComplexity int, input CreateLibraryCourseInput) int
-		CreateUser          func(childComplexity int, input CreateUserInput) int
-		DeleteLibraryCourse func(childComplexity int, id string) int
-		DeleteUser          func(childComplexity int, id string) int
-		DropCourse          func(childComplexity int, id string) int
-		ImportCourses       func(childComplexity int, input ImportCoursesInput) int
-		Login               func(childComplexity int, input LoginInput) int
-		RefreshToken        func(childComplexity int, refreshToken string) int
-		Register            func(childComplexity int, input RegisterInput) int
-		StartCourse         func(childComplexity int, input StartCourseInput) int
-		UpdateLibraryCourse func(childComplexity int, id string, input UpdateLibraryCourseInput) int
-		UpdateProgress      func(childComplexity int, input UpdateProgressInput) int
-		UpdateUser          func(childComplexity int, id string, input UpdateUserInput) int
+		AddBookmark          func(childComplexity int, libraryCourseID string, lessonIndex int, note *string) int
+		CreateLibraryCourse  func(childComplexity int, input CreateLibraryCourseInput) int
+		CreateUser           func(childComplexity int, input CreateUserInput) int
+		DeleteAttachment     func(childComplexity int, id string) int
+		DeleteLibraryCourse  func(childComplexity int, id string) int
+		DeleteUser           func(childComplexity int, id string) int
+		DropCourse           func(childComplexity int, id string) int
+		EnrollInCourse       func(childComplexity int, libraryCourseID string) int
+		ImportCourses        func(childComplexity int, input ImportCoursesInput) int
+		Login                func(childComplexity int, input LoginInput) int
+		RecordCourseView     func(childComplexity int, libraryCourseID string) int
+		RefreshToken         func(childComplexity int, refreshToken string) int
+		Register             func(childComplexity int, input RegisterInput) int
+		RemoveBookmark       func(childComplexity int, libraryCourseID string, lessonIndex int) int
+		SetCurrentLesson     func(childComplexity int, libraryCourseID string, lessonIndex int) int
+		StartCourse          func(childComplexity int, input StartCourseInput) int
+		UnenrollFromCourse   func(childComplexity int, libraryCourseID string) int
+		UpdateCourseProgress func(childComplexity int, libraryCourseID string, lessonIndex int, completed bool) int
+		UpdateLibraryCourse  func(childComplexity int, id string, input UpdateLibraryCourseInput) int
+		UpdateProgress       func(childComplexity int, input UpdateProgressInput) int
+		UpdateUser           func(childComplexity int, id string, input UpdateUserInput) int
 	}
 
 	Query struct {
-		AllTags              func(childComplexity int) int
-		CoursesByTag         func(childComplexity int, tag string, pagination *PaginationInput) int
-		LibraryCourse        func(childComplexity int, id string) int
-		LibraryCourses       func(childComplexity int, pagination *PaginationInput, difficulty *entities.Difficulty) int
-		Me                   func(childComplexity int) int
-		MyAuthoredCourses    func(childComplexity int, pagination *PaginationInput) int
-		MyCompletedCourses   func(childComplexity int, pagination *PaginationInput) int
-		MyCourses            func(childComplexity int, pagination *PaginationInput) int
-		MyInProgressCourses  func(childComplexity int, pagination *PaginationInput) int
-		SearchLibraryCourses func(childComplexity int, query string, pagination *PaginationInput) int
-		User                 func(childComplexity int, id string) int
-		UserCourse           func(childComplexity int, id string) int
-		Users                func(childComplexity int, pagination *PaginationInput) int
+		AllTags                      func(childComplexity int) int
+		CourseAnalytics              func(childComplexity int, libraryCourseID string) int
+		CourseBookmarks              func(childComplexity int, libraryCourseID string) int
+		CoursesByTag                 func(childComplexity int, tag string, pagination *PaginationInput) int
+		GetUserCourseByLibraryCourse func(childComplexity int, libraryCourseID string) int
+		LessonAttachments            func(childComplexity int, libraryCourseID string, lessonIndex int) int
+		LibraryCourse                func(childComplexity int, id string) int
+		LibraryCourses               func(childComplexity int, pagination *PaginationInput, difficulty *entities.Difficulty) int
+		Me                           func(childComplexity int) int
+		MyAuthoredCourses            func(childComplexity int, pagination *PaginationInput) int
+		MyAuthoredCoursesAnalytics   func(childComplexity int) int
+		MyBookmarks                  func(childComplexity int) int
+		MyCompletedCourses           func(childComplexity int, pagination *PaginationInput) int
+		MyCourses                    func(childComplexity int, pagination *PaginationInput) int
+		MyEnrolledCourses            func(childComplexity int) int
+		MyInProgressCourses          func(childComplexity int, pagination *PaginationInput) int
+		SearchLibraryCourses         func(childComplexity int, query string, pagination *PaginationInput) int
+		User                         func(childComplexity int, id string) int
+		UserCourse                   func(childComplexity int, id string) int
+		Users                        func(childComplexity int, pagination *PaginationInput) int
 	}
 
 	TokenPayload struct {
@@ -138,6 +184,7 @@ type ComplexityRoot struct {
 
 	UserCourse struct {
 		CompletedAt        func(childComplexity int) int
+		CompletedLessons   func(childComplexity int) int
 		CurrentLessonIndex func(childComplexity int) int
 		ID                 func(childComplexity int) int
 		LibraryCourse      func(childComplexity int) int
@@ -157,6 +204,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type AttachmentResolver interface {
+	DownloadURL(ctx context.Context, obj *entities.Attachment) (string, error)
+}
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input CreateUserInput) (*entities.User, error)
 	UpdateUser(ctx context.Context, id string, input UpdateUserInput) (*entities.User, error)
@@ -171,6 +221,14 @@ type MutationResolver interface {
 	StartCourse(ctx context.Context, input StartCourseInput) (*entities.UserCourse, error)
 	UpdateProgress(ctx context.Context, input UpdateProgressInput) (*entities.UserCourse, error)
 	DropCourse(ctx context.Context, id string) (bool, error)
+	EnrollInCourse(ctx context.Context, libraryCourseID string) (*entities.UserCourse, error)
+	UnenrollFromCourse(ctx context.Context, libraryCourseID string) (bool, error)
+	UpdateCourseProgress(ctx context.Context, libraryCourseID string, lessonIndex int, completed bool) (*entities.UserCourse, error)
+	SetCurrentLesson(ctx context.Context, libraryCourseID string, lessonIndex int) (*entities.UserCourse, error)
+	AddBookmark(ctx context.Context, libraryCourseID string, lessonIndex int, note *string) (*entities.Bookmark, error)
+	RemoveBookmark(ctx context.Context, libraryCourseID string, lessonIndex int) (bool, error)
+	RecordCourseView(ctx context.Context, libraryCourseID string) (bool, error)
+	DeleteAttachment(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, id string) (*entities.User, error)
@@ -186,6 +244,13 @@ type QueryResolver interface {
 	MyCompletedCourses(ctx context.Context, pagination *PaginationInput) (*UserCourseConnection, error)
 	MyInProgressCourses(ctx context.Context, pagination *PaginationInput) (*UserCourseConnection, error)
 	UserCourse(ctx context.Context, id string) (*entities.UserCourse, error)
+	MyEnrolledCourses(ctx context.Context) ([]*entities.UserCourse, error)
+	GetUserCourseByLibraryCourse(ctx context.Context, libraryCourseID string) (*entities.UserCourse, error)
+	MyBookmarks(ctx context.Context) ([]*entities.Bookmark, error)
+	CourseBookmarks(ctx context.Context, libraryCourseID string) ([]*entities.Bookmark, error)
+	CourseAnalytics(ctx context.Context, libraryCourseID string) (*entities.CourseAnalytics, error)
+	MyAuthoredCoursesAnalytics(ctx context.Context) ([]*entities.CourseAnalytics, error)
+	LessonAttachments(ctx context.Context, libraryCourseID string, lessonIndex int) ([]*entities.Attachment, error)
 }
 type UserCourseResolver interface {
 	LibraryCourse(ctx context.Context, obj *entities.UserCourse) (*entities.LibraryCourse, error)
@@ -210,6 +275,61 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Attachment.downloadUrl":
+		if e.complexity.Attachment.DownloadURL == nil {
+			break
+		}
+
+		return e.complexity.Attachment.DownloadURL(childComplexity), true
+	case "Attachment.filename":
+		if e.complexity.Attachment.Filename == nil {
+			break
+		}
+
+		return e.complexity.Attachment.Filename(childComplexity), true
+	case "Attachment.id":
+		if e.complexity.Attachment.ID == nil {
+			break
+		}
+
+		return e.complexity.Attachment.ID(childComplexity), true
+	case "Attachment.lessonIndex":
+		if e.complexity.Attachment.LessonIndex == nil {
+			break
+		}
+
+		return e.complexity.Attachment.LessonIndex(childComplexity), true
+	case "Attachment.libraryCourseId":
+		if e.complexity.Attachment.LibraryCourseID == nil {
+			break
+		}
+
+		return e.complexity.Attachment.LibraryCourseID(childComplexity), true
+	case "Attachment.mimeType":
+		if e.complexity.Attachment.MimeType == nil {
+			break
+		}
+
+		return e.complexity.Attachment.MimeType(childComplexity), true
+	case "Attachment.originalName":
+		if e.complexity.Attachment.OriginalName == nil {
+			break
+		}
+
+		return e.complexity.Attachment.OriginalName(childComplexity), true
+	case "Attachment.size":
+		if e.complexity.Attachment.Size == nil {
+			break
+		}
+
+		return e.complexity.Attachment.Size(childComplexity), true
+	case "Attachment.uploadedAt":
+		if e.complexity.Attachment.UploadedAt == nil {
+			break
+		}
+
+		return e.complexity.Attachment.UploadedAt(childComplexity), true
+
 	case "AuthPayload.accessToken":
 		if e.complexity.AuthPayload.AccessToken == nil {
 			break
@@ -228,6 +348,80 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.AuthPayload.User(childComplexity), true
+
+	case "Bookmark.createdAt":
+		if e.complexity.Bookmark.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.CreatedAt(childComplexity), true
+	case "Bookmark.id":
+		if e.complexity.Bookmark.ID == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.ID(childComplexity), true
+	case "Bookmark.lessonIndex":
+		if e.complexity.Bookmark.LessonIndex == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.LessonIndex(childComplexity), true
+	case "Bookmark.libraryCourseId":
+		if e.complexity.Bookmark.LibraryCourseID == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.LibraryCourseID(childComplexity), true
+	case "Bookmark.note":
+		if e.complexity.Bookmark.Note == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.Note(childComplexity), true
+	case "Bookmark.userId":
+		if e.complexity.Bookmark.UserID == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.UserID(childComplexity), true
+
+	case "CourseAnalytics.averageProgress":
+		if e.complexity.CourseAnalytics.AverageProgress == nil {
+			break
+		}
+
+		return e.complexity.CourseAnalytics.AverageProgress(childComplexity), true
+	case "CourseAnalytics.completionRate":
+		if e.complexity.CourseAnalytics.CompletionRate == nil {
+			break
+		}
+
+		return e.complexity.CourseAnalytics.CompletionRate(childComplexity), true
+	case "CourseAnalytics.libraryCourseId":
+		if e.complexity.CourseAnalytics.LibraryCourseID == nil {
+			break
+		}
+
+		return e.complexity.CourseAnalytics.LibraryCourseID(childComplexity), true
+	case "CourseAnalytics.totalEnrollments":
+		if e.complexity.CourseAnalytics.TotalEnrollments == nil {
+			break
+		}
+
+		return e.complexity.CourseAnalytics.TotalEnrollments(childComplexity), true
+	case "CourseAnalytics.totalViews":
+		if e.complexity.CourseAnalytics.TotalViews == nil {
+			break
+		}
+
+		return e.complexity.CourseAnalytics.TotalViews(childComplexity), true
+	case "CourseAnalytics.uniqueViews":
+		if e.complexity.CourseAnalytics.UniqueViews == nil {
+			break
+		}
+
+		return e.complexity.CourseAnalytics.UniqueViews(childComplexity), true
 
 	case "Lesson.content":
 		if e.complexity.Lesson.Content == nil {
@@ -346,6 +540,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.LibraryCourseConnection.Total(childComplexity), true
 
+	case "Mutation.addBookmark":
+		if e.complexity.Mutation.AddBookmark == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addBookmark_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddBookmark(childComplexity, args["libraryCourseId"].(string), args["lessonIndex"].(int), args["note"].(*string)), true
 	case "Mutation.createLibraryCourse":
 		if e.complexity.Mutation.CreateLibraryCourse == nil {
 			break
@@ -368,6 +573,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(CreateUserInput)), true
+	case "Mutation.deleteAttachment":
+		if e.complexity.Mutation.DeleteAttachment == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteAttachment_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteAttachment(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteLibraryCourse":
 		if e.complexity.Mutation.DeleteLibraryCourse == nil {
 			break
@@ -401,6 +617,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.DropCourse(childComplexity, args["id"].(string)), true
+	case "Mutation.enrollInCourse":
+		if e.complexity.Mutation.EnrollInCourse == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_enrollInCourse_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EnrollInCourse(childComplexity, args["libraryCourseId"].(string)), true
 	case "Mutation.importCourses":
 		if e.complexity.Mutation.ImportCourses == nil {
 			break
@@ -423,6 +650,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Login(childComplexity, args["input"].(LoginInput)), true
+	case "Mutation.recordCourseView":
+		if e.complexity.Mutation.RecordCourseView == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_recordCourseView_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RecordCourseView(childComplexity, args["libraryCourseId"].(string)), true
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
 			break
@@ -445,6 +683,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Register(childComplexity, args["input"].(RegisterInput)), true
+	case "Mutation.removeBookmark":
+		if e.complexity.Mutation.RemoveBookmark == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeBookmark_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveBookmark(childComplexity, args["libraryCourseId"].(string), args["lessonIndex"].(int)), true
+	case "Mutation.setCurrentLesson":
+		if e.complexity.Mutation.SetCurrentLesson == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setCurrentLesson_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetCurrentLesson(childComplexity, args["libraryCourseId"].(string), args["lessonIndex"].(int)), true
 	case "Mutation.startCourse":
 		if e.complexity.Mutation.StartCourse == nil {
 			break
@@ -456,6 +716,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.StartCourse(childComplexity, args["input"].(StartCourseInput)), true
+	case "Mutation.unenrollFromCourse":
+		if e.complexity.Mutation.UnenrollFromCourse == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_unenrollFromCourse_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UnenrollFromCourse(childComplexity, args["libraryCourseId"].(string)), true
+	case "Mutation.updateCourseProgress":
+		if e.complexity.Mutation.UpdateCourseProgress == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateCourseProgress_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateCourseProgress(childComplexity, args["libraryCourseId"].(string), args["lessonIndex"].(int), args["completed"].(bool)), true
 	case "Mutation.updateLibraryCourse":
 		if e.complexity.Mutation.UpdateLibraryCourse == nil {
 			break
@@ -496,6 +778,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.AllTags(childComplexity), true
+	case "Query.courseAnalytics":
+		if e.complexity.Query.CourseAnalytics == nil {
+			break
+		}
+
+		args, err := ec.field_Query_courseAnalytics_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CourseAnalytics(childComplexity, args["libraryCourseId"].(string)), true
+	case "Query.courseBookmarks":
+		if e.complexity.Query.CourseBookmarks == nil {
+			break
+		}
+
+		args, err := ec.field_Query_courseBookmarks_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CourseBookmarks(childComplexity, args["libraryCourseId"].(string)), true
 	case "Query.coursesByTag":
 		if e.complexity.Query.CoursesByTag == nil {
 			break
@@ -507,6 +811,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.CoursesByTag(childComplexity, args["tag"].(string), args["pagination"].(*PaginationInput)), true
+	case "Query.getUserCourseByLibraryCourse":
+		if e.complexity.Query.GetUserCourseByLibraryCourse == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getUserCourseByLibraryCourse_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetUserCourseByLibraryCourse(childComplexity, args["libraryCourseId"].(string)), true
+	case "Query.lessonAttachments":
+		if e.complexity.Query.LessonAttachments == nil {
+			break
+		}
+
+		args, err := ec.field_Query_lessonAttachments_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.LessonAttachments(childComplexity, args["libraryCourseId"].(string), args["lessonIndex"].(int)), true
 	case "Query.libraryCourse":
 		if e.complexity.Query.LibraryCourse == nil {
 			break
@@ -546,6 +872,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.MyAuthoredCourses(childComplexity, args["pagination"].(*PaginationInput)), true
+	case "Query.myAuthoredCoursesAnalytics":
+		if e.complexity.Query.MyAuthoredCoursesAnalytics == nil {
+			break
+		}
+
+		return e.complexity.Query.MyAuthoredCoursesAnalytics(childComplexity), true
+	case "Query.myBookmarks":
+		if e.complexity.Query.MyBookmarks == nil {
+			break
+		}
+
+		return e.complexity.Query.MyBookmarks(childComplexity), true
 	case "Query.myCompletedCourses":
 		if e.complexity.Query.MyCompletedCourses == nil {
 			break
@@ -568,6 +906,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.MyCourses(childComplexity, args["pagination"].(*PaginationInput)), true
+	case "Query.myEnrolledCourses":
+		if e.complexity.Query.MyEnrolledCourses == nil {
+			break
+		}
+
+		return e.complexity.Query.MyEnrolledCourses(childComplexity), true
 	case "Query.myInProgressCourses":
 		if e.complexity.Query.MyInProgressCourses == nil {
 			break
@@ -705,6 +1049,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.UserCourse.CompletedAt(childComplexity), true
+	case "UserCourse.completedLessons":
+		if e.complexity.UserCourse.CompletedLessons == nil {
+			break
+		}
+
+		return e.complexity.UserCourse.CompletedLessons(childComplexity), true
 	case "UserCourse.currentLessonIndex":
 		if e.complexity.UserCourse.CurrentLessonIndex == nil {
 			break
@@ -920,6 +1270,27 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_addBookmark_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "lessonIndex", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["lessonIndex"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "note", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["note"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createLibraryCourse_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -939,6 +1310,17 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 		return nil, err
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteAttachment_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -975,6 +1357,17 @@ func (ec *executionContext) field_Mutation_dropCourse_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_enrollInCourse_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_importCourses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -994,6 +1387,17 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_recordCourseView_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
 	return args, nil
 }
 
@@ -1019,6 +1423,38 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_removeBookmark_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "lessonIndex", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["lessonIndex"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setCurrentLesson_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "lessonIndex", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["lessonIndex"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_startCourse_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1027,6 +1463,38 @@ func (ec *executionContext) field_Mutation_startCourse_args(ctx context.Context,
 		return nil, err
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_unenrollFromCourse_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateCourseProgress_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "lessonIndex", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["lessonIndex"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "completed", ec.unmarshalNBoolean2bool)
+	if err != nil {
+		return nil, err
+	}
+	args["completed"] = arg2
 	return args, nil
 }
 
@@ -1084,6 +1552,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_courseAnalytics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_courseBookmarks_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_coursesByTag_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1097,6 +1587,33 @@ func (ec *executionContext) field_Query_coursesByTag_args(ctx context.Context, r
 		return nil, err
 	}
 	args["pagination"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getUserCourseByLibraryCourse_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_lessonAttachments_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "libraryCourseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["libraryCourseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "lessonIndex", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["lessonIndex"] = arg1
 	return args, nil
 }
 
@@ -1272,6 +1789,267 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Attachment_id(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attachment_libraryCourseId(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_libraryCourseId,
+		func(ctx context.Context) (any, error) {
+			return obj.LibraryCourseID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_libraryCourseId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attachment_lessonIndex(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_lessonIndex,
+		func(ctx context.Context) (any, error) {
+			return obj.LessonIndex, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_lessonIndex(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attachment_filename(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_filename,
+		func(ctx context.Context) (any, error) {
+			return obj.Filename, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_filename(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attachment_originalName(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_originalName,
+		func(ctx context.Context) (any, error) {
+			return obj.OriginalName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_originalName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attachment_mimeType(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_mimeType,
+		func(ctx context.Context) (any, error) {
+			return obj.MimeType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_mimeType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attachment_size(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_size,
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
+		nil,
+		ec.marshalNInt2int64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_size(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attachment_uploadedAt(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_uploadedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UploadedAt, nil
+		},
+		nil,
+		ec.marshalNDateTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_uploadedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Attachment_downloadUrl(ctx context.Context, field graphql.CollectedField, obj *entities.Attachment) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Attachment_downloadUrl,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Attachment().DownloadURL(ctx, obj)
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Attachment_downloadUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Attachment",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AuthPayload_user(ctx context.Context, field graphql.CollectedField, obj *AuthPayload) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1366,6 +2144,354 @@ func (ec *executionContext) fieldContext_AuthPayload_refreshToken(_ context.Cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Bookmark_id(ctx context.Context, field graphql.CollectedField, obj *entities.Bookmark) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Bookmark_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Bookmark_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Bookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Bookmark_userId(ctx context.Context, field graphql.CollectedField, obj *entities.Bookmark) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Bookmark_userId,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Bookmark_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Bookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Bookmark_libraryCourseId(ctx context.Context, field graphql.CollectedField, obj *entities.Bookmark) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Bookmark_libraryCourseId,
+		func(ctx context.Context) (any, error) {
+			return obj.LibraryCourseID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Bookmark_libraryCourseId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Bookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Bookmark_lessonIndex(ctx context.Context, field graphql.CollectedField, obj *entities.Bookmark) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Bookmark_lessonIndex,
+		func(ctx context.Context) (any, error) {
+			return obj.LessonIndex, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Bookmark_lessonIndex(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Bookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Bookmark_note(ctx context.Context, field graphql.CollectedField, obj *entities.Bookmark) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Bookmark_note,
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Bookmark_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Bookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Bookmark_createdAt(ctx context.Context, field graphql.CollectedField, obj *entities.Bookmark) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Bookmark_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNDateTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Bookmark_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Bookmark",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseAnalytics_libraryCourseId(ctx context.Context, field graphql.CollectedField, obj *entities.CourseAnalytics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseAnalytics_libraryCourseId,
+		func(ctx context.Context) (any, error) {
+			return obj.LibraryCourseID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseAnalytics_libraryCourseId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseAnalytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseAnalytics_totalViews(ctx context.Context, field graphql.CollectedField, obj *entities.CourseAnalytics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseAnalytics_totalViews,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalViews, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseAnalytics_totalViews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseAnalytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseAnalytics_uniqueViews(ctx context.Context, field graphql.CollectedField, obj *entities.CourseAnalytics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseAnalytics_uniqueViews,
+		func(ctx context.Context) (any, error) {
+			return obj.UniqueViews, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseAnalytics_uniqueViews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseAnalytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseAnalytics_totalEnrollments(ctx context.Context, field graphql.CollectedField, obj *entities.CourseAnalytics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseAnalytics_totalEnrollments,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalEnrollments, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseAnalytics_totalEnrollments(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseAnalytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseAnalytics_completionRate(ctx context.Context, field graphql.CollectedField, obj *entities.CourseAnalytics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseAnalytics_completionRate,
+		func(ctx context.Context) (any, error) {
+			return obj.CompletionRate, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseAnalytics_completionRate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseAnalytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseAnalytics_averageProgress(ctx context.Context, field graphql.CollectedField, obj *entities.CourseAnalytics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseAnalytics_averageProgress,
+		func(ctx context.Context) (any, error) {
+			return obj.AverageProgress, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseAnalytics_averageProgress(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseAnalytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2519,6 +3645,8 @@ func (ec *executionContext) fieldContext_Mutation_startCourse(ctx context.Contex
 				return ec.fieldContext_UserCourse_progress(ctx, field)
 			case "currentLessonIndex":
 				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
 			case "startedAt":
 				return ec.fieldContext_UserCourse_startedAt(ctx, field)
 			case "updatedAt":
@@ -2580,6 +3708,8 @@ func (ec *executionContext) fieldContext_Mutation_updateProgress(ctx context.Con
 				return ec.fieldContext_UserCourse_progress(ctx, field)
 			case "currentLessonIndex":
 				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
 			case "startedAt":
 				return ec.fieldContext_UserCourse_startedAt(ctx, field)
 			case "updatedAt":
@@ -2639,6 +3769,414 @@ func (ec *executionContext) fieldContext_Mutation_dropCourse(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_dropCourse_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_enrollInCourse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_enrollInCourse,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().EnrollInCourse(ctx, fc.Args["libraryCourseId"].(string))
+		},
+		nil,
+		ec.marshalNUserCourse2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐUserCourse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_enrollInCourse(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserCourse_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_UserCourse_userId(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_UserCourse_libraryCourseId(ctx, field)
+			case "libraryCourse":
+				return ec.fieldContext_UserCourse_libraryCourse(ctx, field)
+			case "progress":
+				return ec.fieldContext_UserCourse_progress(ctx, field)
+			case "currentLessonIndex":
+				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_UserCourse_startedAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UserCourse_updatedAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_UserCourse_completedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserCourse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_enrollInCourse_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_unenrollFromCourse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_unenrollFromCourse,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().UnenrollFromCourse(ctx, fc.Args["libraryCourseId"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_unenrollFromCourse(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_unenrollFromCourse_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateCourseProgress(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateCourseProgress,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().UpdateCourseProgress(ctx, fc.Args["libraryCourseId"].(string), fc.Args["lessonIndex"].(int), fc.Args["completed"].(bool))
+		},
+		nil,
+		ec.marshalNUserCourse2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐUserCourse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateCourseProgress(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserCourse_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_UserCourse_userId(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_UserCourse_libraryCourseId(ctx, field)
+			case "libraryCourse":
+				return ec.fieldContext_UserCourse_libraryCourse(ctx, field)
+			case "progress":
+				return ec.fieldContext_UserCourse_progress(ctx, field)
+			case "currentLessonIndex":
+				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_UserCourse_startedAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UserCourse_updatedAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_UserCourse_completedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserCourse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateCourseProgress_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_setCurrentLesson(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_setCurrentLesson,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SetCurrentLesson(ctx, fc.Args["libraryCourseId"].(string), fc.Args["lessonIndex"].(int))
+		},
+		nil,
+		ec.marshalNUserCourse2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐUserCourse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setCurrentLesson(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserCourse_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_UserCourse_userId(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_UserCourse_libraryCourseId(ctx, field)
+			case "libraryCourse":
+				return ec.fieldContext_UserCourse_libraryCourse(ctx, field)
+			case "progress":
+				return ec.fieldContext_UserCourse_progress(ctx, field)
+			case "currentLessonIndex":
+				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_UserCourse_startedAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UserCourse_updatedAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_UserCourse_completedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserCourse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setCurrentLesson_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_addBookmark,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().AddBookmark(ctx, fc.Args["libraryCourseId"].(string), fc.Args["lessonIndex"].(int), fc.Args["note"].(*string))
+		},
+		nil,
+		ec.marshalNBookmark2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐBookmark,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addBookmark(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Bookmark_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Bookmark_userId(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_Bookmark_libraryCourseId(ctx, field)
+			case "lessonIndex":
+				return ec.fieldContext_Bookmark_lessonIndex(ctx, field)
+			case "note":
+				return ec.fieldContext_Bookmark_note(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Bookmark_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Bookmark", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addBookmark_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_removeBookmark,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RemoveBookmark(ctx, fc.Args["libraryCourseId"].(string), fc.Args["lessonIndex"].(int))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeBookmark(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeBookmark_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_recordCourseView(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_recordCourseView,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RecordCourseView(ctx, fc.Args["libraryCourseId"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_recordCourseView(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_recordCourseView_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteAttachment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deleteAttachment,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().DeleteAttachment(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteAttachment(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteAttachment_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3294,6 +4832,8 @@ func (ec *executionContext) fieldContext_Query_userCourse(ctx context.Context, f
 				return ec.fieldContext_UserCourse_progress(ctx, field)
 			case "currentLessonIndex":
 				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
 			case "startedAt":
 				return ec.fieldContext_UserCourse_startedAt(ctx, field)
 			case "updatedAt":
@@ -3312,6 +4852,377 @@ func (ec *executionContext) fieldContext_Query_userCourse(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_userCourse_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_myEnrolledCourses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_myEnrolledCourses,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().MyEnrolledCourses(ctx)
+		},
+		nil,
+		ec.marshalNUserCourse2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐUserCourseᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_myEnrolledCourses(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserCourse_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_UserCourse_userId(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_UserCourse_libraryCourseId(ctx, field)
+			case "libraryCourse":
+				return ec.fieldContext_UserCourse_libraryCourse(ctx, field)
+			case "progress":
+				return ec.fieldContext_UserCourse_progress(ctx, field)
+			case "currentLessonIndex":
+				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_UserCourse_startedAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UserCourse_updatedAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_UserCourse_completedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserCourse", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getUserCourseByLibraryCourse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getUserCourseByLibraryCourse,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetUserCourseByLibraryCourse(ctx, fc.Args["libraryCourseId"].(string))
+		},
+		nil,
+		ec.marshalOUserCourse2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐUserCourse,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getUserCourseByLibraryCourse(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserCourse_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_UserCourse_userId(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_UserCourse_libraryCourseId(ctx, field)
+			case "libraryCourse":
+				return ec.fieldContext_UserCourse_libraryCourse(ctx, field)
+			case "progress":
+				return ec.fieldContext_UserCourse_progress(ctx, field)
+			case "currentLessonIndex":
+				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_UserCourse_startedAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UserCourse_updatedAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_UserCourse_completedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserCourse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getUserCourseByLibraryCourse_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_myBookmarks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_myBookmarks,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().MyBookmarks(ctx)
+		},
+		nil,
+		ec.marshalNBookmark2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐBookmarkᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_myBookmarks(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Bookmark_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Bookmark_userId(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_Bookmark_libraryCourseId(ctx, field)
+			case "lessonIndex":
+				return ec.fieldContext_Bookmark_lessonIndex(ctx, field)
+			case "note":
+				return ec.fieldContext_Bookmark_note(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Bookmark_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Bookmark", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_courseBookmarks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_courseBookmarks,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().CourseBookmarks(ctx, fc.Args["libraryCourseId"].(string))
+		},
+		nil,
+		ec.marshalNBookmark2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐBookmarkᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_courseBookmarks(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Bookmark_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Bookmark_userId(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_Bookmark_libraryCourseId(ctx, field)
+			case "lessonIndex":
+				return ec.fieldContext_Bookmark_lessonIndex(ctx, field)
+			case "note":
+				return ec.fieldContext_Bookmark_note(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Bookmark_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Bookmark", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_courseBookmarks_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_courseAnalytics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_courseAnalytics,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().CourseAnalytics(ctx, fc.Args["libraryCourseId"].(string))
+		},
+		nil,
+		ec.marshalNCourseAnalytics2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseAnalytics,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_courseAnalytics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "libraryCourseId":
+				return ec.fieldContext_CourseAnalytics_libraryCourseId(ctx, field)
+			case "totalViews":
+				return ec.fieldContext_CourseAnalytics_totalViews(ctx, field)
+			case "uniqueViews":
+				return ec.fieldContext_CourseAnalytics_uniqueViews(ctx, field)
+			case "totalEnrollments":
+				return ec.fieldContext_CourseAnalytics_totalEnrollments(ctx, field)
+			case "completionRate":
+				return ec.fieldContext_CourseAnalytics_completionRate(ctx, field)
+			case "averageProgress":
+				return ec.fieldContext_CourseAnalytics_averageProgress(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CourseAnalytics", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_courseAnalytics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_myAuthoredCoursesAnalytics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_myAuthoredCoursesAnalytics,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().MyAuthoredCoursesAnalytics(ctx)
+		},
+		nil,
+		ec.marshalNCourseAnalytics2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseAnalyticsᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_myAuthoredCoursesAnalytics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "libraryCourseId":
+				return ec.fieldContext_CourseAnalytics_libraryCourseId(ctx, field)
+			case "totalViews":
+				return ec.fieldContext_CourseAnalytics_totalViews(ctx, field)
+			case "uniqueViews":
+				return ec.fieldContext_CourseAnalytics_uniqueViews(ctx, field)
+			case "totalEnrollments":
+				return ec.fieldContext_CourseAnalytics_totalEnrollments(ctx, field)
+			case "completionRate":
+				return ec.fieldContext_CourseAnalytics_completionRate(ctx, field)
+			case "averageProgress":
+				return ec.fieldContext_CourseAnalytics_averageProgress(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CourseAnalytics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_lessonAttachments(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_lessonAttachments,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().LessonAttachments(ctx, fc.Args["libraryCourseId"].(string), fc.Args["lessonIndex"].(int))
+		},
+		nil,
+		ec.marshalNAttachment2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐAttachmentᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_lessonAttachments(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Attachment_id(ctx, field)
+			case "libraryCourseId":
+				return ec.fieldContext_Attachment_libraryCourseId(ctx, field)
+			case "lessonIndex":
+				return ec.fieldContext_Attachment_lessonIndex(ctx, field)
+			case "filename":
+				return ec.fieldContext_Attachment_filename(ctx, field)
+			case "originalName":
+				return ec.fieldContext_Attachment_originalName(ctx, field)
+			case "mimeType":
+				return ec.fieldContext_Attachment_mimeType(ctx, field)
+			case "size":
+				return ec.fieldContext_Attachment_size(ctx, field)
+			case "uploadedAt":
+				return ec.fieldContext_Attachment_uploadedAt(ctx, field)
+			case "downloadUrl":
+				return ec.fieldContext_Attachment_downloadUrl(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Attachment", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_lessonAttachments_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3984,6 +5895,35 @@ func (ec *executionContext) fieldContext_UserCourse_currentLessonIndex(_ context
 	return fc, nil
 }
 
+func (ec *executionContext) _UserCourse_completedLessons(ctx context.Context, field graphql.CollectedField, obj *entities.UserCourse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UserCourse_completedLessons,
+		func(ctx context.Context) (any, error) {
+			return obj.CompletedLessons, nil
+		},
+		nil,
+		ec.marshalNInt2ᚕintᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_UserCourse_completedLessons(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserCourse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserCourse_startedAt(ctx context.Context, field graphql.CollectedField, obj *entities.UserCourse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -4107,6 +6047,8 @@ func (ec *executionContext) fieldContext_UserCourseConnection_courses(_ context.
 				return ec.fieldContext_UserCourse_progress(ctx, field)
 			case "currentLessonIndex":
 				return ec.fieldContext_UserCourse_currentLessonIndex(ctx, field)
+			case "completedLessons":
+				return ec.fieldContext_UserCourse_completedLessons(ctx, field)
 			case "startedAt":
 				return ec.fieldContext_UserCourse_startedAt(ctx, field)
 			case "updatedAt":
@@ -6148,6 +8090,116 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 
 // region    **************************** object.gotpl ****************************
 
+var attachmentImplementors = []string{"Attachment"}
+
+func (ec *executionContext) _Attachment(ctx context.Context, sel ast.SelectionSet, obj *entities.Attachment) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, attachmentImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Attachment")
+		case "id":
+			out.Values[i] = ec._Attachment_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "libraryCourseId":
+			out.Values[i] = ec._Attachment_libraryCourseId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "lessonIndex":
+			out.Values[i] = ec._Attachment_lessonIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "filename":
+			out.Values[i] = ec._Attachment_filename(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "originalName":
+			out.Values[i] = ec._Attachment_originalName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "mimeType":
+			out.Values[i] = ec._Attachment_mimeType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "size":
+			out.Values[i] = ec._Attachment_size(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "uploadedAt":
+			out.Values[i] = ec._Attachment_uploadedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "downloadUrl":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Attachment_downloadUrl(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var authPayloadImplementors = []string{"AuthPayload"}
 
 func (ec *executionContext) _AuthPayload(ctx context.Context, sel ast.SelectionSet, obj *AuthPayload) graphql.Marshaler {
@@ -6171,6 +8223,131 @@ func (ec *executionContext) _AuthPayload(ctx context.Context, sel ast.SelectionS
 			}
 		case "refreshToken":
 			out.Values[i] = ec._AuthPayload_refreshToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var bookmarkImplementors = []string{"Bookmark"}
+
+func (ec *executionContext) _Bookmark(ctx context.Context, sel ast.SelectionSet, obj *entities.Bookmark) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bookmarkImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Bookmark")
+		case "id":
+			out.Values[i] = ec._Bookmark_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._Bookmark_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "libraryCourseId":
+			out.Values[i] = ec._Bookmark_libraryCourseId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lessonIndex":
+			out.Values[i] = ec._Bookmark_lessonIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._Bookmark_note(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._Bookmark_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var courseAnalyticsImplementors = []string{"CourseAnalytics"}
+
+func (ec *executionContext) _CourseAnalytics(ctx context.Context, sel ast.SelectionSet, obj *entities.CourseAnalytics) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, courseAnalyticsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CourseAnalytics")
+		case "libraryCourseId":
+			out.Values[i] = ec._CourseAnalytics_libraryCourseId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalViews":
+			out.Values[i] = ec._CourseAnalytics_totalViews(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "uniqueViews":
+			out.Values[i] = ec._CourseAnalytics_uniqueViews(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalEnrollments":
+			out.Values[i] = ec._CourseAnalytics_totalEnrollments(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "completionRate":
+			out.Values[i] = ec._CourseAnalytics_completionRate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "averageProgress":
+			out.Values[i] = ec._CourseAnalytics_averageProgress(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -6504,6 +8681,62 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "enrollInCourse":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_enrollInCourse(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "unenrollFromCourse":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_unenrollFromCourse(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateCourseProgress":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateCourseProgress(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "setCurrentLesson":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setCurrentLesson(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addBookmark":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addBookmark(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeBookmark":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeBookmark(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "recordCourseView":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_recordCourseView(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteAttachment":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteAttachment(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6820,6 +9053,157 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "myEnrolledCourses":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myEnrolledCourses(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getUserCourseByLibraryCourse":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserCourseByLibraryCourse(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "myBookmarks":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myBookmarks(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "courseBookmarks":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_courseBookmarks(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "courseAnalytics":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_courseAnalytics(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "myAuthoredCoursesAnalytics":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myAuthoredCoursesAnalytics(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "lessonAttachments":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_lessonAttachments(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -7079,6 +9463,11 @@ func (ec *executionContext) _UserCourse(ctx context.Context, sel ast.SelectionSe
 			}
 		case "currentLessonIndex":
 			out.Values[i] = ec._UserCourse_currentLessonIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "completedLessons":
+			out.Values[i] = ec._UserCourse_completedLessons(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -7511,6 +9900,60 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAttachment2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐAttachmentᚄ(ctx context.Context, sel ast.SelectionSet, v []*entities.Attachment) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAttachment2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐAttachment(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNAttachment2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐAttachment(ctx context.Context, sel ast.SelectionSet, v *entities.Attachment) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Attachment(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNAuthPayload2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v AuthPayload) graphql.Marshaler {
 	return ec._AuthPayload(ctx, sel, &v)
 }
@@ -7523,6 +9966,64 @@ func (ec *executionContext) marshalNAuthPayload2ᚖgithubᚗcomᚋprojectᚋback
 		return graphql.Null
 	}
 	return ec._AuthPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNBookmark2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐBookmark(ctx context.Context, sel ast.SelectionSet, v entities.Bookmark) graphql.Marshaler {
+	return ec._Bookmark(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBookmark2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐBookmarkᚄ(ctx context.Context, sel ast.SelectionSet, v []*entities.Bookmark) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNBookmark2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐBookmark(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNBookmark2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐBookmark(ctx context.Context, sel ast.SelectionSet, v *entities.Bookmark) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Bookmark(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (bool, error) {
@@ -7539,6 +10040,64 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNCourseAnalytics2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseAnalytics(ctx context.Context, sel ast.SelectionSet, v entities.CourseAnalytics) graphql.Marshaler {
+	return ec._CourseAnalytics(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCourseAnalytics2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseAnalyticsᚄ(ctx context.Context, sel ast.SelectionSet, v []*entities.CourseAnalytics) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCourseAnalytics2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseAnalytics(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCourseAnalytics2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseAnalytics(ctx context.Context, sel ast.SelectionSet, v *entities.CourseAnalytics) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CourseAnalytics(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNCreateLibraryCourseInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐCreateLibraryCourseInput(ctx context.Context, v any) (CreateLibraryCourseInput, error) {
@@ -7604,6 +10163,22 @@ func (ec *executionContext) marshalNDifficulty2githubᚗcomᚋprojectᚋbackend�
 	return res
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -7639,6 +10214,52 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v any) (int64, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalInt64(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v any) ([]int, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNLesson2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐLesson(ctx context.Context, sel ast.SelectionSet, v entities.Lesson) graphql.Marshaler {
@@ -8384,6 +11005,18 @@ func (ec *executionContext) unmarshalOPaginationInput2ᚖgithubᚗcomᚋproject�
 	}
 	res, err := ec.unmarshalInputPaginationInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {

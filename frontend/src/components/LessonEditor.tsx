@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { LessonInput } from '../types/course';
+import { useState, useEffect } from 'react';
+import type { LessonInput, Attachment } from '../types/course';
 import {
   Button,
   Input,
@@ -11,10 +11,14 @@ import {
   CardFooter,
 } from '@repo/playbook';
 import { MarkdownEditor } from './MarkdownEditor';
+import { AttachmentList } from './AttachmentList';
+import { AttachmentUpload } from './AttachmentUpload';
+import { attachmentService } from '../services/attachmentService';
 
 interface LessonEditorProps {
   lessons: LessonInput[];
   onChange: (lessons: LessonInput[]) => void;
+  courseId?: string;
 }
 
 interface EditingLesson {
@@ -29,9 +33,11 @@ const EMPTY_LESSON: EditingLesson = {
   content: '',
 };
 
-export function LessonEditor({ lessons, onChange }: LessonEditorProps) {
+export function LessonEditor({ lessons, onChange, courseId }: LessonEditorProps) {
   const [editing, setEditing] = useState<EditingLesson | null>(null);
   const [errors, setErrors] = useState<{ title?: string; content?: string }>({});
+  const [attachments, setAttachments] = useState<Record<number, Attachment[]>>({});
+  const [loadingAttachments, setLoadingAttachments] = useState<Record<number, boolean>>({});
 
   const validate = (): boolean => {
     const newErrors: { title?: string; content?: string } = {};
@@ -58,7 +64,52 @@ export function LessonEditor({ lessons, onChange }: LessonEditorProps) {
       content: lesson.content,
     });
     setErrors({});
+
+    // Load attachments when editing a lesson
+    if (courseId && !attachments[index]) {
+      loadAttachments(index);
+    }
   };
+
+  const loadAttachments = async (lessonIndex: number) => {
+    if (!courseId) return;
+
+    setLoadingAttachments((prev) => ({ ...prev, [lessonIndex]: true }));
+    try {
+      const lessonAttachments = await attachmentService.getLessonAttachments(
+        courseId,
+        lessonIndex
+      );
+      setAttachments((prev) => ({ ...prev, [lessonIndex]: lessonAttachments }));
+    } catch (error) {
+      console.error('Failed to load attachments:', error);
+    } finally {
+      setLoadingAttachments((prev) => ({ ...prev, [lessonIndex]: false }));
+    }
+  };
+
+  const handleAttachmentDeleted = (lessonIndex: number, attachmentId: string) => {
+    setAttachments((prev) => ({
+      ...prev,
+      [lessonIndex]: prev[lessonIndex]?.filter((a) => a.id !== attachmentId) || [],
+    }));
+  };
+
+  const handleUploadSuccess = (lessonIndex: number) => {
+    // Reload attachments after successful upload
+    loadAttachments(lessonIndex);
+  };
+
+  // Load attachments for existing lessons on mount
+  useEffect(() => {
+    if (courseId && lessons.length > 0) {
+      lessons.forEach((_, index) => {
+        if (!attachments[index]) {
+          loadAttachments(index);
+        }
+      });
+    }
+  }, [courseId, lessons.length]);
 
   const handleSaveLesson = () => {
     if (!editing || !validate()) return;
@@ -149,6 +200,41 @@ export function LessonEditor({ lessons, onChange }: LessonEditorProps) {
                   <p className="text-sm text-red-600">{errors.content}</p>
                 )}
               </div>
+
+              {/* Attachment Management - only for existing lessons */}
+              {courseId && editing.index !== null && (
+                <div className="space-y-4 pt-4 border-t">
+                  <div>
+                    <Label>Attachments</Label>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Add supplementary materials like PDFs, images, or code files
+                    </p>
+                  </div>
+
+                  {loadingAttachments[editing.index] ? (
+                    <div className="text-center py-4">
+                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <p className="mt-2 text-sm text-muted-foreground">Loading attachments...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <AttachmentList
+                        attachments={attachments[editing.index] || []}
+                        isAuthor={true}
+                        onDelete={(id) => handleAttachmentDeleted(editing.index!, id)}
+                      />
+
+                      <div className="pt-2">
+                        <AttachmentUpload
+                          courseId={courseId}
+                          lessonIndex={editing.index}
+                          onUploadSuccess={() => handleUploadSuccess(editing.index!)}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={handleCancelEdit}>

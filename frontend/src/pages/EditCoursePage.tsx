@@ -179,7 +179,7 @@ export function EditCoursePage() {
           submitLabel="Save Changes"
         />
 
-        <LessonEditor lessons={lessons} onChange={setLessons} />
+        <LessonEditor lessons={lessons} onChange={setLessons} courseId={id} />
       </div>
     </div>
   );

@@ -91,6 +91,7 @@ type UserCourse {
   libraryCourse: LibraryCourse
   progress: Int!
   currentLessonIndex: Int!
+  completedLessons: [Int!]!
   startedAt: DateTime!
   updatedAt: DateTime!
   completedAt: DateTime
@@ -165,6 +166,16 @@ type Query {
   myCompletedCourses(pagination: PaginationInput): UserCourseConnection!
   myInProgressCourses(pagination: PaginationInput): UserCourseConnection!
   userCourse(id: ID!): UserCourse
+  myEnrolledCourses: [UserCourse!]!
+  getUserCourseByLibraryCourse(libraryCourseId: ID!): UserCourse
+  # Bookmark queries (requires auth)
+  myBookmarks: [Bookmark!]!
+  courseBookmarks(libraryCourseId: ID!): [Bookmark!]!
+  # Analytics queries
+  courseAnalytics(libraryCourseId: ID!): CourseAnalytics!
+  myAuthoredCoursesAnalytics: [CourseAnalytics!]!
+  # Attachment queries
+  lessonAttachments(libraryCourseId: ID!, lessonIndex: Int!): [Attachment!]!
 }
 
 input ImportCoursesInput {
@@ -188,4 +199,48 @@ type Mutation {
   startCourse(input: StartCourseInput!): UserCourse!
   updateProgress(input: UpdateProgressInput!): UserCourse!
   dropCourse(id: ID!): Boolean!
+  enrollInCourse(libraryCourseId: ID!): UserCourse!
+  unenrollFromCourse(libraryCourseId: ID!): Boolean!
+  updateCourseProgress(libraryCourseId: ID!, lessonIndex: Int!, completed: Boolean!): UserCourse!
+  setCurrentLesson(libraryCourseId: ID!, lessonIndex: Int!): UserCourse!
+  # Bookmark mutations (requires auth)
+  addBookmark(libraryCourseId: ID!, lessonIndex: Int!, note: String): Bookmark!
+  removeBookmark(libraryCourseId: ID!, lessonIndex: Int!): Boolean!
+  # Analytics mutations
+  recordCourseView(libraryCourseId: ID!): Boolean!
+  # Attachment mutations
+  deleteAttachment(id: ID!): Boolean!
+}
+
+# Bookmark types
+type Bookmark {
+  id: ID!
+  userId: ID!
+  libraryCourseId: ID!
+  lessonIndex: Int!
+  note: String
+  createdAt: DateTime!
+}
+
+# Analytics types
+type CourseAnalytics {
+  libraryCourseId: ID!
+  totalViews: Int!
+  uniqueViews: Int!
+  totalEnrollments: Int!
+  completionRate: Float!
+  averageProgress: Float!
+}
+
+# Attachment types
+type Attachment {
+  id: ID!
+  libraryCourseId: ID!
+  lessonIndex: Int!
+  filename: String!
+  originalName: String!
+  mimeType: String!
+  size: Int!
+  uploadedAt: DateTime!
+  downloadUrl: String!
 }

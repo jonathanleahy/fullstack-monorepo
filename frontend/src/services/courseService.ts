@@ -44,6 +44,7 @@ const USER_COURSE_FRAGMENT = `
   }
   progress
   currentLessonIndex
+  completedLessons
   startedAt
   updatedAt
   completedAt
@@ -170,6 +171,22 @@ const GET_ALL_TAGS = `
   }
 `;
 
+const GET_MY_ENROLLED_COURSES = `
+  query GetMyEnrolledCourses {
+    myEnrolledCourses {
+      ${USER_COURSE_FRAGMENT}
+    }
+  }
+`;
+
+const GET_USER_COURSE_BY_LIBRARY_COURSE = `
+  query GetUserCourseByLibraryCourse($libraryCourseId: ID!) {
+    getUserCourseByLibraryCourse(libraryCourseId: $libraryCourseId) {
+      ${USER_COURSE_FRAGMENT}
+    }
+  }
+`;
+
 // Mutations
 const START_COURSE = `
   mutation StartCourse($input: StartCourseInput!) {
@@ -219,6 +236,36 @@ const IMPORT_COURSES = `
   mutation ImportCourses($input: ImportCoursesInput!) {
     importCourses(input: $input) {
       ${LIBRARY_COURSE_FRAGMENT}
+    }
+  }
+`;
+
+const ENROLL_IN_COURSE = `
+  mutation EnrollInCourse($libraryCourseId: ID!) {
+    enrollInCourse(libraryCourseId: $libraryCourseId) {
+      ${USER_COURSE_FRAGMENT}
+    }
+  }
+`;
+
+const UNENROLL_FROM_COURSE = `
+  mutation UnenrollFromCourse($libraryCourseId: ID!) {
+    unenrollFromCourse(libraryCourseId: $libraryCourseId)
+  }
+`;
+
+const UPDATE_COURSE_PROGRESS = `
+  mutation UpdateCourseProgress($libraryCourseId: ID!, $lessonIndex: Int!, $completed: Boolean!) {
+    updateCourseProgress(libraryCourseId: $libraryCourseId, lessonIndex: $lessonIndex, completed: $completed) {
+      ${USER_COURSE_FRAGMENT}
+    }
+  }
+`;
+
+const SET_CURRENT_LESSON = `
+  mutation SetCurrentLesson($libraryCourseId: ID!, $lessonIndex: Int!) {
+    setCurrentLesson(libraryCourseId: $libraryCourseId, lessonIndex: $lessonIndex) {
+      ${USER_COURSE_FRAGMENT}
     }
   }
 `;
@@ -366,5 +413,57 @@ export const courseService = {
       { input: { courses } }
     );
     return data.importCourses;
+  },
+
+  // New enrollment and progress methods
+  async getMyEnrolledCourses(): Promise<UserCourse[]> {
+    const data = await graphqlClient.request<{ myEnrolledCourses: UserCourse[] }>(
+      GET_MY_ENROLLED_COURSES
+    );
+    return data.myEnrolledCourses;
+  },
+
+  async getUserCourseByLibraryCourse(libraryCourseId: string): Promise<UserCourse | null> {
+    const data = await graphqlClient.request<{ getUserCourseByLibraryCourse: UserCourse | null }>(
+      GET_USER_COURSE_BY_LIBRARY_COURSE,
+      { libraryCourseId }
+    );
+    return data.getUserCourseByLibraryCourse;
+  },
+
+  async enrollInCourse(libraryCourseId: string): Promise<UserCourse> {
+    const data = await graphqlClient.request<{ enrollInCourse: UserCourse }>(
+      ENROLL_IN_COURSE,
+      { libraryCourseId }
+    );
+    return data.enrollInCourse;
+  },
+
+  async unenrollFromCourse(libraryCourseId: string): Promise<boolean> {
+    const data = await graphqlClient.request<{ unenrollFromCourse: boolean }>(
+      UNENROLL_FROM_COURSE,
+      { libraryCourseId }
+    );
+    return data.unenrollFromCourse;
+  },
+
+  async updateCourseProgress(
+    libraryCourseId: string,
+    lessonIndex: number,
+    completed: boolean
+  ): Promise<UserCourse> {
+    const data = await graphqlClient.request<{ updateCourseProgress: UserCourse }>(
+      UPDATE_COURSE_PROGRESS,
+      { libraryCourseId, lessonIndex, completed }
+    );
+    return data.updateCourseProgress;
+  },
+
+  async setCurrentLesson(libraryCourseId: string, lessonIndex: number): Promise<UserCourse> {
+    const data = await graphqlClient.request<{ setCurrentLesson: UserCourse }>(
+      SET_CURRENT_LESSON,
+      { libraryCourseId, lessonIndex }
+    );
+    return data.setCurrentLesson;
   },
 };

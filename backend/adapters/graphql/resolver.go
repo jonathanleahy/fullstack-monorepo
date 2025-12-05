@@ -7,8 +7,11 @@ import (
 
 // Resolver is the root resolver for GraphQL
 type Resolver struct {
-	UserUseCase          ports.UserPort
-	AuthUseCase          ports.AuthPort
-	LibraryCourseRepo    repositories.LibraryCourseRepository
-	UserCourseRepo       repositories.UserCourseRepository
+	UserUseCase       ports.UserPort
+	AuthUseCase       ports.AuthPort
+	LibraryCourseRepo repositories.LibraryCourseRepository
+	UserCourseRepo    repositories.UserCourseRepository
+	BookmarkRepo      repositories.BookmarkRepository
+	AnalyticsRepo     repositories.AnalyticsRepository
+	AttachmentRepo    repositories.AttachmentRepository
 }

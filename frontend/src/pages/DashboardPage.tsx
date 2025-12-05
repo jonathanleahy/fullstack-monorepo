@@ -10,7 +10,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
   Progress,
   Badge,
 } from '@repo/playbook';
@@ -26,10 +25,10 @@ export function DashboardPage() {
     const fetchData = async () => {
       try {
         const [enrolled, authored] = await Promise.all([
-          courseService.getMyCourses({ limit: 5 }),
+          courseService.getMyEnrolledCourses(),
           courseService.getMyAuthoredCourses({ limit: 5 }),
         ]);
-        setEnrolledCourses(enrolled.courses);
+        setEnrolledCourses(enrolled.slice(0, 5));
         setAuthoredCourses(authored.courses);
       } catch (err) {
         setError('Failed to load dashboard data');
@@ -122,21 +121,37 @@ export function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {enrolledCourses.map((uc) => (
-                <Link key={uc.id} to={`/courses/${uc.libraryCourseId}`}>
-                  <Card className="hover:shadow-md transition-shadow">
-                    <CardContent className="pt-4">
+                <Card key={uc.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-4">
+                    <Link to={`/courses/${uc.libraryCourseId}`}>
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-medium truncate">{uc.libraryCourse?.title}</h3>
                         {uc.completedAt ? (
-                          <Badge variant="success">Completed</Badge>
+                          <Badge variant="default" className="bg-green-500 text-white">Completed</Badge>
                         ) : (
                           <span className="text-sm text-muted-foreground">{uc.progress}%</span>
                         )}
                       </div>
-                      <Progress value={uc.progress} className="h-2" />
-                    </CardContent>
-                  </Card>
-                </Link>
+                      <Progress value={uc.progress} className="h-2 mb-2" />
+                    </Link>
+                    <div className="flex gap-2 mt-2">
+                      {!uc.completedAt && (
+                        <Button asChild size="sm" className="flex-1">
+                          <Link to={`/courses/${uc.libraryCourseId}`}>
+                            Continue Learning
+                          </Link>
+                        </Button>
+                      )}
+                      {uc.completedAt && (
+                        <Button asChild size="sm" variant="outline" className="flex-1">
+                          <Link to={`/courses/${uc.libraryCourseId}`}>
+                            Review Course
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

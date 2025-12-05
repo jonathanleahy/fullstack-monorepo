@@ -12,6 +12,8 @@ import { CreateCoursePage } from './pages/CreateCoursePage';
 import { EditCoursePage } from './pages/EditCoursePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ImportCoursePage } from './pages/ImportCoursePage';
+import { BookmarksPage } from './pages/BookmarksPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
 
 function App() {
   return (
@@ -100,11 +102,31 @@ function App() {
         }
       />
       <Route
+        path="/bookmarks"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <BookmarksPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/users"
         element={
           <ProtectedRoute>
             <Layout>
               <UsersPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AnalyticsPage />
             </Layout>
           </ProtectedRoute>
         }

@@ -433,12 +433,17 @@ func (r *UserCourseRepository) Create(ctx context.Context, userCourse *entities.
 	userCourse.StartedAt = time.Now()
 	userCourse.UpdatedAt = userCourse.StartedAt
 
-	query := `INSERT INTO user_courses (id, user_id, library_course_id, progress, current_lesson_index, started_at, updated_at, completed_at)
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+	completedLessonsJSON, err := json.Marshal(userCourse.CompletedLessons)
+	if err != nil {
+		return nil, err
+	}
 
-	_, err := r.db.DB().ExecContext(ctx, query,
+	query := `INSERT INTO user_courses (id, user_id, library_course_id, progress, current_lesson_index, completed_lessons, started_at, updated_at, completed_at)
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	_, err = r.db.DB().ExecContext(ctx, query,
 		userCourse.ID, userCourse.UserID, userCourse.LibraryCourseID,
-		userCourse.Progress, userCourse.CurrentLessonIndex,
+		userCourse.Progress, userCourse.CurrentLessonIndex, string(completedLessonsJSON),
 		userCourse.StartedAt, userCourse.UpdatedAt, userCourse.CompletedAt)
 	if err != nil {
 		return nil, err
@@ -449,15 +454,16 @@ func (r *UserCourseRepository) Create(ctx context.Context, userCourse *entities.
 
 // GetByID retrieves a user course by ID
 func (r *UserCourseRepository) GetByID(ctx context.Context, id string) (*entities.UserCourse, error) {
-	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, started_at, updated_at, completed_at
+	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, completed_lessons, started_at, updated_at, completed_at
 			  FROM user_courses WHERE id = ?`
 
 	userCourse := &entities.UserCourse{}
 	var completedAt sql.NullTime
+	var completedLessonsJSON sql.NullString
 
 	err := r.db.DB().QueryRowContext(ctx, query, id).Scan(
 		&userCourse.ID, &userCourse.UserID, &userCourse.LibraryCourseID,
-		&userCourse.Progress, &userCourse.CurrentLessonIndex,
+		&userCourse.Progress, &userCourse.CurrentLessonIndex, &completedLessonsJSON,
 		&userCourse.StartedAt, &userCourse.UpdatedAt, &completedAt)
 
 	if err == sql.ErrNoRows {
@@ -469,6 +475,15 @@ func (r *UserCourseRepository) GetByID(ctx context.Context, id string) (*entitie
 
 	if completedAt.Valid {
 		userCourse.CompletedAt = &completedAt.Time
+	}
+
+	// Parse completed lessons JSON
+	if completedLessonsJSON.Valid && completedLessonsJSON.String != "" {
+		if err := json.Unmarshal([]byte(completedLessonsJSON.String), &userCourse.CompletedLessons); err != nil {
+			return nil, err
+		}
+	} else {
+		userCourse.CompletedLessons = []int{}
 	}
 
 	return userCourse, nil
@@ -476,15 +491,16 @@ func (r *UserCourseRepository) GetByID(ctx context.Context, id string) (*entitie
 
 // GetByUserAndCourse retrieves a user course by user ID and library course ID
 func (r *UserCourseRepository) GetByUserAndCourse(ctx context.Context, userID, libraryCourseID string) (*entities.UserCourse, error) {
-	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, started_at, updated_at, completed_at
+	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, completed_lessons, started_at, updated_at, completed_at
 			  FROM user_courses WHERE user_id = ? AND library_course_id = ?`
 
 	userCourse := &entities.UserCourse{}
 	var completedAt sql.NullTime
+	var completedLessonsJSON sql.NullString
 
 	err := r.db.DB().QueryRowContext(ctx, query, userID, libraryCourseID).Scan(
 		&userCourse.ID, &userCourse.UserID, &userCourse.LibraryCourseID,
-		&userCourse.Progress, &userCourse.CurrentLessonIndex,
+		&userCourse.Progress, &userCourse.CurrentLessonIndex, &completedLessonsJSON,
 		&userCourse.StartedAt, &userCourse.UpdatedAt, &completedAt)
 
 	if err == sql.ErrNoRows {
@@ -496,6 +512,15 @@ func (r *UserCourseRepository) GetByUserAndCourse(ctx context.Context, userID, l
 
 	if completedAt.Valid {
 		userCourse.CompletedAt = &completedAt.Time
+	}
+
+	// Parse completed lessons JSON
+	if completedLessonsJSON.Valid && completedLessonsJSON.String != "" {
+		if err := json.Unmarshal([]byte(completedLessonsJSON.String), &userCourse.CompletedLessons); err != nil {
+			return nil, err
+		}
+	} else {
+		userCourse.CompletedLessons = []int{}
 	}
 
 	return userCourse, nil
@@ -505,10 +530,15 @@ func (r *UserCourseRepository) GetByUserAndCourse(ctx context.Context, userID, l
 func (r *UserCourseRepository) Update(ctx context.Context, userCourse *entities.UserCourse) (*entities.UserCourse, error) {
 	userCourse.UpdatedAt = time.Now()
 
-	query := `UPDATE user_courses SET progress = ?, current_lesson_index = ?, updated_at = ?, completed_at = ? WHERE id = ?`
+	completedLessonsJSON, err := json.Marshal(userCourse.CompletedLessons)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `UPDATE user_courses SET progress = ?, current_lesson_index = ?, completed_lessons = ?, updated_at = ?, completed_at = ? WHERE id = ?`
 
 	result, err := r.db.DB().ExecContext(ctx, query,
-		userCourse.Progress, userCourse.CurrentLessonIndex,
+		userCourse.Progress, userCourse.CurrentLessonIndex, string(completedLessonsJSON),
 		userCourse.UpdatedAt, userCourse.CompletedAt, userCourse.ID)
 	if err != nil {
 		return nil, err
@@ -555,7 +585,7 @@ func (r *UserCourseRepository) ListByUser(ctx context.Context, userID string, li
 	}
 
 	// Get paginated user courses
-	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, started_at, updated_at, completed_at
+	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, completed_lessons, started_at, updated_at, completed_at
 			  FROM user_courses WHERE user_id = ? ORDER BY started_at DESC LIMIT ? OFFSET ?`
 
 	rows, err := r.db.DB().QueryContext(ctx, query, userID, limit, offset)
@@ -568,15 +598,25 @@ func (r *UserCourseRepository) ListByUser(ctx context.Context, userID string, li
 	for rows.Next() {
 		uc := &entities.UserCourse{}
 		var completedAt sql.NullTime
+		var completedLessonsJSON sql.NullString
 
 		if err := rows.Scan(&uc.ID, &uc.UserID, &uc.LibraryCourseID,
-			&uc.Progress, &uc.CurrentLessonIndex,
+			&uc.Progress, &uc.CurrentLessonIndex, &completedLessonsJSON,
 			&uc.StartedAt, &uc.UpdatedAt, &completedAt); err != nil {
 			return nil, 0, err
 		}
 
 		if completedAt.Valid {
 			uc.CompletedAt = &completedAt.Time
+		}
+
+		// Parse completed lessons JSON
+		if completedLessonsJSON.Valid && completedLessonsJSON.String != "" {
+			if err := json.Unmarshal([]byte(completedLessonsJSON.String), &uc.CompletedLessons); err != nil {
+				return nil, 0, err
+			}
+		} else {
+			uc.CompletedLessons = []int{}
 		}
 
 		userCourses = append(userCourses, uc)
@@ -595,7 +635,7 @@ func (r *UserCourseRepository) ListCompleted(ctx context.Context, userID string,
 	}
 
 	// Get paginated completed courses
-	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, started_at, updated_at, completed_at
+	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, completed_lessons, started_at, updated_at, completed_at
 			  FROM user_courses WHERE user_id = ? AND completed_at IS NOT NULL ORDER BY completed_at DESC LIMIT ? OFFSET ?`
 
 	rows, err := r.db.DB().QueryContext(ctx, query, userID, limit, offset)
@@ -608,15 +648,25 @@ func (r *UserCourseRepository) ListCompleted(ctx context.Context, userID string,
 	for rows.Next() {
 		uc := &entities.UserCourse{}
 		var completedAt sql.NullTime
+		var completedLessonsJSON sql.NullString
 
 		if err := rows.Scan(&uc.ID, &uc.UserID, &uc.LibraryCourseID,
-			&uc.Progress, &uc.CurrentLessonIndex,
+			&uc.Progress, &uc.CurrentLessonIndex, &completedLessonsJSON,
 			&uc.StartedAt, &uc.UpdatedAt, &completedAt); err != nil {
 			return nil, 0, err
 		}
 
 		if completedAt.Valid {
 			uc.CompletedAt = &completedAt.Time
+		}
+
+		// Parse completed lessons JSON
+		if completedLessonsJSON.Valid && completedLessonsJSON.String != "" {
+			if err := json.Unmarshal([]byte(completedLessonsJSON.String), &uc.CompletedLessons); err != nil {
+				return nil, 0, err
+			}
+		} else {
+			uc.CompletedLessons = []int{}
 		}
 
 		userCourses = append(userCourses, uc)
@@ -635,7 +685,7 @@ func (r *UserCourseRepository) ListInProgress(ctx context.Context, userID string
 	}
 
 	// Get paginated in-progress courses
-	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, started_at, updated_at, completed_at
+	query := `SELECT id, user_id, library_course_id, progress, current_lesson_index, completed_lessons, started_at, updated_at, completed_at
 			  FROM user_courses WHERE user_id = ? AND completed_at IS NULL ORDER BY updated_at DESC LIMIT ? OFFSET ?`
 
 	rows, err := r.db.DB().QueryContext(ctx, query, userID, limit, offset)
@@ -648,15 +698,25 @@ func (r *UserCourseRepository) ListInProgress(ctx context.Context, userID string
 	for rows.Next() {
 		uc := &entities.UserCourse{}
 		var completedAt sql.NullTime
+		var completedLessonsJSON sql.NullString
 
 		if err := rows.Scan(&uc.ID, &uc.UserID, &uc.LibraryCourseID,
-			&uc.Progress, &uc.CurrentLessonIndex,
+			&uc.Progress, &uc.CurrentLessonIndex, &completedLessonsJSON,
 			&uc.StartedAt, &uc.UpdatedAt, &completedAt); err != nil {
 			return nil, 0, err
 		}
 
 		if completedAt.Valid {
 			uc.CompletedAt = &completedAt.Time
+		}
+
+		// Parse completed lessons JSON
+		if completedLessonsJSON.Valid && completedLessonsJSON.String != "" {
+			if err := json.Unmarshal([]byte(completedLessonsJSON.String), &uc.CompletedLessons); err != nil {
+				return nil, 0, err
+			}
+		} else {
+			uc.CompletedLessons = []int{}
 		}
 
 		userCourses = append(userCourses, uc)

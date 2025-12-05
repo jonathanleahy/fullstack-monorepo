@@ -1,5 +1,5 @@
 import { useState, KeyboardEvent } from 'react';
-import { Input, Badge, Button } from '@repo/playbook';
+import { Input, Badge } from '@repo/playbook';
 
 interface TagInputProps {
   tags: string[];

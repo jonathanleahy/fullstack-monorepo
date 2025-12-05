@@ -8,11 +8,17 @@ package graphql
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	httpAdapter "github.com/project/backend/adapters/http"
 	"github.com/project/backend/application/ports"
 	"github.com/project/backend/domain/entities"
 )
+
+// DownloadURL is the resolver for the downloadUrl field.
+func (r *attachmentResolver) DownloadURL(ctx context.Context, obj *entities.Attachment) (string, error) {
+	return fmt.Sprintf("/api/attachments/%s", obj.ID), nil
+}
 
 // CreateUser creates a new user
 func (r *mutationResolver) CreateUser(ctx context.Context, input CreateUserInput) (*entities.User, error) {
@@ -317,6 +323,189 @@ func (r *mutationResolver) DropCourse(ctx context.Context, id string) (bool, err
 	return err == nil, err
 }
 
+// EnrollInCourse is the resolver for the enrollInCourse field.
+func (r *mutationResolver) EnrollInCourse(ctx context.Context, libraryCourseID string) (*entities.UserCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	// Verify the library course exists
+	_, err := r.LibraryCourseRepo.GetByID(ctx, libraryCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if user already has this course
+	existing, err := r.UserCourseRepo.GetByUserAndCourse(ctx, userID, libraryCourseID)
+	if err == nil && existing != nil {
+		return existing, nil // Return existing enrollment
+	}
+
+	userCourse, err := entities.NewUserCourse(userID, libraryCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.UserCourseRepo.Create(ctx, userCourse)
+}
+
+// UnenrollFromCourse is the resolver for the unenrollFromCourse field.
+func (r *mutationResolver) UnenrollFromCourse(ctx context.Context, libraryCourseID string) (bool, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return false, errors.New("authentication required")
+	}
+
+	userCourse, err := r.UserCourseRepo.GetByUserAndCourse(ctx, userID, libraryCourseID)
+	if err != nil {
+		return false, err
+	}
+
+	// Verify ownership
+	if userCourse.UserID != userID {
+		return false, errors.New("not authorized to unenroll from this course")
+	}
+
+	err = r.UserCourseRepo.Delete(ctx, userCourse.ID)
+	return err == nil, err
+}
+
+// UpdateCourseProgress is the resolver for the updateCourseProgress field.
+func (r *mutationResolver) UpdateCourseProgress(ctx context.Context, libraryCourseID string, lessonIndex int, completed bool) (*entities.UserCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	// Get library course to know total lessons
+	libraryCourse, err := r.LibraryCourseRepo.GetByID(ctx, libraryCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	userCourse, err := r.UserCourseRepo.GetByUserAndCourse(ctx, userID, libraryCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify ownership
+	if userCourse.UserID != userID {
+		return nil, errors.New("not authorized to update this course")
+	}
+
+	totalLessons := len(libraryCourse.Lessons)
+
+	if completed {
+		if err := userCourse.MarkLessonCompleted(lessonIndex, totalLessons); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := userCourse.MarkLessonIncomplete(lessonIndex, totalLessons); err != nil {
+			return nil, err
+		}
+	}
+
+	return r.UserCourseRepo.Update(ctx, userCourse)
+}
+
+// SetCurrentLesson is the resolver for the setCurrentLesson field.
+func (r *mutationResolver) SetCurrentLesson(ctx context.Context, libraryCourseID string, lessonIndex int) (*entities.UserCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	userCourse, err := r.UserCourseRepo.GetByUserAndCourse(ctx, userID, libraryCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify ownership
+	if userCourse.UserID != userID {
+		return nil, errors.New("not authorized to update this course")
+	}
+
+	if err := userCourse.SetCurrentLesson(lessonIndex); err != nil {
+		return nil, err
+	}
+
+	return r.UserCourseRepo.Update(ctx, userCourse)
+}
+
+// AddBookmark is the resolver for the addBookmark field.
+func (r *mutationResolver) AddBookmark(ctx context.Context, libraryCourseID string, lessonIndex int, note *string) (*entities.Bookmark, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	noteValue := ""
+	if note != nil {
+		noteValue = *note
+	}
+
+	bookmark, err := entities.NewBookmark(userID, libraryCourseID, lessonIndex, noteValue)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.BookmarkRepo.Create(ctx, bookmark)
+}
+
+// RemoveBookmark is the resolver for the removeBookmark field.
+func (r *mutationResolver) RemoveBookmark(ctx context.Context, libraryCourseID string, lessonIndex int) (bool, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return false, errors.New("authentication required")
+	}
+
+	err := r.BookmarkRepo.DeleteByUserAndLesson(ctx, userID, libraryCourseID, lessonIndex)
+	return err == nil, err
+}
+
+// RecordCourseView is the resolver for the recordCourseView field.
+func (r *mutationResolver) RecordCourseView(ctx context.Context, libraryCourseID string) (bool, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	// userID can be empty for anonymous views
+
+	view, err := entities.NewCourseView(libraryCourseID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	err = r.AnalyticsRepo.RecordView(ctx, view)
+	return err == nil, err
+}
+
+// DeleteAttachment is the resolver for the deleteAttachment field.
+func (r *mutationResolver) DeleteAttachment(ctx context.Context, id string) (bool, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return false, errors.New("authentication required")
+	}
+
+	// Get attachment to verify ownership via course
+	attachment, err := r.AttachmentRepo.GetByID(ctx, id)
+	if err != nil {
+		return false, err
+	}
+
+	// Get course to verify user is the author
+	course, err := r.LibraryCourseRepo.GetByID(ctx, attachment.LibraryCourseID)
+	if err != nil {
+		return false, err
+	}
+
+	if course.AuthorID != userID {
+		return false, errors.New("only the course author can delete attachments")
+	}
+
+	// Note: File deletion is handled by the REST endpoint
+	// This mutation only handles database deletion for GraphQL convenience
+	return r.AttachmentRepo.Delete(ctx, id) == nil, nil
+}
+
 // User returns a single user by ID
 func (r *queryResolver) User(ctx context.Context, id string) (*entities.User, error) {
 	return r.UserUseCase.GetUser(ctx, id)
@@ -606,10 +795,89 @@ func (r *queryResolver) UserCourse(ctx context.Context, id string) (*entities.Us
 	return userCourse, nil
 }
 
+// MyEnrolledCourses is the resolver for the myEnrolledCourses field.
+func (r *queryResolver) MyEnrolledCourses(ctx context.Context) ([]*entities.UserCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	// Get all courses for user (no pagination, return all)
+	courses, _, err := r.UserCourseRepo.ListByUser(ctx, userID, 1000, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	return courses, nil
+}
+
+// GetUserCourseByLibraryCourse is the resolver for the getUserCourseByLibraryCourse field.
+func (r *queryResolver) GetUserCourseByLibraryCourse(ctx context.Context, libraryCourseID string) (*entities.UserCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	userCourse, err := r.UserCourseRepo.GetByUserAndCourse(ctx, userID, libraryCourseID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify ownership
+	if userCourse.UserID != userID {
+		return nil, errors.New("not authorized to view this course")
+	}
+
+	return userCourse, nil
+}
+
+// MyBookmarks is the resolver for the myBookmarks field.
+func (r *queryResolver) MyBookmarks(ctx context.Context) ([]*entities.Bookmark, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	return r.BookmarkRepo.GetByUserID(ctx, userID)
+}
+
+// CourseBookmarks is the resolver for the courseBookmarks field.
+func (r *queryResolver) CourseBookmarks(ctx context.Context, libraryCourseID string) ([]*entities.Bookmark, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	return r.BookmarkRepo.GetByCourse(ctx, userID, libraryCourseID)
+}
+
+// CourseAnalytics is the resolver for the courseAnalytics field.
+func (r *queryResolver) CourseAnalytics(ctx context.Context, libraryCourseID string) (*entities.CourseAnalytics, error) {
+	return r.AnalyticsRepo.GetCourseAnalytics(ctx, libraryCourseID)
+}
+
+// MyAuthoredCoursesAnalytics is the resolver for the myAuthoredCoursesAnalytics field.
+func (r *queryResolver) MyAuthoredCoursesAnalytics(ctx context.Context) ([]*entities.CourseAnalytics, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	return r.AnalyticsRepo.GetAuthorCoursesAnalytics(ctx, userID)
+}
+
+// LessonAttachments is the resolver for the lessonAttachments field.
+func (r *queryResolver) LessonAttachments(ctx context.Context, libraryCourseID string, lessonIndex int) ([]*entities.Attachment, error) {
+	return r.AttachmentRepo.ListByLesson(ctx, libraryCourseID, lessonIndex)
+}
+
 // LibraryCourse is the resolver for the libraryCourse field on UserCourse.
 func (r *userCourseResolver) LibraryCourse(ctx context.Context, obj *entities.UserCourse) (*entities.LibraryCourse, error) {
 	return r.LibraryCourseRepo.GetByID(ctx, obj.LibraryCourseID)
 }
+
+// Attachment returns AttachmentResolver implementation.
+func (r *Resolver) Attachment() AttachmentResolver { return &attachmentResolver{r} }
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
@@ -620,6 +888,7 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // UserCourse returns UserCourseResolver implementation.
 func (r *Resolver) UserCourse() UserCourseResolver { return &userCourseResolver{r} }
 
+type attachmentResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userCourseResolver struct{ *Resolver }

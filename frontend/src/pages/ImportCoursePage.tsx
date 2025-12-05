@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { courseService } from '../services/courseService';
 import { extractGraphQLError } from '../services/graphql';
 import type { CreateLibraryCourseInput } from '../types/course';
@@ -35,7 +35,6 @@ const EXAMPLE_JSON = `[
 ]`;
 
 export function ImportCoursePage() {
-  const navigate = useNavigate();
   const [jsonInput, setJsonInput] = useState('');
   const [parsedCourses, setParsedCourses] = useState<CreateLibraryCourseInput[] | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);

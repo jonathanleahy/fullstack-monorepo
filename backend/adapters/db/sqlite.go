@@ -87,6 +87,41 @@ func (s *SQLiteDB) Migrate() error {
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_user_courses_user_id ON user_courses(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_user_courses_library_course_id ON user_courses(library_course_id)`,
+		`CREATE TABLE IF NOT EXISTS bookmarks (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			library_course_id TEXT NOT NULL,
+			lesson_index INTEGER NOT NULL,
+			note TEXT,
+			created_at DATETIME NOT NULL,
+			FOREIGN KEY (library_course_id) REFERENCES library_courses(id) ON DELETE CASCADE,
+			UNIQUE(user_id, library_course_id, lesson_index)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON bookmarks(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_bookmarks_library_course_id ON bookmarks(library_course_id)`,
+		`CREATE TABLE IF NOT EXISTS course_views (
+			id TEXT PRIMARY KEY,
+			library_course_id TEXT NOT NULL,
+			user_id TEXT,
+			viewed_at DATETIME NOT NULL,
+			FOREIGN KEY (library_course_id) REFERENCES library_courses(id) ON DELETE CASCADE
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_course_views_library_course_id ON course_views(library_course_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_course_views_user_id ON course_views(user_id)`,
+		`CREATE TABLE IF NOT EXISTS attachments (
+			id TEXT PRIMARY KEY,
+			library_course_id TEXT NOT NULL,
+			lesson_index INTEGER NOT NULL,
+			filename TEXT NOT NULL,
+			original_name TEXT NOT NULL,
+			mime_type TEXT NOT NULL,
+			size INTEGER NOT NULL,
+			uploaded_at DATETIME NOT NULL,
+			uploaded_by TEXT NOT NULL,
+			FOREIGN KEY (library_course_id) REFERENCES library_courses(id) ON DELETE CASCADE
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_attachments_library_course_id ON attachments(library_course_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_attachments_lesson ON attachments(library_course_id, lesson_index)`,
 	}
 
 	for _, migration := range migrations {
@@ -103,6 +138,7 @@ func (s *SQLiteDB) Migrate() error {
 	}{
 		{"library_courses", "author_id", "TEXT NOT NULL DEFAULT ''"},
 		{"library_courses", "tags", "TEXT NOT NULL DEFAULT '[]'"},
+		{"user_courses", "completed_lessons", "TEXT NOT NULL DEFAULT '[]'"},
 	}
 
 	for _, cm := range columnMigrations {
