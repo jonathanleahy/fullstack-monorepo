@@ -10,6 +10,7 @@ import {
   CardContent,
   CardFooter,
 } from '@repo/playbook';
+import { MarkdownEditor } from './MarkdownEditor';
 
 interface LessonEditorProps {
   lessons: LessonInput[];
@@ -135,17 +136,14 @@ export function LessonEditor({ lessons, onChange }: LessonEditorProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lesson-content">Content</Label>
-                <textarea
-                  id="lesson-content"
+                <Label htmlFor="lesson-content">Content (Markdown supported)</Label>
+                <MarkdownEditor
                   value={editing.content}
-                  onChange={(e) =>
-                    setEditing((prev) => prev && { ...prev, content: e.target.value })
+                  onChange={(value) =>
+                    setEditing((prev) => prev && { ...prev, content: value })
                   }
-                  placeholder="In this lesson, you'll learn..."
-                  rows={8}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-invalid={!!errors.content}
+                  placeholder="Write your lesson content in Markdown..."
+                  minHeight={250}
                 />
                 {errors.content && (
                   <p className="text-sm text-red-600">{errors.content}</p>

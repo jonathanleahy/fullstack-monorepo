@@ -13,7 +13,7 @@ func TestNewLibraryCourse_ValidInput(t *testing.T) {
 		{Title: "Basics", Content: "Learn the basics", Order: 1},
 	}
 
-	course, err := NewLibraryCourse("Go Programming", "Learn Go from scratch", lessons, "John Doe", DifficultyBeginner, 10)
+	course, err := NewLibraryCourse("Go Programming", "Learn Go from scratch", lessons, "John Doe", "user-123", []string{"programming", "go"}, DifficultyBeginner, 10)
 
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -51,7 +51,7 @@ func TestNewLibraryCourse_ValidInput(t *testing.T) {
 func TestNewLibraryCourse_EmptyTitle(t *testing.T) {
 	lessons := []Lesson{{Title: "Intro", Content: "Content", Order: 0}}
 
-	_, err := NewLibraryCourse("", "Description", lessons, "Author", DifficultyBeginner, 5)
+	_, err := NewLibraryCourse("", "Description", lessons, "Author", "user-123", []string{}, DifficultyBeginner, 5)
 
 	if err != ErrInvalidCourseTitle {
 		t.Errorf("expected ErrInvalidCourseTitle, got %v", err)
@@ -59,7 +59,7 @@ func TestNewLibraryCourse_EmptyTitle(t *testing.T) {
 }
 
 func TestNewLibraryCourse_NoLessons(t *testing.T) {
-	_, err := NewLibraryCourse("Title", "Description", []Lesson{}, "Author", DifficultyBeginner, 5)
+	_, err := NewLibraryCourse("Title", "Description", []Lesson{}, "Author", "user-123", []string{}, DifficultyBeginner, 5)
 
 	if err != ErrNoLessons {
 		t.Errorf("expected ErrNoLessons, got %v", err)
@@ -67,7 +67,7 @@ func TestNewLibraryCourse_NoLessons(t *testing.T) {
 }
 
 func TestNewLibraryCourse_NilLessons(t *testing.T) {
-	_, err := NewLibraryCourse("Title", "Description", nil, "Author", DifficultyBeginner, 5)
+	_, err := NewLibraryCourse("Title", "Description", nil, "Author", "user-123", []string{}, DifficultyBeginner, 5)
 
 	if err != ErrNoLessons {
 		t.Errorf("expected ErrNoLessons, got %v", err)
@@ -76,7 +76,7 @@ func TestNewLibraryCourse_NilLessons(t *testing.T) {
 
 func TestLibraryCourse_AddLesson(t *testing.T) {
 	lessons := []Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	course, _ := NewLibraryCourse("Title", "Desc", lessons, "Author", DifficultyBeginner, 5)
+	course, _ := NewLibraryCourse("Title", "Desc", lessons, "Author", "user-123", []string{}, DifficultyBeginner, 5)
 
 	newLesson := Lesson{Title: "Chapter 1", Content: "First chapter", Order: 1}
 	course.AddLesson(newLesson)
@@ -96,7 +96,7 @@ func TestLibraryCourse_RemoveLesson(t *testing.T) {
 		{Title: "Chapter 1", Content: "First", Order: 1},
 		{Title: "Chapter 2", Content: "Second", Order: 2},
 	}
-	course, _ := NewLibraryCourse("Title", "Desc", lessons, "Author", DifficultyBeginner, 5)
+	course, _ := NewLibraryCourse("Title", "Desc", lessons, "Author", "user-123", []string{}, DifficultyBeginner, 5)
 
 	err := course.RemoveLesson(1)
 
@@ -119,7 +119,7 @@ func TestLibraryCourse_RemoveLesson(t *testing.T) {
 
 func TestLibraryCourse_RemoveLesson_InvalidIndex(t *testing.T) {
 	lessons := []Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	course, _ := NewLibraryCourse("Title", "Desc", lessons, "Author", DifficultyBeginner, 5)
+	course, _ := NewLibraryCourse("Title", "Desc", lessons, "Author", "user-123", []string{}, DifficultyBeginner, 5)
 
 	err := course.RemoveLesson(5)
 
@@ -130,7 +130,7 @@ func TestLibraryCourse_RemoveLesson_InvalidIndex(t *testing.T) {
 
 func TestLibraryCourse_RemoveLesson_LastLesson(t *testing.T) {
 	lessons := []Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	course, _ := NewLibraryCourse("Title", "Desc", lessons, "Author", DifficultyBeginner, 5)
+	course, _ := NewLibraryCourse("Title", "Desc", lessons, "Author", "user-123", []string{}, DifficultyBeginner, 5)
 
 	err := course.RemoveLesson(0)
 

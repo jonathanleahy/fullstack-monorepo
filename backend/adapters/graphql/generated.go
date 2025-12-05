@@ -63,12 +63,14 @@ type ComplexityRoot struct {
 
 	LibraryCourse struct {
 		Author         func(childComplexity int) int
+		AuthorID       func(childComplexity int) int
 		CreatedAt      func(childComplexity int) int
 		Description    func(childComplexity int) int
 		Difficulty     func(childComplexity int) int
 		EstimatedHours func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Lessons        func(childComplexity int) int
+		Tags           func(childComplexity int) int
 		Title          func(childComplexity int) int
 		UpdatedAt      func(childComplexity int) int
 	}
@@ -87,6 +89,7 @@ type ComplexityRoot struct {
 		DeleteLibraryCourse func(childComplexity int, id string) int
 		DeleteUser          func(childComplexity int, id string) int
 		DropCourse          func(childComplexity int, id string) int
+		ImportCourses       func(childComplexity int, input ImportCoursesInput) int
 		Login               func(childComplexity int, input LoginInput) int
 		RefreshToken        func(childComplexity int, refreshToken string) int
 		Register            func(childComplexity int, input RegisterInput) int
@@ -97,9 +100,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		AllTags              func(childComplexity int) int
+		CoursesByTag         func(childComplexity int, tag string, pagination *PaginationInput) int
 		LibraryCourse        func(childComplexity int, id string) int
 		LibraryCourses       func(childComplexity int, pagination *PaginationInput, difficulty *entities.Difficulty) int
 		Me                   func(childComplexity int) int
+		MyAuthoredCourses    func(childComplexity int, pagination *PaginationInput) int
 		MyCompletedCourses   func(childComplexity int, pagination *PaginationInput) int
 		MyCourses            func(childComplexity int, pagination *PaginationInput) int
 		MyInProgressCourses  func(childComplexity int, pagination *PaginationInput) int
@@ -161,6 +167,7 @@ type MutationResolver interface {
 	CreateLibraryCourse(ctx context.Context, input CreateLibraryCourseInput) (*entities.LibraryCourse, error)
 	UpdateLibraryCourse(ctx context.Context, id string, input UpdateLibraryCourseInput) (*entities.LibraryCourse, error)
 	DeleteLibraryCourse(ctx context.Context, id string) (bool, error)
+	ImportCourses(ctx context.Context, input ImportCoursesInput) ([]*entities.LibraryCourse, error)
 	StartCourse(ctx context.Context, input StartCourseInput) (*entities.UserCourse, error)
 	UpdateProgress(ctx context.Context, input UpdateProgressInput) (*entities.UserCourse, error)
 	DropCourse(ctx context.Context, id string) (bool, error)
@@ -172,6 +179,9 @@ type QueryResolver interface {
 	LibraryCourse(ctx context.Context, id string) (*entities.LibraryCourse, error)
 	LibraryCourses(ctx context.Context, pagination *PaginationInput, difficulty *entities.Difficulty) (*LibraryCourseConnection, error)
 	SearchLibraryCourses(ctx context.Context, query string, pagination *PaginationInput) (*LibraryCourseConnection, error)
+	MyAuthoredCourses(ctx context.Context, pagination *PaginationInput) (*LibraryCourseConnection, error)
+	CoursesByTag(ctx context.Context, tag string, pagination *PaginationInput) (*LibraryCourseConnection, error)
+	AllTags(ctx context.Context) ([]string, error)
 	MyCourses(ctx context.Context, pagination *PaginationInput) (*UserCourseConnection, error)
 	MyCompletedCourses(ctx context.Context, pagination *PaginationInput) (*UserCourseConnection, error)
 	MyInProgressCourses(ctx context.Context, pagination *PaginationInput) (*UserCourseConnection, error)
@@ -244,6 +254,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LibraryCourse.Author(childComplexity), true
+	case "LibraryCourse.authorId":
+		if e.complexity.LibraryCourse.AuthorID == nil {
+			break
+		}
+
+		return e.complexity.LibraryCourse.AuthorID(childComplexity), true
 	case "LibraryCourse.createdAt":
 		if e.complexity.LibraryCourse.CreatedAt == nil {
 			break
@@ -280,6 +296,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LibraryCourse.Lessons(childComplexity), true
+	case "LibraryCourse.tags":
+		if e.complexity.LibraryCourse.Tags == nil {
+			break
+		}
+
+		return e.complexity.LibraryCourse.Tags(childComplexity), true
 	case "LibraryCourse.title":
 		if e.complexity.LibraryCourse.Title == nil {
 			break
@@ -379,6 +401,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.DropCourse(childComplexity, args["id"].(string)), true
+	case "Mutation.importCourses":
+		if e.complexity.Mutation.ImportCourses == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_importCourses_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ImportCourses(childComplexity, args["input"].(ImportCoursesInput)), true
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -457,6 +490,23 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.UpdateUser(childComplexity, args["id"].(string), args["input"].(UpdateUserInput)), true
 
+	case "Query.allTags":
+		if e.complexity.Query.AllTags == nil {
+			break
+		}
+
+		return e.complexity.Query.AllTags(childComplexity), true
+	case "Query.coursesByTag":
+		if e.complexity.Query.CoursesByTag == nil {
+			break
+		}
+
+		args, err := ec.field_Query_coursesByTag_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CoursesByTag(childComplexity, args["tag"].(string), args["pagination"].(*PaginationInput)), true
 	case "Query.libraryCourse":
 		if e.complexity.Query.LibraryCourse == nil {
 			break
@@ -485,6 +535,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Me(childComplexity), true
+	case "Query.myAuthoredCourses":
+		if e.complexity.Query.MyAuthoredCourses == nil {
+			break
+		}
+
+		args, err := ec.field_Query_myAuthoredCourses_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MyAuthoredCourses(childComplexity, args["pagination"].(*PaginationInput)), true
 	case "Query.myCompletedCourses":
 		if e.complexity.Query.MyCompletedCourses == nil {
 			break
@@ -734,6 +795,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateLibraryCourseInput,
 		ec.unmarshalInputCreateUserInput,
+		ec.unmarshalInputImportCoursesInput,
 		ec.unmarshalInputLessonInput,
 		ec.unmarshalInputLoginInput,
 		ec.unmarshalInputPaginationInput,
@@ -913,6 +975,17 @@ func (ec *executionContext) field_Mutation_dropCourse_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_importCourses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNImportCoursesInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐImportCoursesInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1011,6 +1084,22 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_coursesByTag_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "tag", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["tag"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pagination", ec.unmarshalOPaginationInput2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐPaginationInput)
+	if err != nil {
+		return nil, err
+	}
+	args["pagination"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_libraryCourse_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1035,6 +1124,17 @@ func (ec *executionContext) field_Query_libraryCourses_args(ctx context.Context,
 		return nil, err
 	}
 	args["difficulty"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_myAuthoredCourses_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "pagination", ec.unmarshalOPaginationInput2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐPaginationInput)
+	if err != nil {
+		return nil, err
+	}
+	args["pagination"] = arg0
 	return args, nil
 }
 
@@ -1511,6 +1611,64 @@ func (ec *executionContext) fieldContext_LibraryCourse_author(_ context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _LibraryCourse_authorId(ctx context.Context, field graphql.CollectedField, obj *entities.LibraryCourse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LibraryCourse_authorId,
+		func(ctx context.Context) (any, error) {
+			return obj.AuthorID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LibraryCourse_authorId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LibraryCourse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LibraryCourse_tags(ctx context.Context, field graphql.CollectedField, obj *entities.LibraryCourse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LibraryCourse_tags,
+		func(ctx context.Context) (any, error) {
+			return obj.Tags, nil
+		},
+		nil,
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LibraryCourse_tags(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LibraryCourse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LibraryCourse_difficulty(ctx context.Context, field graphql.CollectedField, obj *entities.LibraryCourse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1661,6 +1819,10 @@ func (ec *executionContext) fieldContext_LibraryCourseConnection_courses(_ conte
 				return ec.fieldContext_LibraryCourse_lessons(ctx, field)
 			case "author":
 				return ec.fieldContext_LibraryCourse_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_LibraryCourse_authorId(ctx, field)
+			case "tags":
+				return ec.fieldContext_LibraryCourse_tags(ctx, field)
 			case "difficulty":
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
@@ -2119,6 +2281,10 @@ func (ec *executionContext) fieldContext_Mutation_createLibraryCourse(ctx contex
 				return ec.fieldContext_LibraryCourse_lessons(ctx, field)
 			case "author":
 				return ec.fieldContext_LibraryCourse_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_LibraryCourse_authorId(ctx, field)
+			case "tags":
+				return ec.fieldContext_LibraryCourse_tags(ctx, field)
 			case "difficulty":
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
@@ -2180,6 +2346,10 @@ func (ec *executionContext) fieldContext_Mutation_updateLibraryCourse(ctx contex
 				return ec.fieldContext_LibraryCourse_lessons(ctx, field)
 			case "author":
 				return ec.fieldContext_LibraryCourse_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_LibraryCourse_authorId(ctx, field)
+			case "tags":
+				return ec.fieldContext_LibraryCourse_tags(ctx, field)
 			case "difficulty":
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
@@ -2241,6 +2411,71 @@ func (ec *executionContext) fieldContext_Mutation_deleteLibraryCourse(ctx contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteLibraryCourse_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_importCourses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_importCourses,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().ImportCourses(ctx, fc.Args["input"].(ImportCoursesInput))
+		},
+		nil,
+		ec.marshalNLibraryCourse2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐLibraryCourseᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_importCourses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_LibraryCourse_id(ctx, field)
+			case "title":
+				return ec.fieldContext_LibraryCourse_title(ctx, field)
+			case "description":
+				return ec.fieldContext_LibraryCourse_description(ctx, field)
+			case "lessons":
+				return ec.fieldContext_LibraryCourse_lessons(ctx, field)
+			case "author":
+				return ec.fieldContext_LibraryCourse_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_LibraryCourse_authorId(ctx, field)
+			case "tags":
+				return ec.fieldContext_LibraryCourse_tags(ctx, field)
+			case "difficulty":
+				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
+			case "estimatedHours":
+				return ec.fieldContext_LibraryCourse_estimatedHours(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_LibraryCourse_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_LibraryCourse_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LibraryCourse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_importCourses_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2592,6 +2827,10 @@ func (ec *executionContext) fieldContext_Query_libraryCourse(ctx context.Context
 				return ec.fieldContext_LibraryCourse_lessons(ctx, field)
 			case "author":
 				return ec.fieldContext_LibraryCourse_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_LibraryCourse_authorId(ctx, field)
+			case "tags":
+				return ec.fieldContext_LibraryCourse_tags(ctx, field)
 			case "difficulty":
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
@@ -2720,6 +2959,141 @@ func (ec *executionContext) fieldContext_Query_searchLibraryCourses(ctx context.
 	if fc.Args, err = ec.field_Query_searchLibraryCourses_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_myAuthoredCourses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_myAuthoredCourses,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().MyAuthoredCourses(ctx, fc.Args["pagination"].(*PaginationInput))
+		},
+		nil,
+		ec.marshalNLibraryCourseConnection2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐLibraryCourseConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_myAuthoredCourses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "courses":
+				return ec.fieldContext_LibraryCourseConnection_courses(ctx, field)
+			case "total":
+				return ec.fieldContext_LibraryCourseConnection_total(ctx, field)
+			case "page":
+				return ec.fieldContext_LibraryCourseConnection_page(ctx, field)
+			case "limit":
+				return ec.fieldContext_LibraryCourseConnection_limit(ctx, field)
+			case "hasMore":
+				return ec.fieldContext_LibraryCourseConnection_hasMore(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LibraryCourseConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_myAuthoredCourses_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_coursesByTag(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_coursesByTag,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().CoursesByTag(ctx, fc.Args["tag"].(string), fc.Args["pagination"].(*PaginationInput))
+		},
+		nil,
+		ec.marshalNLibraryCourseConnection2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐLibraryCourseConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_coursesByTag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "courses":
+				return ec.fieldContext_LibraryCourseConnection_courses(ctx, field)
+			case "total":
+				return ec.fieldContext_LibraryCourseConnection_total(ctx, field)
+			case "page":
+				return ec.fieldContext_LibraryCourseConnection_page(ctx, field)
+			case "limit":
+				return ec.fieldContext_LibraryCourseConnection_limit(ctx, field)
+			case "hasMore":
+				return ec.fieldContext_LibraryCourseConnection_hasMore(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LibraryCourseConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_coursesByTag_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_allTags(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_allTags,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().AllTags(ctx)
+		},
+		nil,
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_allTags(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -3533,6 +3907,10 @@ func (ec *executionContext) fieldContext_UserCourse_libraryCourse(_ context.Cont
 				return ec.fieldContext_LibraryCourse_lessons(ctx, field)
 			case "author":
 				return ec.fieldContext_LibraryCourse_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_LibraryCourse_authorId(ctx, field)
+			case "tags":
+				return ec.fieldContext_LibraryCourse_tags(ctx, field)
 			case "difficulty":
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
@@ -5311,7 +5689,7 @@ func (ec *executionContext) unmarshalInputCreateLibraryCourseInput(ctx context.C
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "lessons", "author", "difficulty", "estimatedHours"}
+	fieldsInOrder := [...]string{"title", "description", "lessons", "author", "tags", "difficulty", "estimatedHours"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5346,6 +5724,13 @@ func (ec *executionContext) unmarshalInputCreateLibraryCourseInput(ctx context.C
 				return it, err
 			}
 			it.Author = data
+		case "tags":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Tags = data
 		case "difficulty":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("difficulty"))
 			data, err := ec.unmarshalNDifficulty2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐDifficulty(ctx, v)
@@ -5401,6 +5786,33 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 				return it, err
 			}
 			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputImportCoursesInput(ctx context.Context, obj any) (ImportCoursesInput, error) {
+	var it ImportCoursesInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"courses"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "courses":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courses"))
+			data, err := ec.unmarshalNCreateLibraryCourseInput2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐCreateLibraryCourseInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Courses = data
 		}
 	}
 
@@ -5591,7 +6003,7 @@ func (ec *executionContext) unmarshalInputUpdateLibraryCourseInput(ctx context.C
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "lessons", "author", "difficulty", "estimatedHours"}
+	fieldsInOrder := [...]string{"title", "description", "lessons", "author", "tags", "difficulty", "estimatedHours"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5626,6 +6038,13 @@ func (ec *executionContext) unmarshalInputUpdateLibraryCourseInput(ctx context.C
 				return it, err
 			}
 			it.Author = data
+		case "tags":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Tags = data
 		case "difficulty":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("difficulty"))
 			data, err := ec.unmarshalODifficulty2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐDifficulty(ctx, v)
@@ -5863,6 +6282,16 @@ func (ec *executionContext) _LibraryCourse(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "authorId":
+			out.Values[i] = ec._LibraryCourse_authorId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "tags":
+			out.Values[i] = ec._LibraryCourse_tags(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "difficulty":
 			out.Values[i] = ec._LibraryCourse_difficulty(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6047,6 +6476,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "importCourses":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_importCourses(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "startCourse":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_startCourse(ctx, field)
@@ -6221,6 +6657,72 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_searchLibraryCourses(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "myAuthoredCourses":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myAuthoredCourses(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "coursesByTag":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_coursesByTag(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "allTags":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_allTags(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -7044,6 +7546,26 @@ func (ec *executionContext) unmarshalNCreateLibraryCourseInput2githubᚗcomᚋpr
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateLibraryCourseInput2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐCreateLibraryCourseInputᚄ(ctx context.Context, v any) ([]*CreateLibraryCourseInput, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]*CreateLibraryCourseInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCreateLibraryCourseInput2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐCreateLibraryCourseInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNCreateLibraryCourseInput2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐCreateLibraryCourseInput(ctx context.Context, v any) (*CreateLibraryCourseInput, error) {
+	res, err := ec.unmarshalInputCreateLibraryCourseInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐCreateUserInput(ctx context.Context, v any) (CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -7096,6 +7618,11 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNImportCoursesInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐImportCoursesInput(ctx context.Context, v any) (ImportCoursesInput, error) {
+	res, err := ec.unmarshalInputImportCoursesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
@@ -7283,6 +7810,36 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNTokenPayload2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐTokenPayload(ctx context.Context, sel ast.SelectionSet, v TokenPayload) graphql.Marshaler {
@@ -7827,6 +8384,42 @@ func (ec *executionContext) unmarshalOPaginationInput2ᚖgithubᚗcomᚋproject�
 	}
 	res, err := ec.unmarshalInputPaginationInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

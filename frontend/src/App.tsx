@@ -10,6 +10,8 @@ import { MyCoursesPage } from './pages/MyCoursesPage';
 import { CourseDetailPage } from './pages/CourseDetailPage';
 import { CreateCoursePage } from './pages/CreateCoursePage';
 import { EditCoursePage } from './pages/EditCoursePage';
+import { DashboardPage } from './pages/DashboardPage';
+import { ImportCoursePage } from './pages/ImportCoursePage';
 
 function App() {
   return (
@@ -48,6 +50,16 @@ function App() {
         }
       />
       <Route
+        path="/courses/import"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ImportCoursePage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/courses/:id"
         element={
           <Layout>
@@ -67,6 +79,16 @@ function App() {
       />
 
       {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <DashboardPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/my-courses"
         element={

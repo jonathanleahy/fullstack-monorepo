@@ -10,6 +10,7 @@ import {
   CardTitle,
   CardContent,
 } from '@repo/playbook';
+import { TagInput } from './TagInput';
 
 export interface CourseFormData {
   title: string;
@@ -18,6 +19,7 @@ export interface CourseFormData {
   difficulty: Difficulty;
   estimatedHours: number;
   lessons: LessonInput[];
+  tags: string[];
 }
 
 interface CourseFormProps {
@@ -35,6 +37,7 @@ const EMPTY_FORM: CourseFormData = {
   difficulty: 'BEGINNER',
   estimatedHours: 1,
   lessons: [],
+  tags: [],
 };
 
 export function CourseForm({
@@ -60,6 +63,7 @@ export function CourseForm({
           content: l.content,
           order: l.order,
         })),
+        tags: initialData.tags || [],
       });
     }
   }, [initialData]);
@@ -184,6 +188,18 @@ export function CourseForm({
                 <p className="text-sm text-red-600">{errors.estimatedHours}</p>
               )}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tags</Label>
+            <TagInput
+              tags={formData.tags}
+              onChange={(tags) => updateField('tags', tags)}
+              placeholder="Add tags (e.g., programming, beginner, react)"
+            />
+            <p className="text-xs text-muted-foreground">
+              Press Enter to add a tag. Tags help users find your course.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

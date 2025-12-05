@@ -17,6 +17,7 @@ type CreateLibraryCourseInput struct {
 	Description    string              `json:"description"`
 	Lessons        []*LessonInput      `json:"lessons"`
 	Author         string              `json:"author"`
+	Tags           []string            `json:"tags,omitempty"`
 	Difficulty     entities.Difficulty `json:"difficulty"`
 	EstimatedHours int                 `json:"estimatedHours"`
 }
@@ -25,6 +26,10 @@ type CreateUserInput struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
+}
+
+type ImportCoursesInput struct {
+	Courses []*CreateLibraryCourseInput `json:"courses"`
 }
 
 type LessonInput struct {
@@ -77,6 +82,7 @@ type UpdateLibraryCourseInput struct {
 	Description    *string              `json:"description,omitempty"`
 	Lessons        []*LessonInput       `json:"lessons,omitempty"`
 	Author         *string              `json:"author,omitempty"`
+	Tags           []string             `json:"tags,omitempty"`
 	Difficulty     *entities.Difficulty `json:"difficulty,omitempty"`
 	EstimatedHours *int                 `json:"estimatedHours,omitempty"`
 }

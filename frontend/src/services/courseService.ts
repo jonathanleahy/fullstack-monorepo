@@ -27,6 +27,8 @@ const LIBRARY_COURSE_FRAGMENT = `
     ${LESSON_FRAGMENT}
   }
   author
+  authorId
+  tags
   difficulty
   estimatedHours
   createdAt
@@ -134,6 +136,40 @@ const GET_USER_COURSE = `
   }
 `;
 
+const GET_MY_AUTHORED_COURSES = `
+  query GetMyAuthoredCourses($pagination: PaginationInput) {
+    myAuthoredCourses(pagination: $pagination) {
+      courses {
+        ${LIBRARY_COURSE_FRAGMENT}
+      }
+      total
+      page
+      limit
+      hasMore
+    }
+  }
+`;
+
+const GET_COURSES_BY_TAG = `
+  query GetCoursesByTag($tag: String!, $pagination: PaginationInput) {
+    coursesByTag(tag: $tag, pagination: $pagination) {
+      courses {
+        ${LIBRARY_COURSE_FRAGMENT}
+      }
+      total
+      page
+      limit
+      hasMore
+    }
+  }
+`;
+
+const GET_ALL_TAGS = `
+  query GetAllTags {
+    allTags
+  }
+`;
+
 // Mutations
 const START_COURSE = `
   mutation StartCourse($input: StartCourseInput!) {
@@ -176,6 +212,14 @@ const UPDATE_LIBRARY_COURSE = `
 const DELETE_LIBRARY_COURSE = `
   mutation DeleteLibraryCourse($id: ID!) {
     deleteLibraryCourse(id: $id)
+  }
+`;
+
+const IMPORT_COURSES = `
+  mutation ImportCourses($input: ImportCoursesInput!) {
+    importCourses(input: $input) {
+      ${LIBRARY_COURSE_FRAGMENT}
+    }
   }
 `;
 
@@ -293,5 +337,34 @@ export const courseService = {
       { id }
     );
     return data.deleteLibraryCourse;
+  },
+
+  async getMyAuthoredCourses(pagination?: PaginationInput): Promise<LibraryCourseConnection> {
+    const data = await graphqlClient.request<{ myAuthoredCourses: LibraryCourseConnection }>(
+      GET_MY_AUTHORED_COURSES,
+      { pagination }
+    );
+    return data.myAuthoredCourses;
+  },
+
+  async getCoursesByTag(tag: string, pagination?: PaginationInput): Promise<LibraryCourseConnection> {
+    const data = await graphqlClient.request<{ coursesByTag: LibraryCourseConnection }>(
+      GET_COURSES_BY_TAG,
+      { tag, pagination }
+    );
+    return data.coursesByTag;
+  },
+
+  async getAllTags(): Promise<string[]> {
+    const data = await graphqlClient.request<{ allTags: string[] }>(GET_ALL_TAGS);
+    return data.allTags;
+  },
+
+  async importCourses(courses: CreateLibraryCourseInput[]): Promise<LibraryCourse[]> {
+    const data = await graphqlClient.request<{ importCourses: LibraryCourse[] }>(
+      IMPORT_COURSES,
+      { input: { courses } }
+    );
+    return data.importCourses;
   },
 };

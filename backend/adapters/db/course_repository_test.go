@@ -57,6 +57,8 @@ func TestLibraryCourseRepository_Create(t *testing.T) {
 		"Learn Go from scratch",
 		lessons,
 		"John Doe",
+		"user-123",
+		[]string{"programming", "go"},
 		entities.DifficultyBeginner,
 		10,
 	)
@@ -89,7 +91,7 @@ func TestLibraryCourseRepository_GetByID(t *testing.T) {
 
 	// Create a course first
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	course, _ := entities.NewLibraryCourse("Test Course", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	course, _ := entities.NewLibraryCourse("Test Course", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	created, _ := repo.Create(ctx, course)
 
 	// Retrieve it
@@ -128,7 +130,7 @@ func TestLibraryCourseRepository_Update(t *testing.T) {
 
 	// Create a course
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	course, _ := entities.NewLibraryCourse("Original Title", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	course, _ := entities.NewLibraryCourse("Original Title", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	created, _ := repo.Create(ctx, course)
 
 	// Update it
@@ -154,7 +156,7 @@ func TestLibraryCourseRepository_Delete(t *testing.T) {
 
 	// Create a course
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	course, _ := entities.NewLibraryCourse("To Delete", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	course, _ := entities.NewLibraryCourse("To Delete", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	created, _ := repo.Create(ctx, course)
 
 	// Delete it
@@ -180,7 +182,7 @@ func TestLibraryCourseRepository_List(t *testing.T) {
 	// Create multiple courses
 	for i := 0; i < 5; i++ {
 		lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-		course, _ := entities.NewLibraryCourse("Course", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+		course, _ := entities.NewLibraryCourse("Course", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 		repo.Create(ctx, course)
 	}
 
@@ -208,13 +210,13 @@ func TestLibraryCourseRepository_ListByDifficulty(t *testing.T) {
 	// Create courses with different difficulties
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
 
-	beginner, _ := entities.NewLibraryCourse("Beginner", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	beginner, _ := entities.NewLibraryCourse("Beginner", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	repo.Create(ctx, beginner)
 
-	intermediate, _ := entities.NewLibraryCourse("Intermediate", "Desc", lessons, "Author", entities.DifficultyIntermediate, 10)
+	intermediate, _ := entities.NewLibraryCourse("Intermediate", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyIntermediate, 10)
 	repo.Create(ctx, intermediate)
 
-	advanced, _ := entities.NewLibraryCourse("Advanced", "Desc", lessons, "Author", entities.DifficultyAdvanced, 15)
+	advanced, _ := entities.NewLibraryCourse("Advanced", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyAdvanced, 15)
 	repo.Create(ctx, advanced)
 
 	// Filter by beginner
@@ -240,10 +242,10 @@ func TestLibraryCourseRepository_Search(t *testing.T) {
 
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
 
-	go1, _ := entities.NewLibraryCourse("Go Programming", "Learn Go basics", lessons, "Author", entities.DifficultyBeginner, 5)
+	go1, _ := entities.NewLibraryCourse("Go Programming", "Learn Go basics", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	repo.Create(ctx, go1)
 
-	python, _ := entities.NewLibraryCourse("Python Programming", "Learn Python", lessons, "Author", entities.DifficultyBeginner, 5)
+	python, _ := entities.NewLibraryCourse("Python Programming", "Learn Python", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	repo.Create(ctx, python)
 
 	// Search for "Go"
@@ -272,7 +274,7 @@ func TestUserCourseRepository_Create(t *testing.T) {
 
 	// Create a library course first
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	libCourse, _ := entities.NewLibraryCourse("Test Course", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	libCourse, _ := entities.NewLibraryCourse("Test Course", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	createdLib, _ := libRepo.Create(ctx, libCourse)
 
 	// Create a user course
@@ -304,7 +306,7 @@ func TestUserCourseRepository_GetByUserAndCourse(t *testing.T) {
 
 	// Setup
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	libCourse, _ := entities.NewLibraryCourse("Test", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	libCourse, _ := entities.NewLibraryCourse("Test", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	createdLib, _ := libRepo.Create(ctx, libCourse)
 
 	userCourse, _ := entities.NewUserCourse("user-123", createdLib.ID)
@@ -331,7 +333,7 @@ func TestUserCourseRepository_Update(t *testing.T) {
 
 	// Setup
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	libCourse, _ := entities.NewLibraryCourse("Test", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	libCourse, _ := entities.NewLibraryCourse("Test", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	createdLib, _ := libRepo.Create(ctx, libCourse)
 
 	userCourse, _ := entities.NewUserCourse("user-123", createdLib.ID)
@@ -360,9 +362,9 @@ func TestUserCourseRepository_ListByUser(t *testing.T) {
 
 	// Create library courses
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	lib1, _ := entities.NewLibraryCourse("Course 1", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	lib1, _ := entities.NewLibraryCourse("Course 1", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	lib1Created, _ := libRepo.Create(ctx, lib1)
-	lib2, _ := entities.NewLibraryCourse("Course 2", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	lib2, _ := entities.NewLibraryCourse("Course 2", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	lib2Created, _ := libRepo.Create(ctx, lib2)
 
 	// Create user courses for user-123
@@ -399,9 +401,9 @@ func TestUserCourseRepository_ListCompleted(t *testing.T) {
 
 	// Setup
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	lib1, _ := entities.NewLibraryCourse("Course 1", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	lib1, _ := entities.NewLibraryCourse("Course 1", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	lib1Created, _ := libRepo.Create(ctx, lib1)
-	lib2, _ := entities.NewLibraryCourse("Course 2", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	lib2, _ := entities.NewLibraryCourse("Course 2", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	lib2Created, _ := libRepo.Create(ctx, lib2)
 
 	// Create one completed and one in-progress
@@ -439,9 +441,9 @@ func TestUserCourseRepository_ListInProgress(t *testing.T) {
 
 	// Setup
 	lessons := []entities.Lesson{{Title: "Intro", Content: "Welcome", Order: 0}}
-	lib1, _ := entities.NewLibraryCourse("Course 1", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	lib1, _ := entities.NewLibraryCourse("Course 1", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	lib1Created, _ := libRepo.Create(ctx, lib1)
-	lib2, _ := entities.NewLibraryCourse("Course 2", "Desc", lessons, "Author", entities.DifficultyBeginner, 5)
+	lib2, _ := entities.NewLibraryCourse("Course 2", "Desc", lessons, "Author", "user-123", []string{}, entities.DifficultyBeginner, 5)
 	lib2Created, _ := libRepo.Create(ctx, lib2)
 
 	// Create one completed and one in-progress

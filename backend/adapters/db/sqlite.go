@@ -95,5 +95,35 @@ func (s *SQLiteDB) Migrate() error {
 		}
 	}
 
+	// Run column migrations (add new columns to existing tables)
+	columnMigrations := []struct {
+		table      string
+		column     string
+		definition string
+	}{
+		{"library_courses", "author_id", "TEXT NOT NULL DEFAULT ''"},
+		{"library_courses", "tags", "TEXT NOT NULL DEFAULT '[]'"},
+	}
+
+	for _, cm := range columnMigrations {
+		// Check if column exists
+		var count int
+		err := s.db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info(?) WHERE name = ?`, cm.table, cm.column).Scan(&count)
+		if err != nil {
+			return err
+		}
+
+		// Add column if it doesn't exist
+		if count == 0 {
+			_, err := s.db.Exec(`ALTER TABLE ` + cm.table + ` ADD COLUMN ` + cm.column + ` ` + cm.definition)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// Create index for author_id if it doesn't exist
+	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_library_courses_author_id ON library_courses(author_id)`)
+
 	return nil
 }

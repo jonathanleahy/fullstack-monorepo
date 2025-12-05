@@ -32,12 +32,17 @@ func (r *LibraryCourseRepository) Create(ctx context.Context, course *entities.L
 		return nil, err
 	}
 
-	query := `INSERT INTO library_courses (id, title, description, lessons, author, difficulty, estimated_hours, created_at, updated_at)
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	tagsJSON, err := json.Marshal(course.Tags)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `INSERT INTO library_courses (id, title, description, lessons, author, author_id, tags, difficulty, estimated_hours, created_at, updated_at)
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	_, err = r.db.DB().ExecContext(ctx, query,
 		course.ID, course.Title, course.Description, string(lessonsJSON),
-		course.Author, string(course.Difficulty), course.EstimatedHours,
+		course.Author, course.AuthorID, string(tagsJSON), string(course.Difficulty), course.EstimatedHours,
 		course.CreatedAt, course.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -48,16 +53,17 @@ func (r *LibraryCourseRepository) Create(ctx context.Context, course *entities.L
 
 // GetByID retrieves a library course by ID
 func (r *LibraryCourseRepository) GetByID(ctx context.Context, id string) (*entities.LibraryCourse, error) {
-	query := `SELECT id, title, description, lessons, author, difficulty, estimated_hours, created_at, updated_at
+	query := `SELECT id, title, description, lessons, author, author_id, tags, difficulty, estimated_hours, created_at, updated_at
 			  FROM library_courses WHERE id = ?`
 
 	course := &entities.LibraryCourse{}
 	var lessonsJSON string
+	var tagsJSON string
 	var difficulty string
 
 	err := r.db.DB().QueryRowContext(ctx, query, id).Scan(
 		&course.ID, &course.Title, &course.Description, &lessonsJSON,
-		&course.Author, &difficulty, &course.EstimatedHours,
+		&course.Author, &course.AuthorID, &tagsJSON, &difficulty, &course.EstimatedHours,
 		&course.CreatedAt, &course.UpdatedAt)
 
 	if err == sql.ErrNoRows {
@@ -73,6 +79,10 @@ func (r *LibraryCourseRepository) GetByID(ctx context.Context, id string) (*enti
 		return nil, err
 	}
 
+	if err := json.Unmarshal([]byte(tagsJSON), &course.Tags); err != nil {
+		return nil, err
+	}
+
 	return course, nil
 }
 
@@ -85,12 +95,17 @@ func (r *LibraryCourseRepository) Update(ctx context.Context, course *entities.L
 		return nil, err
 	}
 
-	query := `UPDATE library_courses SET title = ?, description = ?, lessons = ?, author = ?,
+	tagsJSON, err := json.Marshal(course.Tags)
+	if err != nil {
+		return nil, err
+	}
+
+	query := `UPDATE library_courses SET title = ?, description = ?, lessons = ?, author = ?, tags = ?,
 			  difficulty = ?, estimated_hours = ?, updated_at = ? WHERE id = ?`
 
 	result, err := r.db.DB().ExecContext(ctx, query,
 		course.Title, course.Description, string(lessonsJSON),
-		course.Author, string(course.Difficulty), course.EstimatedHours,
+		course.Author, string(tagsJSON), string(course.Difficulty), course.EstimatedHours,
 		course.UpdatedAt, course.ID)
 	if err != nil {
 		return nil, err
@@ -137,7 +152,7 @@ func (r *LibraryCourseRepository) List(ctx context.Context, limit, offset int) (
 	}
 
 	// Get paginated courses
-	query := `SELECT id, title, description, lessons, author, difficulty, estimated_hours, created_at, updated_at
+	query := `SELECT id, title, description, lessons, author, author_id, tags, difficulty, estimated_hours, created_at, updated_at
 			  FROM library_courses ORDER BY created_at DESC LIMIT ? OFFSET ?`
 
 	rows, err := r.db.DB().QueryContext(ctx, query, limit, offset)
@@ -150,16 +165,20 @@ func (r *LibraryCourseRepository) List(ctx context.Context, limit, offset int) (
 	for rows.Next() {
 		course := &entities.LibraryCourse{}
 		var lessonsJSON string
+		var tagsJSON string
 		var difficulty string
 
 		if err := rows.Scan(&course.ID, &course.Title, &course.Description, &lessonsJSON,
-			&course.Author, &difficulty, &course.EstimatedHours,
+			&course.Author, &course.AuthorID, &tagsJSON, &difficulty, &course.EstimatedHours,
 			&course.CreatedAt, &course.UpdatedAt); err != nil {
 			return nil, 0, err
 		}
 
 		course.Difficulty = entities.Difficulty(difficulty)
 		if err := json.Unmarshal([]byte(lessonsJSON), &course.Lessons); err != nil {
+			return nil, 0, err
+		}
+		if err := json.Unmarshal([]byte(tagsJSON), &course.Tags); err != nil {
 			return nil, 0, err
 		}
 
@@ -179,7 +198,7 @@ func (r *LibraryCourseRepository) ListByDifficulty(ctx context.Context, difficul
 	}
 
 	// Get paginated courses
-	query := `SELECT id, title, description, lessons, author, difficulty, estimated_hours, created_at, updated_at
+	query := `SELECT id, title, description, lessons, author, author_id, tags, difficulty, estimated_hours, created_at, updated_at
 			  FROM library_courses WHERE difficulty = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
 
 	rows, err := r.db.DB().QueryContext(ctx, query, string(difficulty), limit, offset)
@@ -192,16 +211,20 @@ func (r *LibraryCourseRepository) ListByDifficulty(ctx context.Context, difficul
 	for rows.Next() {
 		course := &entities.LibraryCourse{}
 		var lessonsJSON string
+		var tagsJSON string
 		var diff string
 
 		if err := rows.Scan(&course.ID, &course.Title, &course.Description, &lessonsJSON,
-			&course.Author, &diff, &course.EstimatedHours,
+			&course.Author, &course.AuthorID, &tagsJSON, &diff, &course.EstimatedHours,
 			&course.CreatedAt, &course.UpdatedAt); err != nil {
 			return nil, 0, err
 		}
 
 		course.Difficulty = entities.Difficulty(diff)
 		if err := json.Unmarshal([]byte(lessonsJSON), &course.Lessons); err != nil {
+			return nil, 0, err
+		}
+		if err := json.Unmarshal([]byte(tagsJSON), &course.Tags); err != nil {
 			return nil, 0, err
 		}
 
@@ -223,7 +246,7 @@ func (r *LibraryCourseRepository) Search(ctx context.Context, query string, limi
 	}
 
 	// Get paginated courses
-	sqlQuery := `SELECT id, title, description, lessons, author, difficulty, estimated_hours, created_at, updated_at
+	sqlQuery := `SELECT id, title, description, lessons, author, author_id, tags, difficulty, estimated_hours, created_at, updated_at
 			  FROM library_courses WHERE title LIKE ? OR description LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
 
 	rows, err := r.db.DB().QueryContext(ctx, sqlQuery, searchPattern, searchPattern, limit, offset)
@@ -236,10 +259,11 @@ func (r *LibraryCourseRepository) Search(ctx context.Context, query string, limi
 	for rows.Next() {
 		course := &entities.LibraryCourse{}
 		var lessonsJSON string
+		var tagsJSON string
 		var difficulty string
 
 		if err := rows.Scan(&course.ID, &course.Title, &course.Description, &lessonsJSON,
-			&course.Author, &difficulty, &course.EstimatedHours,
+			&course.Author, &course.AuthorID, &tagsJSON, &difficulty, &course.EstimatedHours,
 			&course.CreatedAt, &course.UpdatedAt); err != nil {
 			return nil, 0, err
 		}
@@ -248,11 +272,149 @@ func (r *LibraryCourseRepository) Search(ctx context.Context, query string, limi
 		if err := json.Unmarshal([]byte(lessonsJSON), &course.Lessons); err != nil {
 			return nil, 0, err
 		}
+		if err := json.Unmarshal([]byte(tagsJSON), &course.Tags); err != nil {
+			return nil, 0, err
+		}
 
 		courses = append(courses, course)
 	}
 
 	return courses, total, rows.Err()
+}
+
+// GetByAuthorID retrieves courses by author ID
+func (r *LibraryCourseRepository) GetByAuthorID(ctx context.Context, authorID string, limit, offset int) ([]*entities.LibraryCourse, int, error) {
+	// Get total count
+	var total int
+	countQuery := `SELECT COUNT(*) FROM library_courses WHERE author_id = ?`
+	if err := r.db.DB().QueryRowContext(ctx, countQuery, authorID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated courses
+	query := `SELECT id, title, description, lessons, author, author_id, tags, difficulty, estimated_hours, created_at, updated_at
+			  FROM library_courses WHERE author_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
+
+	rows, err := r.db.DB().QueryContext(ctx, query, authorID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var courses []*entities.LibraryCourse
+	for rows.Next() {
+		course := &entities.LibraryCourse{}
+		var lessonsJSON string
+		var tagsJSON string
+		var difficulty string
+
+		if err := rows.Scan(&course.ID, &course.Title, &course.Description, &lessonsJSON,
+			&course.Author, &course.AuthorID, &tagsJSON, &difficulty, &course.EstimatedHours,
+			&course.CreatedAt, &course.UpdatedAt); err != nil {
+			return nil, 0, err
+		}
+
+		course.Difficulty = entities.Difficulty(difficulty)
+		if err := json.Unmarshal([]byte(lessonsJSON), &course.Lessons); err != nil {
+			return nil, 0, err
+		}
+		if err := json.Unmarshal([]byte(tagsJSON), &course.Tags); err != nil {
+			return nil, 0, err
+		}
+
+		courses = append(courses, course)
+	}
+
+	return courses, total, rows.Err()
+}
+
+// GetByTag retrieves courses by tag
+func (r *LibraryCourseRepository) GetByTag(ctx context.Context, tag string, limit, offset int) ([]*entities.LibraryCourse, int, error) {
+	// SQLite JSON array search - look for tag in tags JSON array
+	searchPattern := "%\"" + tag + "\"%"
+
+	// Get total count
+	var total int
+	countQuery := `SELECT COUNT(*) FROM library_courses WHERE tags LIKE ?`
+	if err := r.db.DB().QueryRowContext(ctx, countQuery, searchPattern).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated courses
+	query := `SELECT id, title, description, lessons, author, author_id, tags, difficulty, estimated_hours, created_at, updated_at
+			  FROM library_courses WHERE tags LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
+
+	rows, err := r.db.DB().QueryContext(ctx, query, searchPattern, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var courses []*entities.LibraryCourse
+	for rows.Next() {
+		course := &entities.LibraryCourse{}
+		var lessonsJSON string
+		var tagsJSON string
+		var difficulty string
+
+		if err := rows.Scan(&course.ID, &course.Title, &course.Description, &lessonsJSON,
+			&course.Author, &course.AuthorID, &tagsJSON, &difficulty, &course.EstimatedHours,
+			&course.CreatedAt, &course.UpdatedAt); err != nil {
+			return nil, 0, err
+		}
+
+		course.Difficulty = entities.Difficulty(difficulty)
+		if err := json.Unmarshal([]byte(lessonsJSON), &course.Lessons); err != nil {
+			return nil, 0, err
+		}
+		if err := json.Unmarshal([]byte(tagsJSON), &course.Tags); err != nil {
+			return nil, 0, err
+		}
+
+		courses = append(courses, course)
+	}
+
+	return courses, total, rows.Err()
+}
+
+// GetAllTags retrieves all unique tags
+func (r *LibraryCourseRepository) GetAllTags(ctx context.Context) ([]string, error) {
+	query := `SELECT tags FROM library_courses`
+
+	rows, err := r.db.DB().QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tagSet := make(map[string]bool)
+	for rows.Next() {
+		var tagsJSON string
+		if err := rows.Scan(&tagsJSON); err != nil {
+			return nil, err
+		}
+
+		var tags []string
+		if err := json.Unmarshal([]byte(tagsJSON), &tags); err != nil {
+			return nil, err
+		}
+
+		for _, tag := range tags {
+			tagSet[tag] = true
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Convert map to slice
+	allTags := make([]string, 0, len(tagSet))
+	for tag := range tagSet {
+		allTags = append(allTags, tag)
+	}
+
+	return allTags, nil
 }
 
 // UserCourseRepository implements the UserCourseRepository interface with SQLite

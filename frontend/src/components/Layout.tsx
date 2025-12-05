@@ -23,9 +23,14 @@ export function Layout({ children }: LayoutProps) {
               Courses
             </Link>
             {user && (
-              <Link to="/my-courses" className="text-muted-foreground hover:text-foreground transition-colors">
-                My Courses
-              </Link>
+              <>
+                <Link to="/my-courses" className="text-muted-foreground hover:text-foreground transition-colors">
+                  My Courses
+                </Link>
+                <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Dashboard
+                </Link>
+              </>
             )}
             {user ? (
               <div className="flex items-center gap-4">

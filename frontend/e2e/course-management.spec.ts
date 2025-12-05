@@ -64,7 +64,8 @@ test.describe('Course Management', () => {
 
     // Fill in lesson details
     await page.locator('#lesson-title').fill('Getting Started');
-    await page.locator('#lesson-content').fill('This is the first lesson content.');
+    // The markdown editor uses a textarea with class w-md-editor-text-input
+    await page.locator('.w-md-editor-text-input').fill('This is the first lesson content.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     // Lesson should appear in list
@@ -77,7 +78,7 @@ test.describe('Course Management', () => {
     // Add a lesson first
     await page.getByRole('button', { name: /add lesson/i }).click();
     await page.locator('#lesson-title').fill('Original Title');
-    await page.locator('#lesson-content').fill('Original content.');
+    await page.locator('.w-md-editor-text-input').fill('Original content.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     // Edit the lesson
@@ -95,7 +96,7 @@ test.describe('Course Management', () => {
     // Add a lesson
     await page.getByRole('button', { name: /add lesson/i }).click();
     await page.locator('#lesson-title').fill('Lesson to Delete');
-    await page.locator('#lesson-content').fill('This will be deleted.');
+    await page.locator('.w-md-editor-text-input').fill('This will be deleted.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     // Verify lesson exists
@@ -121,7 +122,7 @@ test.describe('Course Management', () => {
     // Add a lesson
     await page.getByRole('button', { name: /add lesson/i }).click();
     await page.locator('#lesson-title').fill('Getting Started with Tests');
-    await page.locator('#lesson-content').fill('In this lesson, we will learn the basics of testing.');
+    await page.locator('.w-md-editor-text-input').fill('In this lesson, we will learn the basics of testing.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     // Submit the form
@@ -142,7 +143,7 @@ test.describe('Course Management', () => {
 
     await page.getByRole('button', { name: /add lesson/i }).click();
     await page.locator('#lesson-title').fill('First Lesson');
-    await page.locator('#lesson-content').fill('Lesson content here.');
+    await page.locator('.w-md-editor-text-input').fill('Lesson content here.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     await page.getByRole('button', { name: /create course/i }).click();
@@ -168,7 +169,7 @@ test.describe('Course Management', () => {
 
     await page.getByRole('button', { name: /add lesson/i }).click();
     await page.locator('#lesson-title').fill('A Lesson');
-    await page.locator('#lesson-content').fill('Some content.');
+    await page.locator('.w-md-editor-text-input').fill('Some content.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     await page.getByRole('button', { name: /create course/i }).click();
@@ -199,7 +200,7 @@ test.describe('Course Management', () => {
 
     await page.getByRole('button', { name: /add lesson/i }).click();
     await page.locator('#lesson-title').fill('Only Lesson');
-    await page.locator('#lesson-content').fill('Content.');
+    await page.locator('.w-md-editor-text-input').fill('Content.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     await page.getByRole('button', { name: /create course/i }).click();
@@ -225,21 +226,22 @@ test.describe('Course Management', () => {
     // Add first lesson
     await page.getByRole('button', { name: /add lesson/i }).click();
     await page.locator('#lesson-title').fill('First Lesson');
-    await page.locator('#lesson-content').fill('First content.');
+    await page.locator('.w-md-editor-text-input').fill('First content.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     // Add second lesson
     await page.getByRole('button', { name: /add lesson/i }).click();
     await page.locator('#lesson-title').fill('Second Lesson');
-    await page.locator('#lesson-content').fill('Second content.');
+    await page.locator('.w-md-editor-text-input').fill('Second content.');
     await page.getByRole('button', { name: /add lesson/i }).last().click();
 
     // Move second lesson up
     const moveUpButtons = page.locator('button[aria-label="Move up"]');
     await moveUpButtons.last().click();
 
-    // Check order - Second Lesson should now be first
-    const lessons = page.locator('.space-y-2 > div');
-    await expect(lessons.first()).toContainText(/second lesson/i);
+    // Check order - Second Lesson should now be first (shown as "1. Second Lesson")
+    // The lessons are in a div with class containing "border rounded-md"
+    const lessonItems = page.locator('.border.rounded-md.bg-muted\\/30');
+    await expect(lessonItems.first()).toContainText(/1\. Second Lesson/i);
   });
 });

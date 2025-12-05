@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLibraryCourse, useCourseActions } from '../hooks/useCourses';
 import { courseService } from '../services/courseService';
 import { useAuth } from '../hooks/useAuth';
 import type { Difficulty, UserCourse } from '../types/course';
+import { MarkdownRenderer } from '../components/MarkdownRenderer';
 
 const difficultyColors: Record<Difficulty, string> = {
   BEGINNER: 'bg-green-100 text-green-800',
@@ -14,7 +15,7 @@ const difficultyColors: Record<Difficulty, string> = {
 export function CourseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { course, isLoading, error, fetchCourse } = useLibraryCourse();
   const { startCourse, updateProgress, isLoading: isActioning } = useCourseActions();
 
@@ -82,7 +83,7 @@ export function CourseDetailPage() {
     }
   };
 
-  const handleSelectLesson = async (index: number) => {
+  const handleSelectLesson = useCallback(async (index: number) => {
     setSelectedLesson(index);
 
     // Update current lesson index if enrolled
@@ -96,7 +97,37 @@ export function CourseDetailPage() {
         setUserCourse(result);
       }
     }
-  };
+  }, [userCourse, updateProgress]);
+
+  // Keyboard navigation
+  const handleKeyNavigation = useCallback((e: KeyboardEvent) => {
+    if (!course) return;
+
+    // Don't handle if user is typing in an input
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'j':
+        if (selectedLesson > 0) {
+          handleSelectLesson(selectedLesson - 1);
+        }
+        break;
+      case 'ArrowRight':
+      case 'k':
+        if (selectedLesson < course.lessons.length - 1) {
+          handleSelectLesson(selectedLesson + 1);
+        }
+        break;
+    }
+  }, [course, selectedLesson, handleSelectLesson]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyNavigation);
+    return () => window.removeEventListener('keydown', handleKeyNavigation);
+  }, [handleKeyNavigation]);
 
   if (isLoading || isLoadingUserCourse) {
     return (
@@ -157,7 +188,7 @@ export function CourseDetailPage() {
                 <span className={`px-3 py-1 text-sm rounded-full ${difficultyColors[course.difficulty]}`}>
                   {course.difficulty.toLowerCase()}
                 </span>
-                {isAuthenticated && (
+                {isAuthenticated && user?.id === course.authorId && (
                   <Link
                     to={`/courses/${course.id}/edit`}
                     className="px-3 py-1 text-sm border rounded-md hover:bg-accent transition-colors"
@@ -175,6 +206,15 @@ export function CourseDetailPage() {
               <span>&bull;</span>
               <span>{course.lessons.length} lessons</span>
             </div>
+            {course.tags && course.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {course.tags.map(tag => (
+                  <span key={tag} className="px-2 py-0.5 text-xs bg-muted rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Progress bar (if enrolled) */}
@@ -207,7 +247,12 @@ export function CourseDetailPage() {
                 </h2>
               </div>
               <div className="prose max-w-none">
-                <p className="whitespace-pre-wrap">{currentLesson.content}</p>
+                <MarkdownRenderer content={currentLesson.content} />
+              </div>
+
+              <div className="mt-4 text-xs text-muted-foreground text-center">
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">←</kbd> or <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">j</kbd> Previous lesson &nbsp;|&nbsp;
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">→</kbd> or <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">k</kbd> Next lesson
               </div>
 
               {/* Lesson navigation */}

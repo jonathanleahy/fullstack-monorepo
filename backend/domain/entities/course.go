@@ -48,6 +48,8 @@ type LibraryCourse struct {
 	Description    string
 	Lessons        []Lesson
 	Author         string
+	AuthorID       string
+	Tags           []string
 	Difficulty     Difficulty
 	EstimatedHours int
 	CreatedAt      time.Time
@@ -55,12 +57,19 @@ type LibraryCourse struct {
 }
 
 // NewLibraryCourse creates a new LibraryCourse with validation
-func NewLibraryCourse(title, description string, lessons []Lesson, author string, difficulty Difficulty, estimatedHours int) (*LibraryCourse, error) {
+func NewLibraryCourse(title, description string, lessons []Lesson, author, authorID string, tags []string, difficulty Difficulty, estimatedHours int) (*LibraryCourse, error) {
 	if title == "" {
 		return nil, ErrInvalidCourseTitle
 	}
 	if len(lessons) == 0 {
 		return nil, ErrNoLessons
+	}
+	if authorID == "" {
+		return nil, ErrInvalidUserID
+	}
+
+	if tags == nil {
+		tags = []string{}
 	}
 
 	now := time.Now()
@@ -69,6 +78,8 @@ func NewLibraryCourse(title, description string, lessons []Lesson, author string
 		Description:    description,
 		Lessons:        lessons,
 		Author:         author,
+		AuthorID:       authorID,
+		Tags:           tags,
 		Difficulty:     difficulty,
 		EstimatedHours: estimatedHours,
 		CreatedAt:      now,

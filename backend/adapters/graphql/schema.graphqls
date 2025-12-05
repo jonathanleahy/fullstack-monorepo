@@ -76,6 +76,8 @@ type LibraryCourse {
   description: String!
   lessons: [Lesson!]!
   author: String!
+  authorId: ID!
+  tags: [String!]!
   difficulty: Difficulty!
   estimatedHours: Int!
   createdAt: DateTime!
@@ -115,6 +117,7 @@ input CreateLibraryCourseInput {
   description: String!
   lessons: [LessonInput!]!
   author: String!
+  tags: [String!]
   difficulty: Difficulty!
   estimatedHours: Int!
 }
@@ -130,6 +133,7 @@ input UpdateLibraryCourseInput {
   description: String
   lessons: [LessonInput!]
   author: String
+  tags: [String!]
   difficulty: Difficulty
   estimatedHours: Int
 }
@@ -153,11 +157,18 @@ type Query {
   libraryCourse(id: ID!): LibraryCourse
   libraryCourses(pagination: PaginationInput, difficulty: Difficulty): LibraryCourseConnection!
   searchLibraryCourses(query: String!, pagination: PaginationInput): LibraryCourseConnection!
+  myAuthoredCourses(pagination: PaginationInput): LibraryCourseConnection!
+  coursesByTag(tag: String!, pagination: PaginationInput): LibraryCourseConnection!
+  allTags: [String!]!
   # User course queries (requires auth)
   myCourses(pagination: PaginationInput): UserCourseConnection!
   myCompletedCourses(pagination: PaginationInput): UserCourseConnection!
   myInProgressCourses(pagination: PaginationInput): UserCourseConnection!
   userCourse(id: ID!): UserCourse
+}
+
+input ImportCoursesInput {
+  courses: [CreateLibraryCourseInput!]!
 }
 
 type Mutation {
@@ -172,6 +183,7 @@ type Mutation {
   createLibraryCourse(input: CreateLibraryCourseInput!): LibraryCourse!
   updateLibraryCourse(id: ID!, input: UpdateLibraryCourseInput!): LibraryCourse!
   deleteLibraryCourse(id: ID!): Boolean!
+  importCourses(input: ImportCoursesInput!): [LibraryCourse!]!
   # User course mutations (requires auth)
   startCourse(input: StartCourseInput!): UserCourse!
   updateProgress(input: UpdateProgressInput!): UserCourse!

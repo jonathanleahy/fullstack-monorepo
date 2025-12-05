@@ -28,6 +28,15 @@ type LibraryCourseRepository interface {
 
 	// Search finds courses by title or description
 	Search(ctx context.Context, query string, limit, offset int) ([]*entities.LibraryCourse, int, error)
+
+	// GetByAuthorID retrieves courses by author ID
+	GetByAuthorID(ctx context.Context, authorID string, limit, offset int) ([]*entities.LibraryCourse, int, error)
+
+	// GetByTag retrieves courses by tag
+	GetByTag(ctx context.Context, tag string, limit, offset int) ([]*entities.LibraryCourse, int, error)
+
+	// GetAllTags retrieves all unique tags
+	GetAllTags(ctx context.Context) ([]string, error)
 }
 
 // UserCourseRepository defines the interface for user course data access

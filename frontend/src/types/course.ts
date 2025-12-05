@@ -12,6 +12,8 @@ export interface LibraryCourse {
   description: string;
   lessons: Lesson[];
   author: string;
+  authorId: string;
+  tags: string[];
   difficulty: Difficulty;
   estimatedHours: number;
   createdAt: string;
@@ -74,6 +76,7 @@ export interface CreateLibraryCourseInput {
   author: string;
   difficulty: Difficulty;
   estimatedHours: number;
+  tags?: string[];
 }
 
 export interface UpdateLibraryCourseInput {
@@ -83,4 +86,9 @@ export interface UpdateLibraryCourseInput {
   author?: string;
   difficulty?: Difficulty;
   estimatedHours?: number;
+  tags?: string[];
+}
+
+export interface ImportCoursesInput {
+  courses: CreateLibraryCourseInput[];
 }

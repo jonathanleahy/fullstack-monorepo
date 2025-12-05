@@ -87,6 +87,11 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 
 // CreateLibraryCourse is the resolver for the createLibraryCourse field.
 func (r *mutationResolver) CreateLibraryCourse(ctx context.Context, input CreateLibraryCourseInput) (*entities.LibraryCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
 	lessons := make([]entities.Lesson, len(input.Lessons))
 	for i, l := range input.Lessons {
 		lessons[i] = entities.Lesson{
@@ -96,11 +101,18 @@ func (r *mutationResolver) CreateLibraryCourse(ctx context.Context, input Create
 		}
 	}
 
+	tags := []string{}
+	if input.Tags != nil {
+		tags = input.Tags
+	}
+
 	course, err := entities.NewLibraryCourse(
 		input.Title,
 		input.Description,
 		lessons,
 		input.Author,
+		userID,
+		tags,
 		input.Difficulty,
 		input.EstimatedHours,
 	)
@@ -113,9 +125,19 @@ func (r *mutationResolver) CreateLibraryCourse(ctx context.Context, input Create
 
 // UpdateLibraryCourse is the resolver for the updateLibraryCourse field.
 func (r *mutationResolver) UpdateLibraryCourse(ctx context.Context, id string, input UpdateLibraryCourseInput) (*entities.LibraryCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
 	course, err := r.LibraryCourseRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
+	}
+
+	// Check if user is the author
+	if course.AuthorID != userID {
+		return nil, errors.New("not authorized to update this course")
 	}
 
 	if input.Title != nil {
@@ -126,6 +148,9 @@ func (r *mutationResolver) UpdateLibraryCourse(ctx context.Context, id string, i
 	}
 	if input.Author != nil {
 		course.Author = *input.Author
+	}
+	if input.Tags != nil {
+		course.Tags = input.Tags
 	}
 	if input.Difficulty != nil {
 		course.Difficulty = *input.Difficulty
@@ -150,8 +175,70 @@ func (r *mutationResolver) UpdateLibraryCourse(ctx context.Context, id string, i
 
 // DeleteLibraryCourse is the resolver for the deleteLibraryCourse field.
 func (r *mutationResolver) DeleteLibraryCourse(ctx context.Context, id string) (bool, error) {
-	err := r.LibraryCourseRepo.Delete(ctx, id)
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return false, errors.New("authentication required")
+	}
+
+	course, err := r.LibraryCourseRepo.GetByID(ctx, id)
+	if err != nil {
+		return false, err
+	}
+
+	// Check if user is the author
+	if course.AuthorID != userID {
+		return false, errors.New("not authorized to delete this course")
+	}
+
+	err = r.LibraryCourseRepo.Delete(ctx, id)
 	return err == nil, err
+}
+
+// ImportCourses is the resolver for the importCourses field.
+func (r *mutationResolver) ImportCourses(ctx context.Context, input ImportCoursesInput) ([]*entities.LibraryCourse, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	var importedCourses []*entities.LibraryCourse
+	for _, courseInput := range input.Courses {
+		lessons := make([]entities.Lesson, len(courseInput.Lessons))
+		for i, l := range courseInput.Lessons {
+			lessons[i] = entities.Lesson{
+				Title:   l.Title,
+				Content: l.Content,
+				Order:   l.Order,
+			}
+		}
+
+		tags := []string{}
+		if courseInput.Tags != nil {
+			tags = courseInput.Tags
+		}
+
+		course, err := entities.NewLibraryCourse(
+			courseInput.Title,
+			courseInput.Description,
+			lessons,
+			courseInput.Author,
+			userID,
+			tags,
+			courseInput.Difficulty,
+			courseInput.EstimatedHours,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		created, err := r.LibraryCourseRepo.Create(ctx, course)
+		if err != nil {
+			return nil, err
+		}
+		importedCourses = append(importedCourses, created)
+	}
+
+	return importedCourses, nil
 }
 
 // StartCourse is the resolver for the startCourse field.
@@ -337,6 +424,70 @@ func (r *queryResolver) SearchLibraryCourses(ctx context.Context, query string, 
 		Limit:   limit,
 		HasMore: offset+len(courses) < total,
 	}, nil
+}
+
+// MyAuthoredCourses is the resolver for the myAuthoredCourses field.
+func (r *queryResolver) MyAuthoredCourses(ctx context.Context, pagination *PaginationInput) (*LibraryCourseConnection, error) {
+	userID := httpAdapter.GetUserIDFromContext(ctx)
+	if userID == "" {
+		return nil, errors.New("authentication required")
+	}
+
+	page, limit := 1, 20
+	if pagination != nil {
+		if pagination.Page != nil {
+			page = *pagination.Page
+		}
+		if pagination.Limit != nil {
+			limit = *pagination.Limit
+		}
+	}
+	offset := (page - 1) * limit
+
+	courses, total, err := r.LibraryCourseRepo.GetByAuthorID(ctx, userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LibraryCourseConnection{
+		Courses: courses,
+		Total:   total,
+		Page:    page,
+		Limit:   limit,
+		HasMore: offset+len(courses) < total,
+	}, nil
+}
+
+// CoursesByTag is the resolver for the coursesByTag field.
+func (r *queryResolver) CoursesByTag(ctx context.Context, tag string, pagination *PaginationInput) (*LibraryCourseConnection, error) {
+	page, limit := 1, 20
+	if pagination != nil {
+		if pagination.Page != nil {
+			page = *pagination.Page
+		}
+		if pagination.Limit != nil {
+			limit = *pagination.Limit
+		}
+	}
+	offset := (page - 1) * limit
+
+	courses, total, err := r.LibraryCourseRepo.GetByTag(ctx, tag, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LibraryCourseConnection{
+		Courses: courses,
+		Total:   total,
+		Page:    page,
+		Limit:   limit,
+		HasMore: offset+len(courses) < total,
+	}, nil
+}
+
+// AllTags is the resolver for the allTags field.
+func (r *queryResolver) AllTags(ctx context.Context) ([]string, error) {
+	return r.LibraryCourseRepo.GetAllTags(ctx)
 }
 
 // MyCourses is the resolver for the myCourses field.
