@@ -64,12 +64,25 @@ enum Difficulty {
   ADVANCED
 }
 
+type QuizQuestion {
+  id: ID!
+  question: String!
+  options: [String!]!
+  correctIndex: Int!
+  explanation: String
+}
+
+type Quiz {
+  questions: [QuizQuestion!]!
+}
+
 type Lesson {
   title: String!
   content: String!
   order: Int!
   sublessons: [Lesson!]
   hasSublessons: Boolean!
+  quiz: Quiz
 }
 
 type LibraryCourse {
@@ -126,11 +139,23 @@ input CreateLibraryCourseInput {
   estimatedHours: Int!
 }
 
+input QuizQuestionInput {
+  question: String!
+  options: [String!]!
+  correctIndex: Int!
+  explanation: String
+}
+
+input QuizInput {
+  questions: [QuizQuestionInput!]!
+}
+
 input LessonInput {
   title: String!
   content: String!
   order: Int!
   sublessons: [LessonInput!]
+  quiz: QuizInput
 }
 
 input UpdateLibraryCourseInput {

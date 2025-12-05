@@ -33,6 +33,12 @@ models:
   Difficulty:
     model:
       - github.com/project/backend/domain/entities.Difficulty
+  Quiz:
+    model:
+      - github.com/project/backend/domain/entities.Quiz
+  QuizQuestion:
+    model:
+      - github.com/project/backend/domain/entities.QuizQuestion
   Lesson:
     model:
       - github.com/project/backend/domain/entities.Lesson
@@ -41,6 +47,8 @@ models:
         resolver: true
       sublessons:
         fieldName: Sublessons
+      quiz:
+        fieldName: Quiz
   LibraryCourse:
     model:
       - github.com/project/backend/domain/entities.LibraryCourse

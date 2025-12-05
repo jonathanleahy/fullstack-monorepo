@@ -1,11 +1,24 @@
 export type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation?: string;
+}
+
+export interface Quiz {
+  questions: QuizQuestion[];
+}
+
 export interface Lesson {
   title: string;
   content: string;
   order: number;
   sublessons?: Lesson[];
   hasSublessons: boolean;
+  quiz?: Quiz;
 }
 
 export interface LibraryCourse {

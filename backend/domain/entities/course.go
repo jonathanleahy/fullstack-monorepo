@@ -23,6 +23,20 @@ func ValidateDifficulty(d Difficulty) error {
 	}
 }
 
+// QuizQuestion represents a single quiz question with multiple choice options
+type QuizQuestion struct {
+	ID           string
+	Question     string
+	Options      []string
+	CorrectIndex int
+	Explanation  string
+}
+
+// Quiz represents a quiz attached to a lesson
+type Quiz struct {
+	Questions []QuizQuestion
+}
+
 // Lesson represents a single lesson within a course
 // Lessons can have sublessons to create a hierarchical chapter structure
 type Lesson struct {
@@ -30,6 +44,7 @@ type Lesson struct {
 	Content    string
 	Order      int
 	Sublessons []Lesson // Nested subchapters/sublessons
+	Quiz       *Quiz    // Optional quiz for this lesson
 }
 
 // Validate checks if the lesson has valid data
