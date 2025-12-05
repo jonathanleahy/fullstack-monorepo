@@ -20,6 +20,41 @@ func (r *attachmentResolver) DownloadURL(ctx context.Context, obj *entities.Atta
 	return fmt.Sprintf("/api/attachments/%s", obj.ID), nil
 }
 
+// HasSublessons is the resolver for the hasSublessons field.
+func (r *lessonResolver) HasSublessons(ctx context.Context, obj *entities.Lesson) (bool, error) {
+	return obj.HasSublessons(), nil
+}
+
+// TotalLessonCount is the resolver for the totalLessonCount field.
+func (r *libraryCourseResolver) TotalLessonCount(ctx context.Context, obj *entities.LibraryCourse) (int, error) {
+	return obj.TotalLessonCount(), nil
+}
+
+// convertLessonInput recursively converts LessonInput to entities.Lesson
+func convertLessonInput(input *LessonInput) entities.Lesson {
+	lesson := entities.Lesson{
+		Title:   input.Title,
+		Content: input.Content,
+		Order:   input.Order,
+	}
+	if len(input.Sublessons) > 0 {
+		lesson.Sublessons = make([]entities.Lesson, len(input.Sublessons))
+		for i, sub := range input.Sublessons {
+			lesson.Sublessons[i] = convertLessonInput(sub)
+		}
+	}
+	return lesson
+}
+
+// convertLessonsInput converts a slice of LessonInput to entities.Lesson
+func convertLessonsInput(inputs []*LessonInput) []entities.Lesson {
+	lessons := make([]entities.Lesson, len(inputs))
+	for i, l := range inputs {
+		lessons[i] = convertLessonInput(l)
+	}
+	return lessons
+}
+
 // CreateUser creates a new user
 func (r *mutationResolver) CreateUser(ctx context.Context, input CreateUserInput) (*entities.User, error) {
 	return r.UserUseCase.CreateUser(ctx, ports.CreateUserInput{
@@ -98,14 +133,7 @@ func (r *mutationResolver) CreateLibraryCourse(ctx context.Context, input Create
 		return nil, errors.New("authentication required")
 	}
 
-	lessons := make([]entities.Lesson, len(input.Lessons))
-	for i, l := range input.Lessons {
-		lessons[i] = entities.Lesson{
-			Title:   l.Title,
-			Content: l.Content,
-			Order:   l.Order,
-		}
-	}
+	lessons := convertLessonsInput(input.Lessons)
 
 	tags := []string{}
 	if input.Tags != nil {
@@ -165,15 +193,7 @@ func (r *mutationResolver) UpdateLibraryCourse(ctx context.Context, id string, i
 		course.EstimatedHours = *input.EstimatedHours
 	}
 	if input.Lessons != nil {
-		lessons := make([]entities.Lesson, len(input.Lessons))
-		for i, l := range input.Lessons {
-			lessons[i] = entities.Lesson{
-				Title:   l.Title,
-				Content: l.Content,
-				Order:   l.Order,
-			}
-		}
-		course.Lessons = lessons
+		course.Lessons = convertLessonsInput(input.Lessons)
 	}
 
 	return r.LibraryCourseRepo.Update(ctx, course)
@@ -209,14 +229,7 @@ func (r *mutationResolver) ImportCourses(ctx context.Context, input ImportCourse
 
 	var importedCourses []*entities.LibraryCourse
 	for _, courseInput := range input.Courses {
-		lessons := make([]entities.Lesson, len(courseInput.Lessons))
-		for i, l := range courseInput.Lessons {
-			lessons[i] = entities.Lesson{
-				Title:   l.Title,
-				Content: l.Content,
-				Order:   l.Order,
-			}
-		}
+		lessons := convertLessonsInput(courseInput.Lessons)
 
 		tags := []string{}
 		if courseInput.Tags != nil {
@@ -879,6 +892,12 @@ func (r *userCourseResolver) LibraryCourse(ctx context.Context, obj *entities.Us
 // Attachment returns AttachmentResolver implementation.
 func (r *Resolver) Attachment() AttachmentResolver { return &attachmentResolver{r} }
 
+// Lesson returns LessonResolver implementation.
+func (r *Resolver) Lesson() LessonResolver { return &lessonResolver{r} }
+
+// LibraryCourse returns LibraryCourseResolver implementation.
+func (r *Resolver) LibraryCourse() LibraryCourseResolver { return &libraryCourseResolver{r} }
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -889,6 +908,8 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 func (r *Resolver) UserCourse() UserCourseResolver { return &userCourseResolver{r} }
 
 type attachmentResolver struct{ *Resolver }
+type lessonResolver struct{ *Resolver }
+type libraryCourseResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userCourseResolver struct{ *Resolver }

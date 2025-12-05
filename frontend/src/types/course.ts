@@ -4,6 +4,8 @@ export interface Lesson {
   title: string;
   content: string;
   order: number;
+  sublessons?: Lesson[];
+  hasSublessons: boolean;
 }
 
 export interface LibraryCourse {
@@ -16,6 +18,7 @@ export interface LibraryCourse {
   tags: string[];
   difficulty: Difficulty;
   estimatedHours: number;
+  totalLessonCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -68,6 +71,7 @@ export interface LessonInput {
   title: string;
   content: string;
   order: number;
+  sublessons?: LessonInput[];
 }
 
 export interface CreateLibraryCourseInput {

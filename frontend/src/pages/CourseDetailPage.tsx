@@ -4,7 +4,7 @@ import { useLibraryCourse } from '../hooks/useCourses';
 import { courseService } from '../services/courseService';
 import { analyticsService } from '../services/analyticsService';
 import { useAuth } from '../hooks/useAuth';
-import type { Difficulty, UserCourse, CourseAnalytics } from '../types/course';
+import type { Difficulty, UserCourse, CourseAnalytics, Lesson } from '../types/course';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { EnrollButton } from '../components/EnrollButton';
@@ -17,6 +17,102 @@ const difficultyColors: Record<Difficulty, string> = {
   ADVANCED: 'bg-red-100 text-red-800',
 };
 
+// Helper to flatten lessons with sublessons into a navigation-friendly structure
+interface FlatLesson {
+  lesson: Lesson;
+  depth: number;
+  parentIndex: number | null;
+  flatIndex: number;
+  path: number[]; // Path to reach this lesson [parentIdx, subIdx, subSubIdx...]
+}
+
+function flattenLessons(lessons: Lesson[]): FlatLesson[] {
+  const result: FlatLesson[] = [];
+
+  function traverse(lessonList: Lesson[], depth: number, parentIndex: number | null, pathPrefix: number[]) {
+    lessonList.forEach((lesson, idx) => {
+      const path = [...pathPrefix, idx];
+      result.push({
+        lesson,
+        depth,
+        parentIndex,
+        flatIndex: result.length,
+        path,
+      });
+      if (lesson.sublessons && lesson.sublessons.length > 0) {
+        traverse(lesson.sublessons, depth + 1, result.length - 1, path);
+      }
+    });
+  }
+
+  traverse(lessons, 0, null, []);
+  return result;
+}
+
+// Component for rendering a single lesson item in the sidebar
+interface LessonItemProps {
+  flatLesson: FlatLesson;
+  isSelected: boolean;
+  isCompleted: boolean;
+  displayNumber: string;
+  onSelect: () => void;
+  expandedLessons: Set<number>;
+  onToggleExpand: (index: number) => void;
+}
+
+function LessonItem({
+  flatLesson,
+  isSelected,
+  isCompleted,
+  displayNumber,
+  onSelect,
+  expandedLessons,
+  onToggleExpand,
+}: LessonItemProps) {
+  const { lesson, depth, flatIndex } = flatLesson;
+  const hasSublessons = lesson.hasSublessons && lesson.sublessons && lesson.sublessons.length > 0;
+  const isExpanded = expandedLessons.has(flatIndex);
+  const paddingLeft = depth * 16 + 16; // 16px base + 16px per depth level
+
+  return (
+    <button
+      onClick={onSelect}
+      className={`w-full text-left p-3 hover:bg-gray-50 transition-colors ${
+        isSelected ? 'bg-primary/5 border-l-4 border-primary' : ''
+      }`}
+      style={{ paddingLeft: `${paddingLeft}px` }}
+    >
+      <div className="flex items-center gap-2">
+        {hasSublessons && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleExpand(flatIndex);
+            }}
+            className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground"
+            aria-label={isExpanded ? 'Collapse' : 'Expand'}
+          >
+            {isExpanded ? '▼' : '▶'}
+          </button>
+        )}
+        {!hasSublessons && depth > 0 && <span className="w-5" />}
+        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
+          isCompleted
+            ? 'bg-green-100 text-green-600'
+            : isSelected
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-gray-100 text-gray-600'
+        }`}>
+          {isCompleted ? '✓' : displayNumber}
+        </div>
+        <span className={`truncate ${isSelected ? 'font-medium' : ''} ${depth > 0 ? 'text-sm' : ''}`}>
+          {lesson.title}
+        </span>
+      </div>
+    </button>
+  );
+}
+
 export function CourseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user } = useAuth();
@@ -25,6 +121,41 @@ export function CourseDetailPage() {
   const [userCourse, setUserCourse] = useState<UserCourse | null>(null);
   const [selectedLesson, setSelectedLesson] = useState(0);
   const [analytics, setAnalytics] = useState<CourseAnalytics | null>(null);
+  const [expandedLessons, setExpandedLessons] = useState<Set<number>>(new Set());
+
+  // Flatten lessons for navigation
+  const flatLessons = course ? flattenLessons(course.lessons.sort((a, b) => a.order - b.order)) : [];
+
+  // Toggle lesson expansion
+  const toggleExpand = useCallback((flatIndex: number) => {
+    setExpandedLessons(prev => {
+      const next = new Set(prev);
+      if (next.has(flatIndex)) {
+        next.delete(flatIndex);
+      } else {
+        next.add(flatIndex);
+      }
+      return next;
+    });
+  }, []);
+
+  // Check if a lesson should be visible (all ancestors expanded)
+  const isLessonVisible = useCallback((flatLesson: FlatLesson): boolean => {
+    if (flatLesson.depth === 0) return true;
+    // Check if all parent lessons are expanded
+    let currentPath = flatLesson.path.slice(0, -1);
+    while (currentPath.length > 0) {
+      const parentFlat = flatLessons.find(fl =>
+        fl.path.length === currentPath.length &&
+        fl.path.every((v, i) => v === currentPath[i])
+      );
+      if (parentFlat && !expandedLessons.has(parentFlat.flatIndex)) {
+        return false;
+      }
+      currentPath = currentPath.slice(0, -1);
+    }
+    return true;
+  }, [flatLessons, expandedLessons]);
 
   useEffect(() => {
     if (id) {
@@ -78,9 +209,9 @@ export function CourseDetailPage() {
     }
   }, [userCourse, course]);
 
-  // Keyboard navigation
+  // Keyboard navigation (uses flat index for navigating through all lessons including sublessons)
   const handleKeyNavigation = useCallback((e: KeyboardEvent) => {
-    if (!course) return;
+    if (!course || flatLessons.length === 0) return;
 
     // Don't handle if user is typing in an input
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
@@ -96,12 +227,12 @@ export function CourseDetailPage() {
         break;
       case 'ArrowRight':
       case 'k':
-        if (selectedLesson < course.lessons.length - 1) {
+        if (selectedLesson < flatLessons.length - 1) {
           handleSelectLesson(selectedLesson + 1);
         }
         break;
     }
-  }, [course, selectedLesson, handleSelectLesson]);
+  }, [course, flatLessons.length, selectedLesson, handleSelectLesson]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyNavigation);
@@ -141,8 +272,14 @@ export function CourseDetailPage() {
     );
   }
 
-  const currentLesson = course.lessons[selectedLesson];
+  const currentFlatLesson = flatLessons[selectedLesson];
+  const currentLesson = currentFlatLesson?.lesson;
   const isCompleted = userCourse?.completedAt != null;
+
+  // Generate display number for a lesson (e.g., "1", "1.1", "1.1.2")
+  const getDisplayNumber = (flatLesson: FlatLesson): string => {
+    return flatLesson.path.map(p => p + 1).join('.');
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -182,7 +319,7 @@ export function CourseDetailPage() {
               <span>&bull;</span>
               <span>{course.estimatedHours} hours</span>
               <span>&bull;</span>
-              <span>{course.lessons.length} lessons</span>
+              <span>{course.totalLessonCount || flatLessons.length} lessons</span>
             </div>
             {course.tags && course.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
@@ -259,11 +396,11 @@ export function CourseDetailPage() {
           )}
 
           {/* Lesson content */}
-          {currentLesson && (
+          {currentLesson && currentFlatLesson && (
             <div className="border rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">
-                  Lesson {selectedLesson + 1}: {currentLesson.title}
+                  {currentFlatLesson.depth > 0 ? 'Section' : 'Lesson'} {getDisplayNumber(currentFlatLesson)}: {currentLesson.title}
                 </h2>
                 <div className="flex items-center gap-3">
                   <LessonProgress
@@ -304,7 +441,7 @@ export function CourseDetailPage() {
 
                   <button
                     onClick={() => handleSelectLesson(selectedLesson + 1)}
-                    disabled={selectedLesson === course.lessons.length - 1}
+                    disabled={selectedLesson === flatLessons.length - 1}
                     className="px-4 py-2 border rounded-md hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next
@@ -334,35 +471,23 @@ export function CourseDetailPage() {
               Course Content
             </h3>
             <div className="divide-y">
-              {course.lessons
-                .sort((a, b) => a.order - b.order)
-                .map((lesson, index) => {
-                  const isCurrentLesson = index === selectedLesson;
-                  const isCompletedLesson = userCourse?.completedLessons?.includes(index) ?? false;
+              {flatLessons
+                .filter(flatLesson => isLessonVisible(flatLesson))
+                .map((flatLesson) => {
+                  const isCurrentLesson = flatLesson.flatIndex === selectedLesson;
+                  const isCompletedLesson = userCourse?.completedLessons?.includes(flatLesson.flatIndex) ?? false;
 
                   return (
-                    <button
-                      key={index}
-                      onClick={() => handleSelectLesson(index)}
-                      className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
-                        isCurrentLesson ? 'bg-primary/5 border-l-4 border-primary' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                          isCompletedLesson
-                            ? 'bg-green-100 text-green-600'
-                            : isCurrentLesson
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-gray-100 text-gray-600'
-                        }`}>
-                          {isCompletedLesson ? '✓' : index + 1}
-                        </div>
-                        <span className={isCurrentLesson ? 'font-medium' : ''}>
-                          {lesson.title}
-                        </span>
-                      </div>
-                    </button>
+                    <LessonItem
+                      key={flatLesson.flatIndex}
+                      flatLesson={flatLesson}
+                      isSelected={isCurrentLesson}
+                      isCompleted={isCompletedLesson}
+                      displayNumber={getDisplayNumber(flatLesson)}
+                      onSelect={() => handleSelectLesson(flatLesson.flatIndex)}
+                      expandedLessons={expandedLessons}
+                      onToggleExpand={toggleExpand}
+                    />
                   );
                 })}
             </div>

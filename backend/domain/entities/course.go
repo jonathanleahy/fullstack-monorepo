@@ -24,10 +24,12 @@ func ValidateDifficulty(d Difficulty) error {
 }
 
 // Lesson represents a single lesson within a course
+// Lessons can have sublessons to create a hierarchical chapter structure
 type Lesson struct {
-	Title   string
-	Content string
-	Order   int
+	Title      string
+	Content    string
+	Order      int
+	Sublessons []Lesson // Nested subchapters/sublessons
 }
 
 // Validate checks if the lesson has valid data
@@ -38,7 +40,27 @@ func (l *Lesson) Validate() error {
 	if l.Content == "" {
 		return ErrInvalidLessonContent
 	}
+	// Validate sublessons recursively
+	for _, sub := range l.Sublessons {
+		if err := sub.Validate(); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+// TotalCount returns the total number of lessons including all sublessons
+func (l *Lesson) TotalCount() int {
+	count := 1 // Count this lesson
+	for _, sub := range l.Sublessons {
+		count += sub.TotalCount()
+	}
+	return count
+}
+
+// HasSublessons returns true if this lesson has any sublessons
+func (l *Lesson) HasSublessons() bool {
+	return len(l.Sublessons) > 0
 }
 
 // LibraryCourse represents a course in the shared library
@@ -91,6 +113,15 @@ func NewLibraryCourse(title, description string, lessons []Lesson, author, autho
 func (c *LibraryCourse) AddLesson(lesson Lesson) {
 	c.Lessons = append(c.Lessons, lesson)
 	c.UpdatedAt = time.Now()
+}
+
+// TotalLessonCount returns the total number of lessons including all sublessons
+func (c *LibraryCourse) TotalLessonCount() int {
+	count := 0
+	for _, lesson := range c.Lessons {
+		count += lesson.TotalCount()
+	}
+	return count
 }
 
 // RemoveLesson removes a lesson at the given index
