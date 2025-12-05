@@ -12,3 +12,5 @@ export { Select } from './Select';
 export type { SelectProps } from './Select';
 export { Textarea } from './Textarea';
 export type { TextareaProps } from './Textarea';
+export { TagInput } from './TagInput';
+export type { TagInputProps } from './TagInput';

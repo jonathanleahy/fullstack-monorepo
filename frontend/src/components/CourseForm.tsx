@@ -9,8 +9,8 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
+  TagInput,
 } from '@repo/playbook';
-import { TagInput } from './TagInput';
 
 export interface CourseFormData {
   title: string;

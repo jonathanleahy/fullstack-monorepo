@@ -1,7 +1,8 @@
 import { useState, KeyboardEvent } from 'react';
-import { Input, Badge } from '@repo/playbook';
+import { Input } from './Input';
+import { Badge } from './Badge';
 
-interface TagInputProps {
+export interface TagInputProps {
   tags: string[];
   onChange: (tags: string[]) => void;
   placeholder?: string;

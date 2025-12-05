@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLibraryCourses } from '../hooks/useCourses';
-import { TagFilter } from '../components/TagFilter';
 import { courseService } from '../services/courseService';
 import type { Difficulty } from '../types/course';
 import {
@@ -13,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  TagFilter,
   CardContent,
   CardFooter,
 } from '@repo/playbook';

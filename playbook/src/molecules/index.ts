@@ -6,3 +6,5 @@ export type { TabsProps, TabsTriggerProps, TabsContentProps } from './Tabs';
 export { Alert, AlertTitle, AlertDescription, alertVariants } from './Alert';
 export { Tooltip } from './Tooltip';
 export type { TooltipProps } from './Tooltip';
+export { TagFilter } from './TagFilter';
+export type { TagFilterProps } from './TagFilter';

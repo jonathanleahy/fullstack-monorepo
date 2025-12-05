@@ -1,6 +1,7 @@
-import { Badge, Button } from '@repo/playbook';
+import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
 
-interface TagFilterProps {
+export interface TagFilterProps {
   availableTags: string[];
   selectedTags: string[];
   onChange: (tags: string[]) => void;
