@@ -82,17 +82,29 @@ echo -e "${YELLOW}Running npm audit...${NC}"
 pnpm audit --audit-level=high > /dev/null 2>&1 || true
 print_status $? "npm security audit"
 
-# 7. Frontend Tests
-echo -e "${YELLOW}Running frontend tests...${NC}"
+# 7. Frontend Unit Tests
+echo -e "${YELLOW}Running frontend unit tests...${NC}"
 pnpm --filter @repo/frontend test > /dev/null 2>&1 || true
-print_status $? "Frontend tests"
+print_status $? "Frontend unit tests"
 
-# 8. Playbook Tests
+# 8. Frontend E2E Tests (Playwright)
+echo -e "${YELLOW}Running frontend E2E tests...${NC}"
+if [ -f "$PROJECT_ROOT/frontend/playwright.config.ts" ]; then
+    # Run Playwright tests (requires backend and frontend to be running or webServer config)
+    cd "$PROJECT_ROOT/frontend"
+    pnpm test:e2e --reporter=list > /dev/null 2>&1 || true
+    print_status $? "Frontend E2E tests (Playwright)"
+    cd "$PROJECT_ROOT"
+else
+    echo -e "${YELLOW}SKIP${NC} Frontend E2E tests (Playwright not configured)"
+fi
+
+# 10. Playbook Tests
 echo -e "${YELLOW}Running playbook tests...${NC}"
 pnpm --filter @repo/playbook test > /dev/null 2>&1 || true
 print_status $? "Playbook tests"
 
-# 9. Backend Tests
+# 11. Backend Tests
 echo -e "${YELLOW}Running backend tests...${NC}"
 cd "$PROJECT_ROOT/backend"
 go test ./... > /dev/null 2>&1 || true
