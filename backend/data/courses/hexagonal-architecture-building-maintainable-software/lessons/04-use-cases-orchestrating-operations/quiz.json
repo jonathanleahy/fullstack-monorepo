@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "usecases-1",
+      "Question": "According to the diagram, what are examples of Use Cases?",
+      "Options": [
+        "HTTP Handler, GraphQL",
+        "CreateUser, GetUser, UpdateUser",
+        "Repository, Email Sender",
+        "Entities, Domain Services"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows CreateUser, GetUser, and UpdateUser as examples of Use Cases. Each use case represents a single business operation."
+    },
+    {
+      "ID": "usecases-2",
+      "Question": "In the diagram, what calls the Use Cases?",
+      "Options": [
+        "Driven Adapters (Repository, Email Sender)",
+        "Domain Entities and Services",
+        "Driving Adapters (HTTP Handler, GraphQL)",
+        "The database directly"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The diagram shows arrows from Driving Adapters (HTTP Handler, GraphQL) pointing to Use Cases. Driving adapters receive external requests and call use cases."
+    },
+    {
+      "ID": "usecases-3",
+      "Question": "In the diagram, what do Use Cases interact with?",
+      "Options": [
+        "Only the database",
+        "Only HTTP handlers",
+        "Both Domain (Entities, Services) and Driven Adapters (Repository, Email Sender)",
+        "Only external APIs"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The diagram shows Use Cases with arrows pointing to both Domain (Entities, Domain Services) and Driven Adapters (Repository, Email Sender)."
+    }
+  ]
+}

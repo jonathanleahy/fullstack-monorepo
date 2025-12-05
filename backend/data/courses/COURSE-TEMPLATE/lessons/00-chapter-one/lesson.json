@@ -1,0 +1,12 @@
+{
+  "title": "Chapter Title",
+  "order": 0,
+  "has_quiz": true,
+  "subchapter_count": 5,
+  "estimated_minutes": 45,
+  "learning_objectives": [
+    "Learning objective 1",
+    "Learning objective 2",
+    "Learning objective 3"
+  ]
+}

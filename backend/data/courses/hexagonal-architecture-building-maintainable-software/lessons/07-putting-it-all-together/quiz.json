@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "summary-1",
+      "Question": "According to the benefits table, how does Hex Arch achieve Testability?",
+      "Options": [
+        "By using faster databases",
+        "Domain has no dependencies, use mocks for adapters",
+        "By generating tests automatically",
+        "By reducing code size"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The benefits table states that Testability is achieved because 'Domain has no dependencies, use mocks for adapters'."
+    },
+    {
+      "ID": "summary-2",
+      "Question": "According to the lesson, when is Hexagonal Architecture a GOOD fit?",
+      "Options": [
+        "Simple CRUD applications",
+        "Prototypes or throwaway code",
+        "Long-lived applications with complex business logic",
+        "Very small teams or solo projects"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The lesson lists 'Long-lived applications' and 'Complex business logic' as good fits for Hexagonal Architecture."
+    },
+    {
+      "ID": "summary-3",
+      "Question": "According to the lesson, when is Hexagonal Architecture OVERKILL?",
+      "Options": [
+        "Applications with multiple interfaces (web, mobile, CLI)",
+        "Teams larger than 2-3 developers",
+        "Simple CRUD applications or prototypes",
+        "Systems with complex business logic"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The lesson lists 'Simple CRUD applications', 'Prototypes or throwaway code', and 'Very small teams or solo projects' as cases where Hex Arch is overkill."
+    }
+  ]
+}

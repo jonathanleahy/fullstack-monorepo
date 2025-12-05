@@ -1,0 +1,95 @@
+{
+  "id": "GENERATE-UUID",
+  "title": "Course Title Here",
+  "subtitle": "Compelling subtitle that sells the transformation",
+  "description": "2-3 sentence description for search results and previews",
+
+  "author": {
+    "name": "Author Name",
+    "bio": "Brief author biography and credentials",
+    "avatar": "/assets/authors/author-slug.jpg",
+    "social": {
+      "twitter": "@handle",
+      "linkedin": "profile-url",
+      "github": "username"
+    }
+  },
+
+  "metadata": {
+    "difficulty": "beginner|intermediate|advanced",
+    "estimated_hours": 10,
+    "chapter_count": 10,
+    "subchapter_count": 50,
+    "language": "en",
+    "last_updated": "YYYY-MM-DD",
+    "version": "1.0.0"
+  },
+
+  "tags": [
+    "primary-topic",
+    "secondary-topic",
+    "technology-name",
+    "skill-type"
+  ],
+
+  "categories": {
+    "primary": "Category Name",
+    "secondary": ["Sub-category 1", "Sub-category 2"]
+  },
+
+  "topics": [
+    "Specific topic 1 covered",
+    "Specific topic 2 covered",
+    "Specific topic 3 covered"
+  ],
+
+  "skills_taught": [
+    "Skill students will gain 1",
+    "Skill students will gain 2",
+    "Skill students will gain 3"
+  ],
+
+  "target_audience": [
+    "Who this course is for 1",
+    "Who this course is for 2",
+    "Who this course is for 3"
+  ],
+
+  "prerequisites": {
+    "required": [
+      "Required knowledge/skill 1",
+      "Required knowledge/skill 2"
+    ],
+    "recommended": [
+      "Helpful but not required 1"
+    ],
+    "courses": [
+      "prerequisite-course-slug"
+    ]
+  },
+
+  "features": {
+    "has_quizzes": true,
+    "has_final_exam": true,
+    "has_certificate": true,
+    "has_case_studies": true,
+    "has_exercises": false,
+    "has_downloadable_resources": false
+  },
+
+  "seo": {
+    "keywords": ["keyword1", "keyword2", "keyword3"],
+    "meta_description": "SEO-optimized description under 160 characters"
+  },
+
+  "related_courses": [
+    "related-course-slug-1",
+    "related-course-slug-2"
+  ],
+
+  "pricing": {
+    "is_free": false,
+    "price": 0,
+    "currency": "USD"
+  }
+}

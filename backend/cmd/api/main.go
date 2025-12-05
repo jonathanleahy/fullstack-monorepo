@@ -13,11 +13,13 @@ import (
 	"github.com/go-chi/cors"
 
 	"github.com/project/backend/adapters/db"
+	"github.com/project/backend/adapters/folder"
 	"github.com/project/backend/adapters/graphql"
 	httpAdapter "github.com/project/backend/adapters/http"
 	"github.com/project/backend/adapters/storage"
 	"github.com/project/backend/application/usecases"
 	"github.com/project/backend/config"
+	"github.com/project/backend/domain/repositories"
 	"github.com/project/backend/domain/services"
 )
 
@@ -47,11 +49,20 @@ func main() {
 
 	// Initialize repositories
 	userRepo := db.NewUserRepository(database)
-	libraryCourseRepo := db.NewLibraryCourseRepository(database)
 	userCourseRepo := db.NewUserCourseRepository(database)
 	bookmarkRepo := db.NewBookmarkRepository(database)
 	analyticsRepo := db.NewAnalyticsRepository(database)
 	attachmentRepo := db.NewAttachmentRepository(database)
+
+	// Initialize course repository (folder-based or database)
+	var libraryCourseRepo repositories.LibraryCourseRepository
+	if cfg.UseFolderCourses {
+		libraryCourseRepo = folder.NewFolderCourseRepository(cfg.CoursesPath)
+		slog.Info("Using folder-based course repository", "path", cfg.CoursesPath)
+	} else {
+		libraryCourseRepo = db.NewLibraryCourseRepository(database)
+		slog.Info("Using database course repository")
+	}
 
 	// Initialize file storage
 	fileStorage := storage.NewFileStorage()

@@ -11,6 +11,8 @@ import (
 type Config struct {
 	Port             string
 	DatabasePath     string
+	CoursesPath      string
+	UseFolderCourses bool
 	EnablePlayground bool
 	AllowedOrigins   []string
 	RequestTimeout   time.Duration
@@ -23,6 +25,8 @@ func Load() *Config {
 	return &Config{
 		Port:             getEnv("PORT", "8082"),
 		DatabasePath:     getEnv("DATABASE_PATH", "./data/app.db"),
+		CoursesPath:      getEnv("COURSES_PATH", "./data/courses"),
+		UseFolderCourses: getEnvBool("USE_FOLDER_COURSES", true),
 		EnablePlayground: getEnvBool("ENABLE_PLAYGROUND", true),
 		AllowedOrigins:   getEnvSlice("ALLOWED_ORIGINS", []string{"http://localhost:3001", "http://localhost:3000"}),
 		RequestTimeout:   getEnvDuration("REQUEST_TIMEOUT", 30*time.Second),

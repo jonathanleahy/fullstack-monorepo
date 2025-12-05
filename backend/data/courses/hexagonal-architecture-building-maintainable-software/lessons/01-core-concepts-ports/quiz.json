@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "ports-1",
+      "Question": "According to the diagram, what are examples of Driving Ports?",
+      "Options": [
+        "UserRepository, OrderRepository, EmailSender",
+        "UserService, OrderService, PaymentService",
+        "Database, Cache, Queue",
+        "HTTP, GraphQL, gRPC"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows UserService, OrderService, and PaymentService as examples of Driving Ports. These are the interfaces that external systems call to drive the application."
+    },
+    {
+      "ID": "ports-2",
+      "Question": "According to the diagram, what are examples of Driven Ports?",
+      "Options": [
+        "UserService, OrderService, PaymentService",
+        "HTTP Handler, CLI, GraphQL Resolver",
+        "UserRepository, OrderRepository, EmailSender",
+        "React, Vue, Angular"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The diagram shows UserRepository, OrderRepository, and EmailSender as examples of Driven Ports. These are interfaces that the application calls to interact with external systems."
+    },
+    {
+      "ID": "ports-3",
+      "Question": "In the diagram, what direction do Driving Ports flow?",
+      "Options": [
+        "Driving Ports call Use Cases",
+        "Use Cases call Driving Ports",
+        "Driving Ports call Driven Ports directly",
+        "Driven Ports call Driving Ports"
+      ],
+      "CorrectIndex": 0,
+      "Explanation": "The diagram shows arrows from Driving Ports to Use Cases with the label 'calls'. Driving Ports receive external input and call the application's use cases."
+    }
+  ]
+}

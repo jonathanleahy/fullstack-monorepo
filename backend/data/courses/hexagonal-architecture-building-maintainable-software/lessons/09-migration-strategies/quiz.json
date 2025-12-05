@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "migration-1",
+      "Question": "According to the lesson, what is the 'golden rule' of migration?",
+      "Options": [
+        "Migrate everything at once for consistency",
+        "Never stop shipping - migrate incrementally",
+        "Always start with the database layer",
+        "Rewrite tests after the migration is complete"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The lesson states: 'Never stop shipping. A migration that blocks feature development is a migration that will be cancelled.'"
+    },
+    {
+      "ID": "migration-2",
+      "Question": "What is the Strangler Fig pattern according to the lesson?",
+      "Options": [
+        "A pattern for removing dead code",
+        "A gradual replacement strategy where old and new systems coexist",
+        "A testing pattern for legacy code",
+        "A pattern for database migrations"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The lesson explains the Strangler Fig pattern as gradually replacing parts of the system, running old and new in parallel, and cutting over incrementally."
+    },
+    {
+      "ID": "migration-3",
+      "Question": "According to the lesson, what is the first and most important step when migrating to Hexagonal Architecture?",
+      "Options": [
+        "Create new database adapters",
+        "Set up dependency injection",
+        "Extract business logic into a clean domain layer",
+        "Write integration tests"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The lesson states in the 'Extracting the Domain' section: 'The first and most important step: pull business logic out of handlers and infrastructure into a clean domain layer.'"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "adapters-1",
+      "Question": "According to the diagram, which of these are Driving Adapters (Inbound)?",
+      "Options": [
+        "PostgreSQL, MongoDB, Redis, AWS SES",
+        "HTTP/REST, GraphQL, gRPC, CLI",
+        "UserRepository, OrderRepository",
+        "Entities, Value Objects, Services"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows HTTP/REST, GraphQL, gRPC, and CLI as Driving Adapters. These handle inbound requests and translate them for the application."
+    },
+    {
+      "ID": "adapters-2",
+      "Question": "According to the diagram, which of these are Driven Adapters (Outbound)?",
+      "Options": [
+        "HTTP/REST, GraphQL, gRPC, CLI",
+        "UserService, OrderService, PaymentService",
+        "PostgreSQL, MongoDB, Redis, AWS SES",
+        "Ports, Use Cases, Domain"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The diagram shows PostgreSQL, MongoDB, Redis, and AWS SES as Driven Adapters. These are the concrete implementations that the application drives for external operations."
+    },
+    {
+      "ID": "adapters-3",
+      "Question": "What is the relationship between adapters and ports shown in the diagram?",
+      "Options": [
+        "Adapters contain ports",
+        "Driving Adapters implement Driving Ports; Driven Ports are implemented by Driven Adapters",
+        "Ports and adapters are the same thing",
+        "Adapters bypass ports entirely"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows arrows indicating that Driving Adapters 'implement' Driving Ports, and Driven Ports are 'implemented by' Driven Adapters."
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "Certificate": {
+    "Title": "Certificate of Completion",
+    "CourseTitle": "[Course Title]",
+    "Subtitle": "has successfully completed",
+    "IssuedBy": "The Study Project",
+    "Logo": "/assets/logo.png",
+    "Background": "/assets/certificate-bg.png",
+
+    "Requirements": {
+      "MinChaptersCompleted": 10,
+      "MinQuizScore": 70,
+      "RequireFinalExam": true,
+      "MinFinalExamScore": 70
+    },
+
+    "Fields": {
+      "StudentName": "[Generated from user profile]",
+      "CompletionDate": "[Generated on completion]",
+      "CertificateID": "[UUID generated on issue]",
+      "VerificationURL": "https://study.example.com/verify/{certificateId}"
+    },
+
+    "Skills": [
+      "[Skill 1 demonstrated by completing this course]",
+      "[Skill 2]",
+      "[Skill 3]",
+      "[Skill 4]",
+      "[Skill 5]"
+    ],
+
+    "Achievements": {
+      "CourseCompletion": {
+        "Name": "Course Graduate",
+        "Description": "Completed all 10 chapters",
+        "Icon": "graduation-cap"
+      },
+      "QuizMaster": {
+        "Name": "Quiz Master",
+        "Description": "Scored 90%+ on all quizzes",
+        "Icon": "trophy"
+      },
+      "PerfectScore": {
+        "Name": "Perfect Score",
+        "Description": "100% on final exam",
+        "Icon": "star"
+      }
+    },
+
+    "Sharing": {
+      "LinkedIn": {
+        "Enabled": true,
+        "OrganizationID": "[LinkedIn Org ID]"
+      },
+      "Twitter": {
+        "Enabled": true,
+        "Template": "I just completed {courseTitle} on @StudyProject! #{hashtag}"
+      },
+      "Download": {
+        "Formats": ["PDF", "PNG"],
+        "Resolution": "high"
+      }
+    }
+  }
+}

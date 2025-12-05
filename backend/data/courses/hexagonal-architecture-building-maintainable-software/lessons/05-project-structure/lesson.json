@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 5,
+  "title": "Project Structure",
+  "subchapter_count": 5,
+  "estimated_minutes": 35,
+  "learning_objectives": [
+    "Organize your codebase for maintainability",
+    "Enforce the dependency direction rule",
+    "Manage configuration for different environments"
+  ]
+}

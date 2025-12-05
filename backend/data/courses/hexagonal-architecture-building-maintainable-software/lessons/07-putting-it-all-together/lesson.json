@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 7,
+  "title": "Putting It All Together",
+  "subchapter_count": 5,
+  "estimated_minutes": 40,
+  "learning_objectives": [
+    "Trace a complete request through the architecture",
+    "Avoid common pitfalls when implementing",
+    "Decide when Hexagonal Architecture is appropriate"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 9,
+  "title": "Migration Strategies",
+  "subchapter_count": 5,
+  "estimated_minutes": 45,
+  "learning_objectives": [
+    "Assess existing architectures for migration readiness",
+    "Apply the Strangler Fig pattern for safe migration",
+    "Extract domain logic incrementally from existing code"
+  ]
+}

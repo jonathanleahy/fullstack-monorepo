@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "structure-1",
+      "Question": "According to the diagram, what are the main directories in a Hexagonal Architecture project?",
+      "Options": [
+        "src, lib, bin, test",
+        "cmd, domain, application, adapters, config",
+        "models, views, controllers",
+        "frontend, backend, shared"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows cmd/ (Entry points), domain/ (THE CORE), application/ (Use cases), adapters/ (Infrastructure), and config/ (Configuration) as the main directories."
+    },
+    {
+      "ID": "structure-2",
+      "Question": "According to the lesson, what is the dependency direction in Hexagonal Architecture?",
+      "Options": [
+        "Domain → Application → Adapters",
+        "Adapters → Application → Domain",
+        "All layers depend on each other equally",
+        "Application → Domain → Adapters"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The lesson states: Dependencies always point inward: Adapters → Application → Domain. Never: Domain → Adapters."
+    },
+    {
+      "ID": "structure-3",
+      "Question": "According to the diagram, what belongs in the domain/ directory?",
+      "Options": [
+        "HTTP handlers and GraphQL resolvers",
+        "entities/, services/, repositories/ (interfaces)",
+        "Database connection code",
+        "Configuration files"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows domain/ containing entities/, services/, and repositories/ (interfaces). This is the core business logic."
+    }
+  ]
+}

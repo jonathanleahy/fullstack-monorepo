@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 2,
+  "title": "Core Concepts: Adapters",
+  "subchapter_count": 5,
+  "estimated_minutes": 40,
+  "learning_objectives": [
+    "Understand what adapters are and how they work",
+    "Differentiate between driving and driven adapters",
+    "Implement swappable adapters for flexibility"
+  ]
+}
