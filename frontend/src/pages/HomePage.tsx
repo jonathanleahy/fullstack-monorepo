@@ -11,10 +11,10 @@ export function HomePage() {
       </p>
       <div className="flex gap-4 justify-center">
         <Link
-          to="/users"
+          to="/courses"
           className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
         >
-          View Users
+          Browse Courses
         </Link>
         <a
           href="/graphql"
