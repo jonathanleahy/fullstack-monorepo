@@ -8,6 +8,8 @@ import type {
   PaginationInput,
   StartCourseInput,
   UpdateProgressInput,
+  CreateLibraryCourseInput,
+  UpdateLibraryCourseInput,
 } from '../types/course';
 
 // Query fragments
@@ -155,6 +157,28 @@ const DROP_COURSE = `
   }
 `;
 
+const CREATE_LIBRARY_COURSE = `
+  mutation CreateLibraryCourse($input: CreateLibraryCourseInput!) {
+    createLibraryCourse(input: $input) {
+      ${LIBRARY_COURSE_FRAGMENT}
+    }
+  }
+`;
+
+const UPDATE_LIBRARY_COURSE = `
+  mutation UpdateLibraryCourse($id: ID!, $input: UpdateLibraryCourseInput!) {
+    updateLibraryCourse(id: $id, input: $input) {
+      ${LIBRARY_COURSE_FRAGMENT}
+    }
+  }
+`;
+
+const DELETE_LIBRARY_COURSE = `
+  mutation DeleteLibraryCourse($id: ID!) {
+    deleteLibraryCourse(id: $id)
+  }
+`;
+
 // Service functions
 export const courseService = {
   // Library course queries
@@ -244,5 +268,30 @@ export const courseService = {
       { id }
     );
     return data.dropCourse;
+  },
+
+  // Library course management mutations
+  async createLibraryCourse(input: CreateLibraryCourseInput): Promise<LibraryCourse> {
+    const data = await graphqlClient.request<{ createLibraryCourse: LibraryCourse }>(
+      CREATE_LIBRARY_COURSE,
+      { input }
+    );
+    return data.createLibraryCourse;
+  },
+
+  async updateLibraryCourse(id: string, input: UpdateLibraryCourseInput): Promise<LibraryCourse> {
+    const data = await graphqlClient.request<{ updateLibraryCourse: LibraryCourse }>(
+      UPDATE_LIBRARY_COURSE,
+      { id, input }
+    );
+    return data.updateLibraryCourse;
+  },
+
+  async deleteLibraryCourse(id: string): Promise<boolean> {
+    const data = await graphqlClient.request<{ deleteLibraryCourse: boolean }>(
+      DELETE_LIBRARY_COURSE,
+      { id }
+    );
+    return data.deleteLibraryCourse;
   },
 };

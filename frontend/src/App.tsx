@@ -8,6 +8,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { CoursesPage } from './pages/CoursesPage';
 import { MyCoursesPage } from './pages/MyCoursesPage';
 import { CourseDetailPage } from './pages/CourseDetailPage';
+import { CreateCoursePage } from './pages/CreateCoursePage';
+import { EditCoursePage } from './pages/EditCoursePage';
 
 function App() {
   return (
@@ -36,11 +38,31 @@ function App() {
         }
       />
       <Route
+        path="/courses/new"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <CreateCoursePage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/courses/:id"
         element={
           <Layout>
             <CourseDetailPage />
           </Layout>
+        }
+      />
+      <Route
+        path="/courses/:id/edit"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <EditCoursePage />
+            </Layout>
+          </ProtectedRoute>
         }
       />
 

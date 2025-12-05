@@ -60,3 +60,27 @@ export interface UpdateProgressInput {
   progress: number;
   currentLessonIndex?: number;
 }
+
+export interface LessonInput {
+  title: string;
+  content: string;
+  order: number;
+}
+
+export interface CreateLibraryCourseInput {
+  title: string;
+  description: string;
+  lessons: LessonInput[];
+  author: string;
+  difficulty: Difficulty;
+  estimatedHours: number;
+}
+
+export interface UpdateLibraryCourseInput {
+  title?: string;
+  description?: string;
+  lessons?: LessonInput[];
+  author?: string;
+  difficulty?: Difficulty;
+  estimatedHours?: number;
+}

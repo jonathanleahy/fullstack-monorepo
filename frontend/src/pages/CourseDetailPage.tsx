@@ -153,9 +153,19 @@ export function CourseDetailPage() {
           <div className="mb-6">
             <div className="flex items-start justify-between mb-2">
               <h1 className="text-3xl font-bold">{course.title}</h1>
-              <span className={`px-3 py-1 text-sm rounded-full ${difficultyColors[course.difficulty]}`}>
-                {course.difficulty.toLowerCase()}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`px-3 py-1 text-sm rounded-full ${difficultyColors[course.difficulty]}`}>
+                  {course.difficulty.toLowerCase()}
+                </span>
+                {isAuthenticated && (
+                  <Link
+                    to={`/courses/${course.id}/edit`}
+                    className="px-3 py-1 text-sm border rounded-md hover:bg-accent transition-colors"
+                  >
+                    Edit
+                  </Link>
+                )}
+              </div>
             </div>
             <p className="text-muted-foreground mb-4">{course.description}</p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
