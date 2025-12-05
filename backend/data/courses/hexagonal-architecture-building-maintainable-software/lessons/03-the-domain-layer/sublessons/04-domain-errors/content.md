@@ -1,5 +1,11 @@
 # Domain Errors
 
+## Sam's Scenario
+
+Sam's original error handling was a mess: `errors.New("error")`, `fmt.Errorf("something went wrong")`, and worst of all, returning HTTP 500 for business rule violations like "book already on loan." Alex explained: "Domain errors are your business vocabulary. They tell adapters exactly what went wrong, so they can respond appropriately."
+
+## What are Domain Errors?
+
 Domain errors are an essential part of your domain layer. They express business failures in a meaningful, typed way.
 
 ## Why Domain Errors Matter
@@ -24,7 +30,7 @@ flowchart LR
     style Good fill:#9f9,stroke:#333
 ```
 
-## Defining Domain Errors
+## Defining Domain Errors for BookShelf
 
 ```go
 package entities
@@ -33,21 +39,25 @@ import "errors"
 
 // Domain errors - express business failures
 var (
+    // Book errors
+    ErrBookNotFound       = errors.New("book not found")
+    ErrBookAlreadyOnLoan  = errors.New("book is already on loan")
+    ErrBookNotOnLoan      = errors.New("book is not currently on loan")
+    ErrInvalidISBN        = errors.New("invalid ISBN format")
+    ErrTitleTooShort      = errors.New("title must be at least 2 characters")
+    ErrDuplicateISBN      = errors.New("book with this ISBN already exists")
+
     // User errors
-    ErrUserNotFound     = errors.New("user not found")
-    ErrEmailAlreadyTaken = errors.New("email address is already taken")
-    ErrInvalidEmail     = errors.New("invalid email format")
-    ErrNameTooShort     = errors.New("name must be at least 2 characters")
+    ErrUserNotFound       = errors.New("user not found")
+    ErrInvalidEmail       = errors.New("invalid email format")
+    ErrEmailAlreadyTaken  = errors.New("email address is already taken")
 
-    // Order errors
-    ErrOrderNotFound      = errors.New("order not found")
-    ErrInsufficientStock  = errors.New("insufficient stock for order")
-    ErrOrderAlreadyPaid   = errors.New("order has already been paid")
-    ErrOrderCancelled     = errors.New("order has been cancelled")
-
-    // Payment errors
-    ErrPaymentDeclined   = errors.New("payment was declined")
-    ErrInvalidCardNumber = errors.New("invalid card number")
+    // Loan errors
+    ErrLoanNotFound       = errors.New("loan record not found")
+    ErrUserNotEligible    = errors.New("user is not eligible to borrow")
+    ErrTooManyActiveLoans = errors.New("user has too many active loans")
+    ErrOverdueLoans       = errors.New("user has overdue loans")
+    ErrAlreadyReturned    = errors.New("book has already been returned")
 )
 ```
 
@@ -68,17 +78,17 @@ var (
 )
 
 // Specific errors wrap base errors
-func NewUserNotFoundError(id string) error {
-    return fmt.Errorf("user %s: %w", id, ErrNotFound)
+func NewBookNotFoundError(id string) error {
+    return fmt.Errorf("book %s: %w", id, ErrNotFound)
 }
 
-func NewEmailTakenError(email string) error {
-    return fmt.Errorf("email %s already taken: %w", email, ErrConflict)
+func NewISBNTakenError(isbn string) error {
+    return fmt.Errorf("ISBN %s: %w", isbn, ErrConflict)
 }
 
 // Usage in adapters - check error type
-func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
-    user, err := h.service.GetUser(ctx, id)
+func (h *BookHandler) GetBook(w http.ResponseWriter, r *http.Request) {
+    book, err := h.service.GetBook(ctx, id)
     if err != nil {
         if errors.Is(err, entities.ErrNotFound) {
             http.Error(w, err.Error(), http.StatusNotFound)
@@ -96,7 +106,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 ```mermaid
 flowchart TB
     subgraph Domain["Domain Layer"]
-        DE["ErrUserNotFound<br/>ErrEmailTaken"]
+        DE["ErrBookNotFound<br/>ErrBookAlreadyOnLoan<br/>ErrInvalidISBN"]
     end
 
     subgraph HTTP["HTTP Adapter"]
@@ -105,18 +115,18 @@ flowchart TB
         H400["400 Bad Request"]
     end
 
-    subgraph GRPC["gRPC Adapter"]
+    subgraph GraphQL["GraphQL Adapter"]
         G1["NOT_FOUND"]
-        G2["ALREADY_EXISTS"]
-        G3["INVALID_ARGUMENT"]
+        G2["CONFLICT"]
+        G3["BAD_USER_INPUT"]
     end
 
     DE --> HTTP
-    DE --> GRPC
+    DE --> GraphQL
 
     style Domain fill:#90EE90,stroke:#333
     style HTTP fill:#87CEEB,stroke:#333
-    style GRPC fill:#DDA0DD,stroke:#333
+    style GraphQL fill:#DDA0DD,stroke:#333
 ```
 
 ```go
@@ -159,23 +169,35 @@ func (e *ValidationError) HasErrors() bool {
 }
 
 // Usage in entity
-func NewUser(name, email string) (*User, error) {
+func NewBook(title, author string, isbn ISBN) (*Book, error) {
     validation := &ValidationError{}
 
-    if len(name) < 2 {
-        validation.Add("name", "must be at least 2 characters")
+    if len(title) < 2 {
+        validation.Add("title", "must be at least 2 characters")
     }
-    if !isValidEmail(email) {
-        validation.Add("email", "invalid format")
+    if len(author) < 2 {
+        validation.Add("author", "must be at least 2 characters")
+    }
+    if !isbn.IsValid() {
+        validation.Add("isbn", "invalid ISBN format")
     }
 
     if validation.HasErrors() {
         return nil, validation
     }
 
-    return &User{Name: name, Email: email}, nil
+    return &Book{
+        Title:  title,
+        Author: author,
+        ISBN:   isbn,
+        Status: StatusAvailable,
+    }, nil
 }
 ```
+
+## Sam's Insight
+
+"So when a book is already on loan, I return `ErrBookAlreadyOnLoan` from the domain, and my HTTP adapter translates that to a 409 Conflict," Sam explained. "And if Maya adds a GraphQL adapter, it'll translate the same error to `CONFLICT`. The domain doesn't care." Alex beamed: "Perfect! Now your errors are part of your ubiquitous language."
 
 ## Domain Error Best Practices
 

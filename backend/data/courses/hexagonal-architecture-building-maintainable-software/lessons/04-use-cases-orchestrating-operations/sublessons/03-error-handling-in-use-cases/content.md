@@ -1,5 +1,11 @@
 # Error Handling in Use Cases
 
+## Sam's Scenario
+
+Sam's error handling was inconsistent. Domain errors like `ErrBookAlreadyOnLoan` were being logged as internal server errors. Database failures weren't wrapped with context. Alex explained: "Use cases are the boundary where you decide which errors to return as-is (domain errors) and which to wrap with context (infrastructure errors)."
+
+## Error Handling Strategy
+
 Use cases must handle errors from both domain operations and driven ports, translating them appropriately.
 
 ## Error Flow in Hexagonal Architecture
@@ -35,17 +41,23 @@ flowchart TB
     style UseCase fill:#FFD700,stroke:#333
 ```
 
-## Handling Domain Errors
+## Handling Domain Errors in BookShelf
 
 Domain errors come from entity creation and validation:
 
 ```go
-func (uc *UserUseCase) CreateUser(ctx context.Context, input ports.CreateUserInput) (*entities.User, error) {
-    // Domain validation error
-    user, err := entities.NewUser(input.Name, input.Email)
+func (uc *LoanBookUseCase) Execute(ctx context.Context, input LoanBookInput) (*entities.Loan, error) {
+    // Get book
+    book, err := uc.bookRepo.FindByID(ctx, input.BookID)
+    if err != nil {
+        return nil, err
+    }
+
+    // Domain validation error from Book.LoanTo()
+    err = book.LoanTo(input.UserID, StandardLoanPeriod)
     if err != nil {
         // Return domain error as-is - it's meaningful
-        return nil, err  // e.g., ErrInvalidEmail, ErrNameTooShort
+        return nil, err  // e.g., ErrBookAlreadyOnLoan, ErrBookNotOnLoan
     }
 
     // ...
@@ -55,28 +67,33 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, input ports.CreateUserInp
 ## Handling Repository Errors
 
 ```go
-func (uc *UserUseCase) CreateUser(ctx context.Context, input ports.CreateUserInput) (*entities.User, error) {
-    // Check for existing user
-    existing, err := uc.userRepo.FindByEmail(ctx, input.Email)
-    if err != nil && !errors.Is(err, entities.ErrUserNotFound) {
+func (uc *CreateBookUseCase) Execute(ctx context.Context, input CreateBookInput) (*entities.Book, error) {
+    // Check for existing book with same ISBN
+    existing, err := uc.bookRepo.FindByISBN(ctx, input.ISBN)
+    if err != nil && !errors.Is(err, entities.ErrBookNotFound) {
         // Unexpected error - log and wrap
-        uc.logger.Error("failed to check email", "error", err)
-        return nil, fmt.Errorf("failed to check email availability: %w", err)
+        uc.logger.Error("failed to check ISBN", "error", err)
+        return nil, fmt.Errorf("failed to check ISBN availability: %w", err)
     }
     if existing != nil {
         // Business rule violation
-        return nil, entities.ErrEmailAlreadyTaken
+        return nil, entities.ErrDuplicateISBN
     }
 
-    // Create and save
-    user, _ := entities.NewUser(input.Name, input.Email)
-
-    if err := uc.userRepo.Save(ctx, user); err != nil {
-        uc.logger.Error("failed to save user", "error", err)
-        return nil, fmt.Errorf("failed to save user: %w", err)
+    // Create domain entity
+    isbn, _ := entities.NewISBN(input.ISBN)
+    book, err := entities.NewBook(input.Title, input.Author, isbn)
+    if err != nil {
+        return nil, err  // Domain error
     }
 
-    return user, nil
+    // Save to repository
+    if err := uc.bookRepo.Save(ctx, book); err != nil {
+        uc.logger.Error("failed to save book", "error", err)
+        return nil, fmt.Errorf("failed to save book: %w", err)
+    }
+
+    return book, nil
 }
 ```
 
@@ -101,26 +118,35 @@ flowchart TD
 For non-critical side effects, decide if failure should abort the operation:
 
 ```go
-func (uc *UserUseCase) CreateUser(ctx context.Context, input ports.CreateUserInput) (*entities.User, error) {
-    user, _ := entities.NewUser(input.Name, input.Email)
+func (uc *LoanBookUseCase) Execute(ctx context.Context, input LoanBookInput) (*entities.Loan, error) {
+    // ... business logic ...
 
     // Critical: must succeed
-    if err := uc.userRepo.Save(ctx, user); err != nil {
-        return nil, fmt.Errorf("failed to save user: %w", err)
+    if err := uc.loanRepo.Save(ctx, loan); err != nil {
+        return nil, fmt.Errorf("failed to save loan: %w", err)
+    }
+
+    if err := uc.bookRepo.Save(ctx, book); err != nil {
+        return nil, fmt.Errorf("failed to update book status: %w", err)
     }
 
     // Non-critical: log and continue
-    if err := uc.emailSender.SendWelcomeEmail(ctx, user.Email, user.Name); err != nil {
-        uc.logger.Warn("failed to send welcome email",
-            "userID", user.ID,
+    if err := uc.notifier.SendLoanConfirmation(ctx, loan); err != nil {
+        uc.logger.Warn("failed to send loan confirmation",
+            "loanID", loan.ID,
+            "userID", loan.UserID,
             "error", err,
         )
-        // Don't return error - user was created successfully
+        // Don't return error - loan was created successfully
     }
 
-    return user, nil
+    return loan, nil
 }
 ```
+
+## Sam's Insight
+
+"I see," Sam said. "Domain errors like `ErrBookAlreadyOnLoan` go straight up - they're already meaningful. Infrastructure errors get wrapped with context. And non-critical failures like email notifications just get logged." Alex confirmed: "Exactly. Your use case decides what's critical and what's not."
 
 ## Error Handling Guidelines
 

@@ -1,40 +1,45 @@
 {
   "Questions": [
     {
-      "ID": "domain-1",
-      "Question": "According to the diagram, what are examples of Entities in the Domain Layer?",
+      "ID": "domain-q1",
+      "Type": "multiple-choice",
+      "Question": "According to the lesson, Sam's Book entity enforces which business rule directly in the domain?",
       "Options": [
-        "Money, Email, Address",
-        "AuthService, PricingService",
-        "User, Order, Product",
-        "ErrUserNotFound, ErrInvalidEmail"
+        "Books must have valid ISBN formats",
+        "Users cannot borrow more than 5 books",
+        "Loans must be returned within 14 days",
+        "All of the above are enforced in the domain"
       ],
-      "CorrectIndex": 2,
-      "Explanation": "The diagram shows User, Order, and Product as examples of Entities in the Domain Layer. Entities are the core business objects."
+      "CorrectIndex": 3,
+      "Explanation": "Sam's domain layer includes all these business rules: ISBN validation in value objects, borrowing limits in User entity, and loan due date calculations in the Loan entity."
     },
     {
-      "ID": "domain-2",
-      "Question": "According to the diagram, what are examples of Value Objects?",
-      "Options": [
-        "User, Order, Product",
-        "Money, Email, Address",
-        "AuthService, PricingService",
-        "PostgreSQL, MongoDB, Redis"
-      ],
-      "CorrectIndex": 1,
-      "Explanation": "The diagram shows Money, Email, and Address as Value Objects. These are immutable objects defined by their attributes rather than identity."
+      "ID": "domain-q2",
+      "Type": "true-false",
+      "Question": "According to the Golden Rules of the Domain, domain code should import database packages like 'database/sql' for persistence.",
+      "CorrectAnswer": false,
+      "Explanation": "The Golden Rules explicitly state: 'No infrastructure imports, no framework dependencies.' The domain layer must be completely pure - persistence is handled by adapters that implement repository ports."
     },
     {
-      "ID": "domain-3",
-      "Question": "What are the four sections of the Domain Layer shown in the diagram?",
+      "ID": "domain-q3",
+      "Type": "multiple-select",
+      "Question": "According to the lesson, which of the following are VALUE OBJECTS (not entities) in BookShelf? Select ALL that apply.",
       "Options": [
-        "Controllers, Services, Repositories, Views",
-        "Entities, Value Objects, Domain Services, Domain Errors",
-        "HTTP, GraphQL, gRPC, CLI",
-        "Create, Read, Update, Delete"
+        "Book",
+        "ISBN",
+        "Email",
+        "User"
       ],
-      "CorrectIndex": 1,
-      "Explanation": "The diagram shows the Domain Layer containing Entities, Value Objects, Domain Services, and Domain Errors as its four main sections."
+      "CorrectIndices": [1, 2],
+      "Explanation": "ISBN and Email are value objects - they are immutable and defined by their attributes. Book and User are entities - they have unique identities that persist over time."
+    },
+    {
+      "ID": "domain-q4",
+      "Type": "fill-blank",
+      "Question": "According to the lesson, _______ are domain objects with unique identities that persist over time, while value objects are defined by their attributes.",
+      "CorrectAnswers": ["Entities", "entities", "ENTITIES", "Entity", "entity"],
+      "CaseSensitive": false,
+      "Explanation": "The lesson distinguishes entities (objects with identity like Book, User, Loan) from value objects (immutable objects defined by attributes like ISBN, Email, DateRange)."
     }
   ]
 }

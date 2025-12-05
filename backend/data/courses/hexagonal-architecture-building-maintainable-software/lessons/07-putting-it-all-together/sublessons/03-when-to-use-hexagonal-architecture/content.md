@@ -1,5 +1,17 @@
 # When to Use Hexagonal Architecture
 
+## Sam's Scenario
+
+Sam's friend Riley was starting a new project and asked Sam for advice. "Should I use hexagonal architecture from day one like you did with BookShelf?"
+
+Sam paused. "BookShelf is a complex system with multiple interfaces, evolving requirements, and needs to support different deployment models. But what are you building?"
+
+"Just a simple internal tool for tracking office supplies," Riley replied. "It's basically CRUD operations on a few tables."
+
+Sam shook his head. "Then no - hexagonal architecture would be overkill. Let me show you when it makes sense and when it doesn't."
+
+## Making the Decision
+
 Hexagonal Architecture is powerful but not always necessary. Here's a practical guide to help you decide.
 
 ## The Decision Matrix
@@ -142,3 +154,11 @@ You can always refactor toward Hexagonal Architecture when:
 - You need to add a new interface (CLI, GraphQL)
 - You want to swap a technology (new database)
 - The team is growing and needs clearer boundaries
+
+## Sam's Advice to Riley
+
+"For your supply tracking tool, start with a simple handler-service-repository pattern," Sam advised. "Three layers, minimal ceremony. But if it grows - if you need a mobile app, if the business logic gets complex, if you're adding multiple integrations - then migrate to hexagonal architecture."
+
+Riley nodded. "That makes sense. Use the right tool for the job."
+
+"Exactly," Sam agreed. "Hexagonal architecture saved BookShelf. It let me add Maya's mobile requirements and Chen's enterprise features without rewriting everything. But for a simple internal tool? It would just slow you down."

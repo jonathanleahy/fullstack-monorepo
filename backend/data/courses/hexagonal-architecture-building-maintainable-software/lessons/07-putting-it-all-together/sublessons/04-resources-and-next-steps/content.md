@@ -1,5 +1,17 @@
 # Resources and Next Steps
 
+## Sam's Scenario
+
+Sam had come a long way with BookShelf. From a weekend hackathon project to a well-architected system serving real users. Alex met with Sam for one final session.
+
+"You've mastered hexagonal architecture," Alex said. "BookShelf is clean, testable, and ready to scale. But this is just the beginning. What's next?"
+
+Sam had been thinking about this. "I want to go deeper. Learn about domain-driven design, event sourcing, CQRS. BookShelf is growing, and I want to keep learning the best patterns."
+
+Alex smiled. "That's the right mindset. Let me point you to resources that will take you to the next level."
+
+## Continuing Your Journey
+
 Congratulations on completing this course! Here's where to go next to deepen your understanding.
 
 ## Your Learning Journey
@@ -64,10 +76,10 @@ mindmap
 
 ## Practice Project Ideas
 
-1. **User Management Service**
-   - Entities: User, Role, Permission
-   - Adapters: REST, PostgreSQL, Email
-   - Features: Registration, authentication, password reset
+1. **Library Management System (like BookShelf)**
+   - Entities: Book, User, Loan
+   - Adapters: REST, GraphQL, PostgreSQL, Email
+   - Features: Borrow, return, late fees, reservations
 
 2. **Order Management System**
    - Entities: Order, Product, Customer
@@ -115,3 +127,11 @@ flowchart TB
 The best way to learn is by doing. Start with a small project, apply the patterns, make mistakes, and iterate.
 
 **Happy architecting!**
+
+## Sam's Final Thoughts
+
+Six months after starting BookShelf, Sam reflected on his journey. The hexagonal architecture principles Alex taught him had transformed not just his code, but his entire approach to software design.
+
+"I used to write code that worked today," Sam wrote in his blog. "Now I write code that can evolve tomorrow. BookShelf started as a weekend project and grew into a real product serving thousands of users. Without hexagonal architecture, I would have had to rewrite it from scratch. Instead, I just kept adding adapters and extending use cases."
+
+He closed his laptop and smiled. The real journey was just beginning.

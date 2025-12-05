@@ -1,5 +1,9 @@
 # The Golden Rules of the Domain
 
+## Sam's Scenario
+
+When Maya asked Sam to add a mobile app, Sam panicked. The entire BookShelf backend was tightly coupled to the Gin web framework. "How do I support both REST and GraphQL?" Alex reassured: "If your domain doesn't know about HTTP, switching adapters is trivial. Let's enforce the golden rules."
+
 ## Dependency Rule
 
 ```mermaid
@@ -27,46 +31,74 @@ flowchart TB
 
 ```go
 // BAD: Domain depends on web framework
+package entities
+
 import "github.com/gin-gonic/gin"
 
-func (u *User) HandleRequest(c *gin.Context) { ... }
+func (b *Book) HandleRequest(c *gin.Context) { ... }
 
 // GOOD: Domain is pure Go
-func (u *User) UpdateEmail(email string) error { ... }
+package entities
+
+func (b *Book) LoanTo(userID string, duration time.Duration) error { ... }
 ```
 
 ## Rule 2: No Infrastructure Concerns
 
 ```go
-// BAD: Domain knows about SQL
-func (u *User) Save(db *sql.DB) error {
-    db.Exec("INSERT INTO users...")
+// BAD: Domain knows about database
+package entities
+
+import "database/sql"
+
+func (b *Book) Save(db *sql.DB) error {
+    db.Exec("INSERT INTO books...")
 }
 
 // GOOD: Domain doesn't know how it's persisted
-// (Persistence is handled by repository adapters)
+// Repository adapters handle persistence
+package entities
+
+type Book struct {
+    ID     string
+    Title  string
+    ISBN   ISBN
+    // No database references!
+}
 ```
 
 ## Rule 3: Express Business Rules Clearly
 
 ```go
 // BAD: Magic numbers, unclear rules
-if len(password) < 8 {
-    return err
+func (b *Book) LoanTo(userID string) error {
+    if b.Status == 1 {  // What does 1 mean?
+        return errors.New("error")
+    }
+    // ...
 }
 
-// GOOD: Named constants, clear rules
-const MinPasswordLength = 8
-
-var ErrPasswordTooShort = fmt.Errorf(
-    "password must be at least %d characters",
-    MinPasswordLength,
+// GOOD: Named constants, expressive errors
+const (
+    StatusAvailable BookStatus = "available"
+    StatusOnLoan    BookStatus = "on_loan"
 )
 
-func ValidatePassword(password string) error {
-    if len(password) < MinPasswordLength {
-        return ErrPasswordTooShort
+const (
+    StandardLoanPeriod = 14 * 24 * time.Hour  // 14 days
+    MaxRenewals        = 2
+)
+
+var ErrBookAlreadyOnLoan = errors.New("book is already on loan")
+
+func (b *Book) LoanTo(userID string, loanPeriod time.Duration) error {
+    if b.Status == StatusOnLoan {
+        return ErrBookAlreadyOnLoan
     }
-    return nil
+    // ...
 }
 ```
+
+## Sam's Insight
+
+"Now my domain speaks library language, not database or HTTP language," Sam noted. Alex agreed: "Exactly. Your Book entity has no idea if it's being stored in Postgres, SQLite, or a JSON file. That's the power of the dependency rule."

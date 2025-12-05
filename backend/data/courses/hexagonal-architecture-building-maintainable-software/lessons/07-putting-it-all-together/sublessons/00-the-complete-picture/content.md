@@ -1,5 +1,15 @@
 # The Complete Picture
 
+## Sam's Scenario
+
+After weeks of refactoring BookShelf with Alex's guidance, Sam wanted to understand how everything fit together. "Let's trace a complete request," Alex suggested. "When a user borrows a book through your API, how does the request flow through all the layers?"
+
+Sam pulled up his architecture diagram. "It starts with an HTTP request, goes through my handler adapter, calls the BorrowBook use case, which uses the domain entities and calls repository ports, which are implemented by my PostgreSQL adapters."
+
+"Exactly!" Alex said. "Let's walk through it step by step so you can see how hexagonal architecture orchestrates all these components."
+
+## Tracing a Request Through BookShelf
+
 Let's trace a complete request through a Hexagonal Architecture application to see how all the pieces work together.
 
 ## End-to-End Request Flow
@@ -8,40 +18,49 @@ Let's trace a complete request through a Hexagonal Architecture application to s
 sequenceDiagram
     participant Client
     participant HTTP as HTTP Handler
-    participant UC as CreateUserUseCase
-    participant Entity as User Entity
-    participant Repo as UserRepository
-    participant Email as EmailSender
-    participant DB as Database
-    participant SMTP as Email Service
+    participant UC as BorrowBookUseCase
+    participant Book as Book Entity
+    participant BookRepo as BookRepository
+    participant LoanRepo as LoanRepository
+    participant Notifier as NotificationSender
+    participant DB as PostgreSQL
+    participant Email as Email Service
 
-    Client->>HTTP: POST /users {"name": "John", "email": "john@example.com"}
+    Client->>HTTP: POST /loans {"user_id": "user-123", "book_id": "book-456"}
     HTTP->>HTTP: Parse JSON, validate HTTP
 
-    HTTP->>UC: CreateUser(input)
-    UC->>Repo: FindByEmail("john@example.com")
-    Repo->>DB: SELECT * FROM users WHERE email = ?
-    DB-->>Repo: No rows
-    Repo-->>UC: nil, ErrUserNotFound
+    HTTP->>UC: BorrowBook(input)
+    UC->>BookRepo: FindByID("book-456")
+    BookRepo->>DB: SELECT * FROM books WHERE id = ?
+    DB-->>BookRepo: book data
+    BookRepo-->>UC: book
 
-    UC->>Entity: NewUser("John", "john@example.com")
-    Entity->>Entity: Validate, generate ID
-    Entity-->>UC: user
+    UC->>Book: book.IsAvailable()
+    Book-->>UC: true
 
-    UC->>Repo: Save(user)
-    Repo->>DB: INSERT INTO users...
-    DB-->>Repo: OK
-    Repo-->>UC: nil
+    UC->>Book: NewLoan("user-123", "book-456", dueDate)
+    Book->>Book: Validate, generate ID
+    Book-->>UC: loan
 
-    UC->>Email: SendWelcomeEmail("john@example.com", "John")
-    Email->>SMTP: Send email
-    SMTP-->>Email: OK
-    Email-->>UC: nil
+    UC->>LoanRepo: Save(loan)
+    LoanRepo->>DB: INSERT INTO loans...
+    DB-->>LoanRepo: OK
+    LoanRepo-->>UC: nil
 
-    UC-->>HTTP: user
+    UC->>BookRepo: MarkAsUnavailable("book-456")
+    BookRepo->>DB: UPDATE books SET available = false...
+    DB-->>BookRepo: OK
+    BookRepo-->>UC: nil
+
+    UC->>Notifier: SendLoanConfirmation("user-123", "book-456")
+    Notifier->>Email: Send email
+    Email-->>Notifier: OK
+    Notifier-->>UC: nil
+
+    UC-->>HTTP: loan
 
     HTTP->>HTTP: Map to response
-    HTTP-->>Client: 201 Created {"id": "...", "name": "John", ...}
+    HTTP-->>Client: 201 Created {"id": "loan-789", "due_date": "2024-02-15", ...}
 ```
 
 ## The Architecture Diagram
@@ -147,6 +166,12 @@ func main() {
 The domain and use cases have **no idea**:
 - That HTTP is being used (could be CLI, GraphQL, gRPC)
 - That PostgreSQL stores the data (could be MongoDB, SQLite)
-- That SendGrid sends emails (could be SES, SMTP)
+- That email notifications are sent (could be SMS, push notifications)
 
 This ignorance is the source of the architecture's power.
+
+## Sam's Insight
+
+"I get it now!" Sam exclaimed. "My BorrowBook use case doesn't know about HTTP status codes, SQL queries, or email APIs. It just knows about books, users, loans, and ports. When Maya asks for a mobile app, I just add a new driving adapter. When Chen needs on-premise deployment, I swap the PostgreSQL adapter for a different database adapter. The core business logic stays the same!"
+
+Alex nodded. "That's hexagonal architecture in action. The center holds your valuable business logic, and the edges are swappable adapters. You've built a system that can evolve without rewriting the core."

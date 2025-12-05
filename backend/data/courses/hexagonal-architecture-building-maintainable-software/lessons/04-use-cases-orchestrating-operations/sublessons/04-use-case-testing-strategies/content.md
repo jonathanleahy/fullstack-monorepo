@@ -1,5 +1,11 @@
 # Use Case Testing Strategies
 
+## Sam's Scenario
+
+Sam was struggling to test the `LoanBook` use case because it needed a real database and email server. Alex showed how mocking ports makes testing trivial: "With hexagonal architecture, you test use cases with mocks - no database, no network, just pure business logic validation."
+
+## Why Use Case Testing is Easy
+
 Testing use cases is where Hexagonal Architecture really shines. With proper port abstractions, you can test all business logic without any infrastructure.
 
 ## Testing Architecture
@@ -27,78 +33,121 @@ flowchart TB
 ## Basic Use Case Test Structure
 
 ```go
-func TestCreateUser_Success(t *testing.T) {
+func TestLoanBook_Success(t *testing.T) {
     // 1. ARRANGE: Create mocks and use case
-    mockRepo := new(mocks.UserRepository)
-    mockEmail := new(mocks.EmailSender)
+    mockBookRepo := new(mocks.BookRepository)
+    mockUserRepo := new(mocks.UserRepository)
+    mockEligibility := services.NewLoanEligibilityService(5, 0)
     logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-    useCase := usecases.NewUserUseCase(mockRepo, mockEmail, logger)
+    useCase := usecases.NewLoanBookUseCase(
+        mockBookRepo,
+        mockUserRepo,
+        mockEligibility,
+        logger,
+    )
 
-    // 2. SETUP EXPECTATIONS
-    mockRepo.On("FindByEmail", mock.Anything, "john@example.com").
-        Return(nil, entities.ErrUserNotFound)
-    mockRepo.On("Save", mock.Anything, mock.AnythingOfType("*entities.User")).
-        Return(nil)
-    mockEmail.On("SendWelcomeEmail", mock.Anything, "john@example.com", "John").
+    // 2. SETUP TEST DATA
+    isbn, _ := entities.NewISBN("9780134686991")
+    book := &entities.Book{
+        ID:     "book-123",
+        Title:  "Clean Architecture",
+        ISBN:   isbn,
+        Status: entities.StatusAvailable,
+    }
+    user := &entities.User{ID: "user-456"}
+
+    // 3. SETUP EXPECTATIONS
+    mockBookRepo.On("FindByID", mock.Anything, "book-123").
+        Return(book, nil)
+    mockUserRepo.On("FindByID", mock.Anything, "user-456").
+        Return(user, nil)
+    mockUserRepo.On("CountActiveLoans", mock.Anything, "user-456").
+        Return(2)
+    mockUserRepo.On("CountOverdueLoans", mock.Anything, "user-456").
+        Return(0)
+    mockBookRepo.On("Save", mock.Anything, mock.AnythingOfType("*entities.Book")).
         Return(nil)
 
-    // 3. ACT: Execute use case
-    user, err := useCase.CreateUser(context.Background(), ports.CreateUserInput{
-        Name:  "John",
-        Email: "john@example.com",
+    // 4. ACT: Execute use case
+    result, err := useCase.Execute(context.Background(), usecases.LoanBookInput{
+        BookID:     "book-123",
+        UserID:     "user-456",
+        LoanPeriod: 14 * 24 * time.Hour,
     })
 
-    // 4. ASSERT: Verify results
+    // 5. ASSERT: Verify results
     assert.NoError(t, err)
-    assert.NotNil(t, user)
-    assert.Equal(t, "John", user.Name)
-    assert.Equal(t, "john@example.com", user.Email)
+    assert.NotNil(t, result)
+    assert.Equal(t, entities.StatusOnLoan, result.Status)
+    assert.Equal(t, "user-456", *result.BorrowedBy)
 
-    // 5. VERIFY: Check mock expectations
-    mockRepo.AssertExpectations(t)
-    mockEmail.AssertExpectations(t)
+    // 6. VERIFY: Check mock expectations
+    mockBookRepo.AssertExpectations(t)
+    mockUserRepo.AssertExpectations(t)
 }
 ```
 
 ## Testing Error Scenarios
 
 ```go
-func TestCreateUser_EmailAlreadyTaken(t *testing.T) {
-    mockRepo := new(mocks.UserRepository)
-    useCase := usecases.NewUserUseCase(mockRepo, nil, nil)
+func TestLoanBook_BookAlreadyOnLoan(t *testing.T) {
+    mockBookRepo := new(mocks.BookRepository)
+    mockUserRepo := new(mocks.UserRepository)
 
-    // Existing user found
-    existingUser := &entities.User{Email: "taken@example.com"}
-    mockRepo.On("FindByEmail", mock.Anything, "taken@example.com").
-        Return(existingUser, nil)
+    // Book is already on loan
+    existingUserID := "other-user"
+    book := &entities.Book{
+        ID:         "book-123",
+        Status:     entities.StatusOnLoan,
+        BorrowedBy: &existingUserID,
+    }
 
-    _, err := useCase.CreateUser(context.Background(), ports.CreateUserInput{
-        Name:  "Jane",
-        Email: "taken@example.com",
+    mockBookRepo.On("FindByID", mock.Anything, "book-123").
+        Return(book, nil)
+    mockUserRepo.On("FindByID", mock.Anything, "user-456").
+        Return(&entities.User{ID: "user-456"}, nil)
+    mockUserRepo.On("CountActiveLoans", mock.Anything, "user-456").
+        Return(2)
+    mockUserRepo.On("CountOverdueLoans", mock.Anything, "user-456").
+        Return(0)
+
+    useCase := usecases.NewLoanBookUseCase(mockBookRepo, mockUserRepo, nil, nil)
+
+    _, err := useCase.Execute(context.Background(), usecases.LoanBookInput{
+        BookID:     "book-123",
+        UserID:     "user-456",
+        LoanPeriod: 14 * 24 * time.Hour,
     })
 
-    assert.ErrorIs(t, err, entities.ErrEmailAlreadyTaken)
+    assert.ErrorIs(t, err, entities.ErrBookAlreadyOnLoan)
 }
 
-func TestCreateUser_RepositorySaveError(t *testing.T) {
-    mockRepo := new(mocks.UserRepository)
-    mockEmail := new(mocks.EmailSender)
+func TestLoanBook_UserNotEligible(t *testing.T) {
+    mockBookRepo := new(mocks.BookRepository)
+    mockUserRepo := new(mocks.UserRepository)
+    eligibility := services.NewLoanEligibilityService(5, 0) // Max 5 loans, 0 overdue
 
-    mockRepo.On("FindByEmail", mock.Anything, mock.Anything).
-        Return(nil, entities.ErrUserNotFound)
-    mockRepo.On("Save", mock.Anything, mock.Anything).
-        Return(errors.New("database connection lost"))
+    book := &entities.Book{ID: "book-123", Status: entities.StatusAvailable}
 
-    useCase := usecases.NewUserUseCase(mockRepo, mockEmail, slog.Default())
+    mockBookRepo.On("FindByID", mock.Anything, "book-123").
+        Return(book, nil)
+    mockUserRepo.On("FindByID", mock.Anything, "user-456").
+        Return(&entities.User{ID: "user-456"}, nil)
+    mockUserRepo.On("CountActiveLoans", mock.Anything, "user-456").
+        Return(5)  // Already at max
+    mockUserRepo.On("CountOverdueLoans", mock.Anything, "user-456").
+        Return(0)
 
-    _, err := useCase.CreateUser(context.Background(), ports.CreateUserInput{
-        Name:  "John",
-        Email: "john@example.com",
+    useCase := usecases.NewLoanBookUseCase(mockBookRepo, mockUserRepo, eligibility, nil)
+
+    _, err := useCase.Execute(context.Background(), usecases.LoanBookInput{
+        BookID:     "book-123",
+        UserID:     "user-456",
+        LoanPeriod: 14 * 24 * time.Hour,
     })
 
-    assert.Error(t, err)
-    assert.Contains(t, err.Error(), "failed to save user")
+    assert.ErrorIs(t, err, entities.ErrUserNotEligible)
 }
 ```
 
@@ -205,4 +254,8 @@ func TestPlaceOrder_Success(t *testing.T) {
 | **Mock at port level** | Not at database level |
 | **Verify interactions** | Check mocks were called correctly |
 | **Table-driven tests** | For validation and edge cases |
-| **Descriptive names** | `TestCreateUser_EmailAlreadyTaken` |
+| **Descriptive names** | `TestLoanBook_BookAlreadyOnLoan` |
+
+## Sam's Insight
+
+"This is amazing!" Sam exclaimed. "I can test the entire `LoanBook` workflow without touching a database. The mocks verify that I'm calling repositories correctly, and I can simulate errors easily." Alex smiled: "That's the hexagonal advantage - testability without infrastructure."

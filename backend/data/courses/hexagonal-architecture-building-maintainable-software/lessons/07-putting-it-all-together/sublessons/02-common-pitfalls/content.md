@@ -1,5 +1,15 @@
 # Common Pitfalls
 
+## Sam's Scenario
+
+A few weeks into refactoring BookShelf, Sam hit a roadblock. His code was getting messy again - validation logic was creeping into his HTTP handlers, and his domain entities were importing database packages.
+
+"I think I'm doing hexagonal architecture wrong," Sam admitted to Alex during a code review.
+
+Alex pulled up Sam's code. "You've fallen into some common traps. Let me show you the most frequent pitfalls and how to avoid them."
+
+## Common Mistakes
+
 Even experienced developers make mistakes when implementing Hexagonal Architecture. Here are the most common pitfalls and how to avoid them.
 
 ## Pitfall 1: Domain Importing Infrastructure
@@ -177,3 +187,11 @@ func (u *User) UpdateEmail(email string) error {
 | **Error leakage** | `sql.ErrNoRows` reaches use cases | Translate in adapter |
 | **Anemic domain** | Entities are just structs | Add behavior |
 | **Skip testing** | "I'll add tests later" | TDD from start |
+
+## Sam's Recovery
+
+After Alex's review, Sam refactored his problematic code. He moved the "user can borrow" validation from his HTTP handler into the User entity. He translated SQL errors to domain errors in his repository adapter. He added behavior to his Loan entity for calculating late fees.
+
+"Much better," Alex said after the second review. "Your domain is pure again, your adapters are thin, and your business logic lives in the right place. These pitfalls are easy to fall into, but also easy to fix once you recognize them."
+
+Sam nodded. "The key is constant vigilance. Every time I write code, I ask myself: 'Does this belong in the domain, use case, or adapter?' That simple question keeps me on track."

@@ -1,40 +1,45 @@
 {
   "Questions": [
     {
-      "ID": "migration-1",
-      "Question": "According to the lesson, what is the 'golden rule' of migration?",
+      "ID": "migration-q1",
+      "Type": "multiple-choice",
+      "Question": "According to the lesson, what migration pattern did Sam teach Riley to use for PetAdopt?",
       "Options": [
-        "Migrate everything at once for consistency",
-        "Never stop shipping - migrate incrementally",
-        "Always start with the database layer",
-        "Rewrite tests after the migration is complete"
+        "Big Bang Rewrite - rewrite everything at once",
+        "Strangler Fig Pattern - gradually replace old code",
+        "Feature Toggle Pattern - hide new code behind flags",
+        "Blue-Green Deployment - run two complete systems"
       ],
       "CorrectIndex": 1,
-      "Explanation": "The lesson states: 'Never stop shipping. A migration that blocks feature development is a migration that will be cancelled.'"
+      "Explanation": "Sam recommended the Strangler Fig Pattern, where new hexagonal code gradually replaces old code like a strangler fig tree enveloping its host - no risky big-bang rewrites."
     },
     {
-      "ID": "migration-2",
-      "Question": "What is the Strangler Fig pattern according to the lesson?",
-      "Options": [
-        "A pattern for removing dead code",
-        "A gradual replacement strategy where old and new systems coexist",
-        "A testing pattern for legacy code",
-        "A pattern for database migrations"
-      ],
-      "CorrectIndex": 1,
-      "Explanation": "The lesson explains the Strangler Fig pattern as gradually replacing parts of the system, running old and new in parallel, and cutting over incrementally."
+      "ID": "migration-q2",
+      "Type": "true-false",
+      "Question": "According to the lesson, a big-bang rewrite is the recommended approach because it's faster than incremental migration.",
+      "CorrectAnswer": false,
+      "Explanation": "The lesson explicitly warns against big-bang rewrites. They're risky, often fail, and delay value delivery. Incremental migration with the Strangler Fig pattern is safer and delivers value continuously."
     },
     {
-      "ID": "migration-3",
-      "Question": "According to the lesson, what is the first and most important step when migrating to Hexagonal Architecture?",
+      "ID": "migration-q3",
+      "Type": "multiple-select",
+      "Question": "According to the lesson, what were the results of Riley's PetAdopt migration? Select ALL that apply.",
       "Options": [
-        "Create new database adapters",
-        "Set up dependency injection",
-        "Extract business logic into a clean domain layer",
-        "Write integration tests"
+        "Test coverage went from 0% to 81%",
+        "Deploy time dropped from 2 hours to 15 minutes",
+        "The migration took 4 weeks of incremental work",
+        "They had to stop all development during migration"
       ],
-      "CorrectIndex": 2,
-      "Explanation": "The lesson states in the 'Extracting the Domain' section: 'The first and most important step: pull business logic out of handlers and infrastructure into a clean domain layer.'"
+      "CorrectIndices": [0, 1, 2],
+      "Explanation": "Riley's migration achieved 81% coverage, 15-minute deploys, in 4 weeks of incremental work. The key benefit was that development continued throughout - they didn't have to stop."
+    },
+    {
+      "ID": "migration-q4",
+      "Type": "fill-blank",
+      "Question": "According to the lesson, the first step in migration is to _______ the domain by moving business logic out of handlers into pure domain objects.",
+      "CorrectAnswers": ["extract", "Extract", "EXTRACT"],
+      "CaseSensitive": false,
+      "Explanation": "The migration strategy starts with extracting the domain - identifying business rules in handlers and moving them into proper entities and value objects in a pure domain layer."
     }
   ]
 }

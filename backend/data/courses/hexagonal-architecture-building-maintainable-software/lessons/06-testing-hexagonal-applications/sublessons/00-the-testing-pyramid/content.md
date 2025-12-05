@@ -1,5 +1,13 @@
 # The Testing Pyramid
 
+## Sam's Scenario
+
+After launching BookShelf to Maya's beta users, Sam quickly realized that manual testing wasn't sustainable. Every time he added a feature like "loan history tracking," he had to manually test book creation, user registration, and loan workflows all over again. One weekend, he broke the late-fee calculation while adding a new feature, and users complained.
+
+Alex noticed Sam's frustration during a code review. "You need a testing strategy," Alex explained. "With Hexagonal Architecture, you can build a testing pyramid - lots of fast unit tests for your domain logic, fewer integration tests for your database, and just a few end-to-end tests to verify critical flows. Let me show you how this works with BookShelf."
+
+## The Testing Pyramid
+
 The testing pyramid is a strategy for organizing tests by scope and speed. Hexagonal Architecture makes each level easier to implement.
 
 ## The Pyramid
@@ -58,22 +66,23 @@ flowchart TB
 
 ## Real-World Test Distribution
 
-A well-structured project might have:
+A well-structured project like BookShelf might have:
 
 ```
 tests/
 ├── unit/           (70% of tests)
 │   ├── entities/
+│   │   ├── book_test.go
 │   │   ├── user_test.go
-│   │   └── order_test.go
+│   │   └── loan_test.go
 │   └── services/
-│       └── pricing_test.go
+│       └── late_fee_calculator_test.go
 ├── usecase/        (20% of tests)
-│   ├── create_user_test.go
-│   └── place_order_test.go
+│   ├── borrow_book_test.go
+│   └── return_book_test.go
 ├── integration/    (8% of tests)
 │   ├── postgres_repo_test.go
-│   └── email_sender_test.go
+│   └── notification_sender_test.go
 └── e2e/            (2% of tests)
     └── api_test.go
 ```
@@ -136,3 +145,9 @@ flowchart TD
     style Integration fill:#FFD700,stroke:#333
     style E2E fill:#f99,stroke:#333
 ```
+
+## Sam's Insight
+
+Sam started implementing the testing pyramid for BookShelf. His Book entity tests ran in milliseconds with no database. His BorrowBook use case tests used mocks and ran in under 10ms. Integration tests for his PostgreSQL repository took 100ms. And his full E2E test for the complete borrow-and-return flow took about a second.
+
+"Now I can run 200 tests in 5 seconds," Sam told Alex proudly. "Before, I couldn't even run one test because everything needed a real database." The testing pyramid had transformed his development workflow - he could refactor with confidence, knowing that breaking changes would be caught instantly.

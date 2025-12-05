@@ -1,76 +1,113 @@
 # Anatomy of a Use Case
 
+## Sam's Scenario
+
+Sam asked Alex: "What exactly goes inside a use case?" Alex walked through the `LoanBook` use case step by step: check if the book exists, verify it's available, check user eligibility, create the loan, save to repository, and send a notification. "Each step coordinates domain logic or external services," Alex explained.
+
 ## Use Case Flow
 
 ```mermaid
 sequenceDiagram
     participant Handler
-    participant UC as UserUseCase
-    participant Repo as UserRepository
-    participant Email as EmailSender
-    participant Entity as User Entity
+    participant UC as LoanBookUseCase
+    participant BookRepo as BookRepository
+    participant UserRepo as UserRepository
+    participant Eligibility as EligibilityService
+    participant Entity as Book Entity
 
-    Handler->>UC: CreateUser(input)
-    UC->>Repo: FindByEmail(email)
-    Repo-->>UC: nil (not found)
-    UC->>Entity: NewUser(name, email)
-    Entity-->>UC: user
-    UC->>Repo: Save(user)
-    Repo-->>UC: nil (success)
-    UC->>Email: SendWelcomeEmail()
-    Email-->>UC: nil (success)
-    UC-->>Handler: user
+    Handler->>UC: LoanBook(input)
+    UC->>BookRepo: FindByID(bookID)
+    BookRepo-->>UC: book
+    UC->>UserRepo: FindByID(userID)
+    UserRepo-->>UC: user
+    UC->>Eligibility: CanBorrow(user)
+    Eligibility-->>UC: true
+    UC->>Entity: LoanTo(userID, period)
+    Entity-->>UC: nil (success)
+    UC->>BookRepo: Save(book)
+    BookRepo-->>UC: nil (success)
+    UC-->>Handler: loan
 ```
 
 ```go
 package usecases
 
-// UserUseCase implements the UserService driving port
-type UserUseCase struct {
-    userRepo    repositories.UserRepository  // driven port
-    emailSender repositories.EmailSender     // driven port
-    logger      *slog.Logger
+import (
+    "context"
+    "time"
+    "myapp/internal/domain/entities"
+    "myapp/internal/domain/repositories"
+    "myapp/internal/domain/services"
+)
+
+// LoanBookUseCase handles book loan operations
+type LoanBookUseCase struct {
+    bookRepo           repositories.BookRepository
+    userRepo           repositories.UserRepository
+    eligibilityService *services.LoanEligibilityService
+    logger             *slog.Logger
 }
 
-func NewUserUseCase(
+func NewLoanBookUseCase(
+    bookRepo repositories.BookRepository,
     userRepo repositories.UserRepository,
-    emailSender repositories.EmailSender,
+    eligibility *services.LoanEligibilityService,
     logger *slog.Logger,
-) *UserUseCase {
-    return &UserUseCase{
-        userRepo:    userRepo,
-        emailSender: emailSender,
-        logger:      logger,
+) *LoanBookUseCase {
+    return &LoanBookUseCase{
+        bookRepo:           bookRepo,
+        userRepo:           userRepo,
+        eligibilityService: eligibility,
+        logger:             logger,
     }
 }
 
-func (uc *UserUseCase) CreateUser(
+type LoanBookInput struct {
+    BookID     string
+    UserID     string
+    LoanPeriod time.Duration
+}
+
+func (uc *LoanBookUseCase) Execute(
     ctx context.Context,
-    input ports.CreateUserInput,
-) (*entities.User, error) {
+    input LoanBookInput,
+) (*entities.Book, error) {
     // 1. LOG: Operation started
-    uc.logger.Info("creating user", "email", input.Email)
+    uc.logger.Info("loaning book", "bookID", input.BookID, "userID", input.UserID)
 
-    // 2. CHECK: Business rule - email must be unique
-    existing, _ := uc.userRepo.FindByEmail(ctx, input.Email)
-    if existing != nil {
-        return nil, entities.ErrEmailTaken
-    }
-
-    // 3. CREATE: Domain entity
-    user, err := entities.NewUser(input.Name, input.Email)
+    // 2. FETCH: Get book entity
+    book, err := uc.bookRepo.FindByID(ctx, input.BookID)
     if err != nil {
         return nil, err
     }
 
-    // 4. PERSIST: Save via repository
-    if err := uc.userRepo.Save(ctx, user); err != nil {
+    // 3. FETCH: Get user
+    user, err := uc.userRepo.FindByID(ctx, input.UserID)
+    if err != nil {
         return nil, err
     }
 
-    // 5. SIDE EFFECT: Send welcome email
-    uc.emailSender.SendWelcomeEmail(ctx, user.Email, user.Name)
+    // 4. BUSINESS RULE: Check eligibility
+    activeLoans := uc.userRepo.CountActiveLoans(ctx, user.ID)
+    overdueLoans := uc.userRepo.CountOverdueLoans(ctx, user.ID)
+    if !uc.eligibilityService.CanBorrow(activeLoans, overdueLoans) {
+        return nil, entities.ErrUserNotEligible
+    }
 
-    return user, nil
+    // 5. DOMAIN LOGIC: Loan the book
+    if err := book.LoanTo(input.UserID, input.LoanPeriod); err != nil {
+        return nil, err
+    }
+
+    // 6. PERSIST: Save updated book
+    if err := uc.bookRepo.Save(ctx, book); err != nil {
+        return nil, err
+    }
+
+    return book, nil
 }
 ```
+
+## Sam's Insight
+
+"I see the pattern now," Sam noted. "The use case orchestrates: fetch entities, check business rules using domain services, call entity methods, save via repository. It's like the conductor of an orchestra." Alex nodded: "Perfect analogy. Each musician (entity, service, repository) plays their part, and the use case conducts."

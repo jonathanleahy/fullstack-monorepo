@@ -1,40 +1,45 @@
 {
   "Questions": [
     {
-      "ID": "intro-1",
-      "Question": "According to the lesson, what is the core idea of Hexagonal Architecture in one sentence?",
+      "ID": "intro-q1",
+      "Type": "multiple-choice",
+      "Question": "According to the lesson, what was Sam's main problem with the original BookShelf codebase?",
       "Options": [
-        "Your application should have exactly six ports",
-        "Your business logic should not know or care about the outside world",
-        "Your database should be at the center of the application",
-        "Your HTTP handlers should contain all the business rules"
+        "The code was too slow to run",
+        "Database queries and business logic were tightly coupled throughout the codebase",
+        "There weren't enough features",
+        "The user interface was outdated"
       ],
       "CorrectIndex": 1,
-      "Explanation": "The lesson states: 'Your business logic should not know or care about the outside world.' This is the fundamental principle from which everything else flows."
+      "Explanation": "Sam's challenge showed that database queries were scattered throughout HTTP handlers and business logic was mixed with JSON serialization - making it impossible to add mobile apps or switch databases without rewriting everything."
     },
     {
-      "ID": "intro-2",
-      "Question": "According to the timeline diagram, what typically happens to a project at Month 12 with traditional architecture?",
-      "Options": [
-        "Fast development and everything works",
-        "Tests slow down and database coupling appears",
-        "Framework migration needed and everything breaks",
-        "Team frustration and technical debt explosion"
-      ],
-      "CorrectIndex": 2,
-      "Explanation": "The timeline diagram shows that at Month 12: 'Framework migration needed' and 'Everything breaks'. This illustrates the pain of tightly-coupled architecture."
+      "ID": "intro-q2",
+      "Type": "true-false",
+      "Question": "According to the lesson, in Hexagonal Architecture, your business logic should know about and directly depend on the database implementation.",
+      "CorrectAnswer": false,
+      "Explanation": "The core principle is that 'Your business logic should not know or care about the outside world.' The domain core is isolated from infrastructure concerns like databases."
     },
     {
-      "ID": "intro-3",
-      "Question": "What are the three core parts of Hexagonal Architecture shown in the hexagon diagram?",
+      "ID": "intro-q3",
+      "Type": "multiple-select",
+      "Question": "According to the course overview, which of the following can BookShelf support after applying Hexagonal Architecture? Select ALL that apply.",
       "Options": [
-        "Controllers, Models, Views",
-        "Domain Core, Driving Adapters, Driven Adapters",
-        "Database, API, Frontend",
-        "HTTP, SQL, SMTP"
+        "Multiple interfaces (REST, GraphQL, gRPC, mobile apps)",
+        "Different databases (PostgreSQL, SQLite, Oracle)",
+        "Only cloud deployment",
+        "Independent testing at every layer"
       ],
-      "CorrectIndex": 1,
-      "Explanation": "The hexagon diagram shows the Domain Core (green) at the center, with Driving Adapters (blue) on one side and Driven Adapters (purple) on the other."
+      "CorrectIndices": [0, 1, 3],
+      "Explanation": "The lesson states BookShelf can support multiple interfaces, different databases, deploy anywhere (cloud, on-premise, embedded), and be tested independently. Only cloud deployment is incorrect - it can deploy anywhere."
+    },
+    {
+      "ID": "intro-q4",
+      "Type": "fill-blank",
+      "Question": "According to the hexagon diagram, the _______ Core sits at the center of the architecture, surrounded by adapters.",
+      "CorrectAnswers": ["Domain", "domain", "DOMAIN"],
+      "CaseSensitive": false,
+      "Explanation": "The hexagon diagram shows the Domain Core (green) at the center, with Driving Adapters and Driven Adapters connecting it to the outside world."
     }
   ]
 }

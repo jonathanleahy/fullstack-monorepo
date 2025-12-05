@@ -1,5 +1,19 @@
 # Benefits Recap
 
+## Sam's Scenario
+
+Three months after adopting hexagonal architecture for BookShelf, Sam met with Alex for a retrospective. "Let's talk about what changed," Alex said. "Before hexagonal architecture, how long did it take to add a new feature?"
+
+Sam thought back. "At least a week. I'd have to manually test everything, hope I didn't break something, and pray the database changes worked in production."
+
+"And now?" Alex asked.
+
+"Two days, maybe three," Sam replied. "With my test suite, I know immediately if something breaks. When Maya asked for a GraphQL API alongside REST, I just added a new adapter in a day. The business logic didn't change at all."
+
+Alex smiled. "Let's document exactly what benefits hexagonal architecture delivered for BookShelf."
+
+## The Core Benefits
+
 Let's summarize the key benefits of Hexagonal Architecture and how they're achieved.
 
 ## The Core Benefits
@@ -145,3 +159,18 @@ This means:
 | **Team Scalability** | Teams can own different layers |
 | **Easy Onboarding** | Standard structure, clear navigation |
 | **Confident Refactoring** | High test coverage enables changes |
+
+## Sam's Results with BookShelf
+
+After three months with hexagonal architecture, Sam measured the impact:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Test execution time | 0 tests | 250 tests in 2.5s | Infinite |
+| Test coverage | 0% | 87% | +87% |
+| Time to add feature | 5-7 days | 2-3 days | 2x faster |
+| Time to add new interface | Weeks | Hours | 10x+ faster |
+| Production bugs | 2-3/week | 1-2/month | 6x reduction |
+| New developer onboarding | 2 months | 2 weeks | 4x faster |
+
+"The numbers speak for themselves," Sam told Maya during their next investor meeting. "Hexagonal architecture didn't just make the code cleaner - it made the business move faster."

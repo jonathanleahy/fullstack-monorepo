@@ -1,40 +1,45 @@
 {
   "Questions": [
     {
-      "ID": "realworld-1",
-      "Question": "According to the lesson, what is the recommended pattern for adding logging to use cases without polluting the domain?",
+      "ID": "patterns-q1",
+      "Type": "multiple-choice",
+      "Question": "According to the lesson, where should logging be implemented in BookShelf to avoid polluting the domain?",
       "Options": [
-        "Add logging directly in entity methods",
-        "Use the Decorator pattern to wrap services",
-        "Add logging in the database adapter",
-        "Use global logging variables"
-      ],
-      "CorrectIndex": 1,
-      "Explanation": "The lesson shows the Decorator pattern where a LoggingUserService wraps the inner UserService, adding logging without modifying the original implementation."
-    },
-    {
-      "ID": "realworld-2",
-      "Question": "According to the diagram, what should happen to side effects like sending emails in a transactional use case?",
-      "Options": [
-        "Side effects should happen before the transaction starts",
-        "Side effects should happen inside the transaction",
-        "Side effects should happen after successful transaction commit",
-        "Side effects should be avoided entirely"
+        "Inside domain entities like Book and User",
+        "In use cases before each operation",
+        "As decorators or middleware in the adapter layer",
+        "In a global logging singleton"
       ],
       "CorrectIndex": 2,
-      "Explanation": "The lesson states: 'Side effects after commit' and shows that events/emails should be published after the transaction is successfully committed."
+      "Explanation": "Cross-cutting concerns like logging should be implemented in the adapter layer as decorators or middleware. This keeps the domain pure while still providing full observability."
     },
     {
-      "ID": "realworld-3",
-      "Question": "According to the lesson, where does caching best fit in Hexagonal Architecture?",
+      "ID": "patterns-q2",
+      "Type": "true-false",
+      "Question": "According to the lesson, caching in Hexagonal Architecture should be implemented inside the domain layer for best performance.",
+      "CorrectAnswer": false,
+      "Explanation": "Caching should be implemented as a decorator adapter that wraps the real repository. The domain stays pure, and the caching adapter transparently adds caching behavior."
+    },
+    {
+      "ID": "patterns-q3",
+      "Type": "multiple-select",
+      "Question": "According to the lesson, which cross-cutting concerns did Sam need to add to BookShelf for production? Select ALL that apply.",
       "Options": [
-        "In the domain entities",
-        "In the use cases",
-        "As a repository decorator",
-        "In the HTTP middleware only"
+        "Transaction logging",
+        "Caching for popular books",
+        "Metrics and monitoring",
+        "Direct database access from handlers"
       ],
-      "CorrectIndex": 2,
-      "Explanation": "The lesson recommends the 'repository decorator pattern is most common - cache database results' and shows CachedUserRepository wrapping the real repository."
+      "CorrectIndices": [0, 1, 2],
+      "Explanation": "Sam needed to add logging, caching, and metrics - all implemented in the adapter layer. Direct database access from handlers would violate hexagonal principles."
+    },
+    {
+      "ID": "patterns-q4",
+      "Type": "fill-blank",
+      "Question": "According to the lesson, _______ events allow loose coupling between different parts of the system by publishing what happened rather than directly calling other services.",
+      "CorrectAnswers": ["Domain", "domain", "DOMAIN"],
+      "CaseSensitive": false,
+      "Explanation": "Domain events (like BookBorrowed, LoanOverdue) enable event-driven patterns. Components publish events about what happened, and other components react to those events."
     }
   ]
 }

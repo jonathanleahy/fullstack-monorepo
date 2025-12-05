@@ -1,5 +1,13 @@
 # Testing Adapters
 
+## Sam's Scenario
+
+Sam's PostgreSQL repository adapter was working in development, but he wasn't confident it would handle edge cases correctly. What if a book's ISBN was too long for the database column? What if two users tried to borrow the same book simultaneously?
+
+"You need integration tests for your adapters," Alex explained. "These tests use a real database to verify that your SQL queries work correctly, data mapping is accurate, and errors are handled properly. Let me show you how to test your BookRepository adapter using test containers."
+
+## Testing Infrastructure Integration
+
 Adapter tests verify that your concrete implementations correctly interact with external systems. These are integration tests that require real infrastructure.
 
 ## What Adapter Tests Verify
@@ -30,38 +38,50 @@ Adapter tests verify:
 ## Database Repository Tests
 
 ```go
-func TestPostgresUserRepository(t *testing.T) {
+func TestPostgresBookRepository(t *testing.T) {
     // Setup: Use testcontainers or test database
     pool := setupTestDB(t)
-    repo := postgres.NewUserRepository(pool)
+    repo := postgres.NewBookRepository(pool)
 
     t.Run("Save and FindByID", func(t *testing.T) {
-        user, _ := entities.NewUser("Test User", "test@example.com")
+        book, _ := entities.NewBook("Clean Code", "Robert Martin", "9780132350884")
 
         // Save
-        err := repo.Save(context.Background(), user)
+        err := repo.Save(context.Background(), book)
         require.NoError(t, err)
 
         // Find
-        found, err := repo.FindByID(context.Background(), user.ID)
+        found, err := repo.FindByID(context.Background(), book.ID)
         require.NoError(t, err)
-        assert.Equal(t, user.ID, found.ID)
-        assert.Equal(t, user.Email, found.Email)
+        assert.Equal(t, book.ID, found.ID)
+        assert.Equal(t, book.Title, found.Title)
+        assert.Equal(t, book.ISBN, found.ISBN)
     })
 
-    t.Run("FindByEmail returns ErrNotFound for missing user", func(t *testing.T) {
-        _, err := repo.FindByEmail(context.Background(), "nonexistent@example.com")
-        assert.ErrorIs(t, err, entities.ErrUserNotFound)
+    t.Run("FindByISBN returns ErrNotFound for missing book", func(t *testing.T) {
+        _, err := repo.FindByISBN(context.Background(), "9999999999999")
+        assert.ErrorIs(t, err, entities.ErrBookNotFound)
     })
 
-    t.Run("Save returns error for duplicate email", func(t *testing.T) {
-        user1, _ := entities.NewUser("User 1", "dupe@example.com")
-        user2, _ := entities.NewUser("User 2", "dupe@example.com")
+    t.Run("Save returns error for duplicate ISBN", func(t *testing.T) {
+        book1, _ := entities.NewBook("Book 1", "Author 1", "9780132350884")
+        book2, _ := entities.NewBook("Book 2", "Author 2", "9780132350884")
 
-        _ = repo.Save(context.Background(), user1)
-        err := repo.Save(context.Background(), user2)
+        _ = repo.Save(context.Background(), book1)
+        err := repo.Save(context.Background(), book2)
 
-        assert.Error(t, err)
+        assert.Error(t, err) // Unique constraint violation
+    })
+
+    t.Run("MarkAsUnavailable updates availability", func(t *testing.T) {
+        book, _ := entities.NewBook("Test Book", "Test Author", "9781234567890")
+        repo.Save(context.Background(), book)
+
+        err := repo.MarkAsUnavailable(context.Background(), book.ID)
+        require.NoError(t, err)
+
+        found, _ := repo.FindByID(context.Background(), book.ID)
+        assert.False(t, found.Available)
     })
 }
 ```
@@ -133,27 +153,44 @@ func TestStripePaymentGateway(t *testing.T) {
 }
 ```
 
-## Testing Email Adapters
+## Testing Notification Adapters
 
-For email adapters, you often use test mode or capture emails:
+For notification adapters, you often use test mode or capture messages:
 
 ```go
-func TestSendGridEmailSender(t *testing.T) {
-    // Use SendGrid sandbox mode
-    sender := sendgrid.NewEmailSender(sendgrid.Config{
-        APIKey:      os.Getenv("SENDGRID_TEST_KEY"),
+func TestEmailNotificationSender(t *testing.T) {
+    // Use email service sandbox mode
+    sender := email.NewNotificationSender(email.Config{
+        APIKey:      os.Getenv("EMAIL_TEST_KEY"),
         SandboxMode: true,  // Doesn't actually send
     })
 
-    t.Run("SendWelcomeEmail succeeds", func(t *testing.T) {
-        err := sender.SendWelcomeEmail(context.Background(),
-            "test@example.com",
-            "Test User",
+    t.Run("SendLoanConfirmation succeeds", func(t *testing.T) {
+        err := sender.SendLoanConfirmation(context.Background(),
+            "user-123",
+            "book-456",
+        )
+        assert.NoError(t, err)
+    })
+
+    t.Run("SendOverdueNotice includes correct details", func(t *testing.T) {
+        err := sender.SendOverdueNotice(context.Background(),
+            "user-123",
+            "book-456",
+            5, // days overdue
         )
         assert.NoError(t, err)
     })
 }
 ```
+
+## Sam's Insight
+
+After setting up integration tests with test containers, Sam discovered a bug he hadn't caught before: his repository wasn't properly handling concurrent borrows of the same book. The integration test revealed the race condition when two users tried to borrow simultaneously.
+
+"Without these tests, that bug would have made it to production," Sam said. "Integration tests are slower - they take 100ms instead of 1ms - but they're worth it for catching these real-world issues."
+
+Alex agreed. "Exactly. You don't need many integration tests, but the ones you have should cover critical paths and edge cases that only appear when you interact with real infrastructure."
 
 ## Adapter Test Best Practices
 

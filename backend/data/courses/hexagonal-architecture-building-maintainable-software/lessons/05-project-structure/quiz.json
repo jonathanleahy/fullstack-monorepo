@@ -1,40 +1,45 @@
 {
   "Questions": [
     {
-      "ID": "structure-1",
-      "Question": "According to the diagram, what are the main directories in a Hexagonal Architecture project?",
+      "ID": "structure-q1",
+      "Type": "multiple-choice",
+      "Question": "According to the lesson, Sam's BookShelf went from a 1,200-line main.go to what kind of structure?",
       "Options": [
-        "src, lib, bin, test",
-        "cmd, domain, application, adapters, config",
-        "models, views, controllers",
-        "frontend, backend, shared"
+        "Multiple main.go files in different folders",
+        "Organized directories: domain/, application/, ports/, adapters/, cmd/",
+        "One file per function",
+        "A single large package with clear comments"
       ],
       "CorrectIndex": 1,
-      "Explanation": "The diagram shows cmd/ (Entry points), domain/ (THE CORE), application/ (Use cases), adapters/ (Infrastructure), and config/ (Configuration) as the main directories."
+      "Explanation": "Sam restructured BookShelf with clear directories: domain/ for pure business logic, application/ for use cases, ports/ for interfaces, adapters/ for implementations, and cmd/ for entry points."
     },
     {
-      "ID": "structure-2",
-      "Question": "According to the lesson, what is the dependency direction in Hexagonal Architecture?",
-      "Options": [
-        "Domain → Application → Adapters",
-        "Adapters → Application → Domain",
-        "All layers depend on each other equally",
-        "Application → Domain → Adapters"
-      ],
-      "CorrectIndex": 1,
-      "Explanation": "The lesson states: Dependencies always point inward: Adapters → Application → Domain. Never: Domain → Adapters."
+      "ID": "structure-q2",
+      "Type": "true-false",
+      "Question": "According to the lesson, the cmd/ directory contains all the business logic and domain entities.",
+      "CorrectAnswer": false,
+      "Explanation": "The cmd/ directory contains entry points and dependency wiring - where concrete adapters are instantiated and injected. Business logic lives in domain/, and entities are in domain/."
     },
     {
-      "ID": "structure-3",
-      "Question": "According to the diagram, what belongs in the domain/ directory?",
+      "ID": "structure-q3",
+      "Type": "multiple-select",
+      "Question": "According to the dependency direction rule, which of the following imports are CORRECT? Select ALL that apply.",
       "Options": [
-        "HTTP handlers and GraphQL resolvers",
-        "entities/, services/, repositories/ (interfaces)",
-        "Database connection code",
-        "Configuration files"
+        "adapters/postgres imports domain/",
+        "domain/ imports adapters/postgres",
+        "application/ imports domain/",
+        "domain/ imports application/"
       ],
-      "CorrectIndex": 1,
-      "Explanation": "The diagram shows domain/ containing entities/, services/, and repositories/ (interfaces). This is the core business logic."
+      "CorrectIndices": [0, 2],
+      "Explanation": "Dependencies point INWARD. Adapters can import domain (outer → inner), and application can import domain. Domain should NEVER import adapters or application (inner → outer is wrong)."
+    },
+    {
+      "ID": "structure-q4",
+      "Type": "fill-blank",
+      "Question": "According to the lesson, dependencies always point _______ toward the domain layer.",
+      "CorrectAnswers": ["inward", "Inward", "INWARD", "in", "In"],
+      "CaseSensitive": false,
+      "Explanation": "The dependency direction rule states that outer layers depend on inner layers. Adapters depend on ports, which depend on domain. Never the reverse."
     }
   ]
 }

@@ -1,40 +1,45 @@
 {
   "Questions": [
     {
-      "ID": "testing-1",
-      "Question": "According to the Testing Pyramid diagram, which layer should have the MOST tests?",
+      "ID": "testing-q1",
+      "Type": "multiple-choice",
+      "Question": "According to the lesson, Sam went from 0% test coverage to what percentage after applying hexagonal testing strategies?",
       "Options": [
-        "E2E Tests",
-        "Integration Tests",
-        "Use Case Tests",
-        "Domain Unit Tests"
+        "25%",
+        "50%",
+        "85%",
+        "100%"
       ],
-      "CorrectIndex": 3,
-      "Explanation": "The pyramid shows Domain Unit Tests at the bottom labeled '(Many)'. The base of the testing pyramid should have the most tests."
+      "CorrectIndex": 2,
+      "Explanation": "Sam's story shows going from 0% to 85% test coverage in a week by applying the testing pyramid: pure domain tests, use case tests with mocks, and integration tests for adapters."
     },
     {
-      "ID": "testing-2",
-      "Question": "According to the Testing Pyramid diagram, which layer should have the FEWEST tests?",
-      "Options": [
-        "Domain Unit Tests",
-        "Use Case Tests",
-        "Integration Tests",
-        "E2E Tests"
-      ],
-      "CorrectIndex": 3,
-      "Explanation": "The pyramid shows E2E Tests at the top labeled '(Few)'. End-to-end tests are expensive and should be used sparingly."
+      "ID": "testing-q2",
+      "Type": "true-false",
+      "Question": "According to the lesson, domain layer tests require mock objects because the domain depends on database interfaces.",
+      "CorrectAnswer": false,
+      "Explanation": "Domain tests are PURE unit tests that need NO mocks! The domain layer has no external dependencies, so you can test entities and value objects directly without any mocking."
     },
     {
-      "ID": "testing-3",
-      "Question": "What are the four layers of the Testing Pyramid shown in the diagram?",
+      "ID": "testing-q3",
+      "Type": "multiple-select",
+      "Question": "According to the testing pyramid, which layers require integration tests with REAL dependencies? Select ALL that apply.",
       "Options": [
-        "Unit, Integration, System, Acceptance",
-        "E2E Tests, Integration Tests, Use Case Tests, Domain Unit Tests",
-        "Frontend, Backend, Database, API",
-        "White box, Black box, Gray box, Clear box"
+        "Domain layer (entities, value objects)",
+        "Driven adapters (database repositories)",
+        "Use cases (application layer)",
+        "Driving adapters (HTTP handlers with full stack)"
       ],
-      "CorrectIndex": 1,
-      "Explanation": "The diagram shows four layers: E2E Tests (Few), Integration Tests (Some), Use Case Tests (More), and Domain Unit Tests (Many)."
+      "CorrectIndices": [1, 3],
+      "Explanation": "Adapters require integration tests with real dependencies. Database repositories need real databases (or testcontainers). E2E tests through driving adapters test the full stack. Domain and use cases use unit tests."
+    },
+    {
+      "ID": "testing-q4",
+      "Type": "fill-blank",
+      "Question": "According to the lesson, use cases should be tested with _______ adapters that implement the port interfaces.",
+      "CorrectAnswers": ["mock", "Mock", "MOCK", "fake", "Fake", "in-memory", "InMemory"],
+      "CaseSensitive": false,
+      "Explanation": "Use cases are tested with mock/fake adapters injected through the constructor. For example, InMemoryBookRepository implements BookRepository for fast, isolated testing."
     }
   ]
 }

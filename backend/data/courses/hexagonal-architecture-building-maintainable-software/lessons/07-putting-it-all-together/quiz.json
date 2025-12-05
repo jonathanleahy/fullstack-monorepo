@@ -1,40 +1,45 @@
 {
   "Questions": [
     {
-      "ID": "summary-1",
-      "Question": "According to the benefits table, how does Hex Arch achieve Testability?",
+      "ID": "together-q1",
+      "Type": "multiple-choice",
+      "Question": "According to the lesson, what impressed Maya (the investor) about BookShelf's new architecture?",
       "Options": [
-        "By using faster databases",
-        "Domain has no dependencies, use mocks for adapters",
-        "By generating tests automatically",
-        "By reducing code size"
+        "The application ran faster than before",
+        "How easily a mobile API could be added without changing business logic",
+        "The use of the latest JavaScript framework",
+        "The lower hosting costs"
       ],
       "CorrectIndex": 1,
-      "Explanation": "The benefits table states that Testability is achieved because 'Domain has no dependencies, use mocks for adapters'."
+      "Explanation": "Maya was impressed that adding mobile app support (a new driving adapter) didn't require changing any business logic - just adding a new adapter that calls the same use cases."
     },
     {
-      "ID": "summary-2",
-      "Question": "According to the lesson, when is Hexagonal Architecture a GOOD fit?",
-      "Options": [
-        "Simple CRUD applications",
-        "Prototypes or throwaway code",
-        "Long-lived applications with complex business logic",
-        "Very small teams or solo projects"
-      ],
-      "CorrectIndex": 2,
-      "Explanation": "The lesson lists 'Long-lived applications' and 'Complex business logic' as good fits for Hexagonal Architecture."
+      "ID": "together-q2",
+      "Type": "true-false",
+      "Question": "According to the lesson, Chen's on-premise requirement was solved by adding SQLite as an alternative driven adapter for the BookRepository port.",
+      "CorrectAnswer": true,
+      "Explanation": "Chen needed on-premise deployment with a different database. Sam created an SQLite adapter implementing the same BookRepository port, allowing on-premise deployment without changing business logic."
     },
     {
-      "ID": "summary-3",
-      "Question": "According to the lesson, when is Hexagonal Architecture OVERKILL?",
+      "ID": "together-q3",
+      "Type": "multiple-select",
+      "Question": "According to the 'Complete Picture' section, which of the following are benefits Sam gained from Hexagonal Architecture? Select ALL that apply.",
       "Options": [
-        "Applications with multiple interfaces (web, mobile, CLI)",
-        "Teams larger than 2-3 developers",
-        "Simple CRUD applications or prototypes",
-        "Systems with complex business logic"
+        "Testability - domain can be tested without infrastructure",
+        "Flexibility - swap adapters without changing business logic",
+        "Faster database queries",
+        "Maintainability - clear boundaries make changes safer"
       ],
-      "CorrectIndex": 2,
-      "Explanation": "The lesson lists 'Simple CRUD applications', 'Prototypes or throwaway code', and 'Very small teams or solo projects' as cases where Hex Arch is overkill."
+      "CorrectIndices": [0, 1, 3],
+      "Explanation": "The three core benefits are testability, flexibility, and maintainability. Database query speed is determined by the adapter implementation, not the architecture pattern itself."
+    },
+    {
+      "ID": "together-q4",
+      "Type": "fill-blank",
+      "Question": "According to the Common Pitfalls section, putting business logic in HTTP handlers instead of the domain is called having an _______ domain model.",
+      "CorrectAnswers": ["anemic", "Anemic", "ANEMIC"],
+      "CaseSensitive": false,
+      "Explanation": "An anemic domain model has entities that are just data containers, with all logic in services or handlers. This scatters business rules and breaks encapsulation."
     }
   ]
 }

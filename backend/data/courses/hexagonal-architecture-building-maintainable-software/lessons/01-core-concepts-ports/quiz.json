@@ -1,40 +1,45 @@
 {
   "Questions": [
     {
-      "ID": "ports-1",
-      "Question": "According to the diagram, what are examples of Driving Ports?",
+      "ID": "ports-q1",
+      "Type": "multiple-choice",
+      "Question": "According to the lesson, in BookShelf's architecture, the BookRepository interface is an example of what type of port?",
       "Options": [
-        "UserRepository, OrderRepository, EmailSender",
-        "UserService, OrderService, PaymentService",
-        "Database, Cache, Queue",
-        "HTTP, GraphQL, gRPC"
+        "A driving port (inbound)",
+        "A driven port (outbound)",
+        "A domain service",
+        "An adapter"
       ],
       "CorrectIndex": 1,
-      "Explanation": "The diagram shows UserService, OrderService, and PaymentService as examples of Driving Ports. These are the interfaces that external systems call to drive the application."
+      "Explanation": "BookRepository is a driven (outbound) port - an interface that defines what BookShelf needs from the outside world (data persistence). The application calls this port to store and retrieve books."
     },
     {
-      "ID": "ports-2",
-      "Question": "According to the diagram, what are examples of Driven Ports?",
-      "Options": [
-        "UserService, OrderService, PaymentService",
-        "HTTP Handler, CLI, GraphQL Resolver",
-        "UserRepository, OrderRepository, EmailSender",
-        "React, Vue, Angular"
-      ],
-      "CorrectIndex": 2,
-      "Explanation": "The diagram shows UserRepository, OrderRepository, and EmailSender as examples of Driven Ports. These are interfaces that the application calls to interact with external systems."
+      "ID": "ports-q2",
+      "Type": "true-false",
+      "Question": "According to the lesson, driving ports are interfaces that the application calls to request services from the outside world.",
+      "CorrectAnswer": false,
+      "Explanation": "Driving (inbound) ports are interfaces that the OUTSIDE WORLD calls to interact with the application. Driven (outbound) ports are what the application calls. The lesson explains: 'Driving Ports define what your application offers to the world.'"
     },
     {
-      "ID": "ports-3",
-      "Question": "In the diagram, what direction do Driving Ports flow?",
+      "ID": "ports-q3",
+      "Type": "multiple-select",
+      "Question": "According to the BookShelf port examples, which of the following are DRIVEN ports? Select ALL that apply.",
       "Options": [
-        "Driving Ports call Use Cases",
-        "Use Cases call Driving Ports",
-        "Driving Ports call Driven Ports directly",
-        "Driven Ports call Driving Ports"
+        "BookService",
+        "BookRepository",
+        "NotificationSender",
+        "UserService"
       ],
-      "CorrectIndex": 0,
-      "Explanation": "The diagram shows arrows from Driving Ports to Use Cases with the label 'calls'. Driving Ports receive external input and call the application's use cases."
+      "CorrectIndices": [1, 2],
+      "Explanation": "BookRepository and NotificationSender are driven ports - they define what BookShelf NEEDS from external systems (database, email). BookService and UserService are driving ports - what BookShelf OFFERS to the outside world."
+    },
+    {
+      "ID": "ports-q4",
+      "Type": "fill-blank",
+      "Question": "According to the lesson, ports are _______ that define contracts between your application and the outside world.",
+      "CorrectAnswers": ["interfaces", "Interfaces", "INTERFACES"],
+      "CaseSensitive": false,
+      "Explanation": "The lesson defines ports as interfaces - technology-agnostic contracts. They don't specify HOW something is done, only WHAT operations are available."
     }
   ]
 }
