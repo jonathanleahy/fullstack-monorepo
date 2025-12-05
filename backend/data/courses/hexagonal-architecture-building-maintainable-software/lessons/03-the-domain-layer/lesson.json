@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 3,
+  "title": "The Domain Layer",
+  "subchapter_count": 5,
+  "estimated_minutes": 45,
+  "learning_objectives": [
+    "Design entities and value objects",
+    "Create domain services for cross-entity logic",
+    "Define meaningful domain errors"
+  ]
+}

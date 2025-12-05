@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 6,
+  "title": "Testing Hexagonal Applications",
+  "subchapter_count": 5,
+  "estimated_minutes": 45,
+  "learning_objectives": [
+    "Apply the testing pyramid to hexagonal applications",
+    "Test domain logic in complete isolation",
+    "Write integration tests for adapters"
+  ]
+}

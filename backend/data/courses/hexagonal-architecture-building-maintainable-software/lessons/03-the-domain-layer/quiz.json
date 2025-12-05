@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "domain-1",
+      "Question": "According to the diagram, what are examples of Entities in the Domain Layer?",
+      "Options": [
+        "Money, Email, Address",
+        "AuthService, PricingService",
+        "User, Order, Product",
+        "ErrUserNotFound, ErrInvalidEmail"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The diagram shows User, Order, and Product as examples of Entities in the Domain Layer. Entities are the core business objects."
+    },
+    {
+      "ID": "domain-2",
+      "Question": "According to the diagram, what are examples of Value Objects?",
+      "Options": [
+        "User, Order, Product",
+        "Money, Email, Address",
+        "AuthService, PricingService",
+        "PostgreSQL, MongoDB, Redis"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows Money, Email, and Address as Value Objects. These are immutable objects defined by their attributes rather than identity."
+    },
+    {
+      "ID": "domain-3",
+      "Question": "What are the four sections of the Domain Layer shown in the diagram?",
+      "Options": [
+        "Controllers, Services, Repositories, Views",
+        "Entities, Value Objects, Domain Services, Domain Errors",
+        "HTTP, GraphQL, gRPC, CLI",
+        "Create, Read, Update, Delete"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows the Domain Layer containing Entities, Value Objects, Domain Services, and Domain Errors as its four main sections."
+    }
+  ]
+}

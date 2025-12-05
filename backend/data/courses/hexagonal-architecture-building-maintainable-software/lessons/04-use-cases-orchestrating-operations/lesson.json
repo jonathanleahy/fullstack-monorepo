@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 4,
+  "title": "Use Cases: Orchestrating Operations",
+  "subchapter_count": 5,
+  "estimated_minutes": 45,
+  "learning_objectives": [
+    "Understand the role of use cases in the architecture",
+    "Structure use cases for clarity and testability",
+    "Handle errors appropriately in use cases"
+  ]
+}

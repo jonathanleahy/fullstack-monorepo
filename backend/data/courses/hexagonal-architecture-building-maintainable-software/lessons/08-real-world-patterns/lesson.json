@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 8,
+  "title": "Real-World Patterns",
+  "subchapter_count": 5,
+  "estimated_minutes": 45,
+  "learning_objectives": [
+    "Implement cross-cutting concerns without polluting the domain",
+    "Handle transactions across multiple repositories",
+    "Design event-driven patterns for scalability"
+  ]
+}

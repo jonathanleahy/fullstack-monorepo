@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 0,
+  "title": "Introduction to Hexagonal Architecture",
+  "subchapter_count": 5,
+  "estimated_minutes": 30,
+  "learning_objectives": [
+    "Understand why traditional architecture often fails",
+    "Grasp the core concept of Hexagonal Architecture",
+    "Know when to use (and when not to use) this pattern"
+  ]
+}

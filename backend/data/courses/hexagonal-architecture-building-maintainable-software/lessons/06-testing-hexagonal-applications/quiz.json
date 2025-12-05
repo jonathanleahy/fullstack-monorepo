@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "testing-1",
+      "Question": "According to the Testing Pyramid diagram, which layer should have the MOST tests?",
+      "Options": [
+        "E2E Tests",
+        "Integration Tests",
+        "Use Case Tests",
+        "Domain Unit Tests"
+      ],
+      "CorrectIndex": 3,
+      "Explanation": "The pyramid shows Domain Unit Tests at the bottom labeled '(Many)'. The base of the testing pyramid should have the most tests."
+    },
+    {
+      "ID": "testing-2",
+      "Question": "According to the Testing Pyramid diagram, which layer should have the FEWEST tests?",
+      "Options": [
+        "Domain Unit Tests",
+        "Use Case Tests",
+        "Integration Tests",
+        "E2E Tests"
+      ],
+      "CorrectIndex": 3,
+      "Explanation": "The pyramid shows E2E Tests at the top labeled '(Few)'. End-to-end tests are expensive and should be used sparingly."
+    },
+    {
+      "ID": "testing-3",
+      "Question": "What are the four layers of the Testing Pyramid shown in the diagram?",
+      "Options": [
+        "Unit, Integration, System, Acceptance",
+        "E2E Tests, Integration Tests, Use Case Tests, Domain Unit Tests",
+        "Frontend, Backend, Database, API",
+        "White box, Black box, Gray box, Clear box"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The diagram shows four layers: E2E Tests (Few), Integration Tests (Some), Use Case Tests (More), and Domain Unit Tests (Many)."
+    }
+  ]
+}

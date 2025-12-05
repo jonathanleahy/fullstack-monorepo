@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "realworld-1",
+      "Question": "According to the lesson, what is the recommended pattern for adding logging to use cases without polluting the domain?",
+      "Options": [
+        "Add logging directly in entity methods",
+        "Use the Decorator pattern to wrap services",
+        "Add logging in the database adapter",
+        "Use global logging variables"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The lesson shows the Decorator pattern where a LoggingUserService wraps the inner UserService, adding logging without modifying the original implementation."
+    },
+    {
+      "ID": "realworld-2",
+      "Question": "According to the diagram, what should happen to side effects like sending emails in a transactional use case?",
+      "Options": [
+        "Side effects should happen before the transaction starts",
+        "Side effects should happen inside the transaction",
+        "Side effects should happen after successful transaction commit",
+        "Side effects should be avoided entirely"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The lesson states: 'Side effects after commit' and shows that events/emails should be published after the transaction is successfully committed."
+    },
+    {
+      "ID": "realworld-3",
+      "Question": "According to the lesson, where does caching best fit in Hexagonal Architecture?",
+      "Options": [
+        "In the domain entities",
+        "In the use cases",
+        "As a repository decorator",
+        "In the HTTP middleware only"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The lesson recommends the 'repository decorator pattern is most common - cache database results' and shows CachedUserRepository wrapping the real repository."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "325d185d-2b79-450f-92e7-fabc030474d7",
+  "title": "Hexagonal Architecture: Building Maintainable Software",
+  "subtitle": "Master the Ports and Adapters pattern for testable, flexible applications",
+  "description": "Master the Ports and Adapters pattern from the ground up. This comprehensive course takes you from 'what is this weird hexagon thing?' to confidently architecting enterprise applications. You'll learn through real examples, common mistakes to avoid, and hands-on exercises. By the end, you'll understand why companies like Netflix, Spotify, and countless startups use this pattern - and how to apply it in your own projects.",
+  "author": "Architecture Academy",
+  "author_bio": "Our courses are designed by experienced software architects who have built and maintained large-scale systems across industries including fintech, healthcare, and e-commerce.",
+  "difficulty": "intermediate",
+  "estimated_hours": 12,
+  "chapter_count": 10,
+  "subchapter_count": 50,
+  "tags": ["architecture", "golang", "clean-code", "testing", "design-patterns", "ports-and-adapters"],
+  "language": "en",
+  "last_updated": "2024-12-05"
+}

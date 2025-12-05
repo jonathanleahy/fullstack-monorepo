@@ -1,0 +1,40 @@
+{
+  "Questions": [
+    {
+      "ID": "intro-1",
+      "Question": "According to the lesson, what is the core idea of Hexagonal Architecture in one sentence?",
+      "Options": [
+        "Your application should have exactly six ports",
+        "Your business logic should not know or care about the outside world",
+        "Your database should be at the center of the application",
+        "Your HTTP handlers should contain all the business rules"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The lesson states: 'Your business logic should not know or care about the outside world.' This is the fundamental principle from which everything else flows."
+    },
+    {
+      "ID": "intro-2",
+      "Question": "According to the timeline diagram, what typically happens to a project at Month 12 with traditional architecture?",
+      "Options": [
+        "Fast development and everything works",
+        "Tests slow down and database coupling appears",
+        "Framework migration needed and everything breaks",
+        "Team frustration and technical debt explosion"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "The timeline diagram shows that at Month 12: 'Framework migration needed' and 'Everything breaks'. This illustrates the pain of tightly-coupled architecture."
+    },
+    {
+      "ID": "intro-3",
+      "Question": "What are the three core parts of Hexagonal Architecture shown in the hexagon diagram?",
+      "Options": [
+        "Controllers, Models, Views",
+        "Domain Core, Driving Adapters, Driven Adapters",
+        "Database, API, Frontend",
+        "HTTP, SQL, SMTP"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "The hexagon diagram shows the Domain Core (green) at the center, with Driving Adapters (blue) on one side and Driven Adapters (purple) on the other."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "has_quiz": true,
+  "order": 1,
+  "title": "Core Concepts: Ports",
+  "subchapter_count": 5,
+  "estimated_minutes": 40,
+  "learning_objectives": [
+    "Understand what ports are and their purpose",
+    "Differentiate between driving and driven ports",
+    "Design effective port interfaces"
+  ]
+}

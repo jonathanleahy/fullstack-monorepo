@@ -1,0 +1,185 @@
+{
+  "Title": "Final Exam",
+  "Description": "Comprehensive assessment covering all 10 chapters",
+  "PassingScore": 70,
+  "TimeLimit": 60,
+  "TimeLimitUnit": "minutes",
+  "AllowRetake": true,
+  "RetakeDelay": 24,
+  "RetakeDelayUnit": "hours",
+  "ShuffleQuestions": true,
+  "ShuffleOptions": true,
+  "ShowCorrectAnswers": "after-submission",
+  "Questions": [
+    {
+      "ID": "final-ch1-q1",
+      "Type": "multiple-choice",
+      "ChapterRef": 1,
+      "Difficulty": "easy",
+      "Points": 1,
+      "Question": "[Question from Chapter 1 content]",
+      "Options": [
+        "[Option A]",
+        "[Option B - Correct]",
+        "[Option C]",
+        "[Option D]"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "[Reference to Chapter 1 content]"
+    },
+    {
+      "ID": "final-ch1-q2",
+      "Type": "true-false",
+      "ChapterRef": 1,
+      "Difficulty": "easy",
+      "Points": 1,
+      "Question": "[True/False statement from Chapter 1]",
+      "CorrectAnswer": true,
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch2-q1",
+      "Type": "multiple-choice",
+      "ChapterRef": 2,
+      "Difficulty": "medium",
+      "Points": 2,
+      "Question": "[Question from Chapter 2 content]",
+      "Options": [
+        "[Option A]",
+        "[Option B]",
+        "[Option C - Correct]",
+        "[Option D]"
+      ],
+      "CorrectIndex": 2,
+      "Explanation": "[Reference to Chapter 2 content]"
+    },
+    {
+      "ID": "final-ch2-q2",
+      "Type": "multiple-select",
+      "ChapterRef": 2,
+      "Difficulty": "medium",
+      "Points": 2,
+      "Question": "[Select ALL that apply - from Chapter 2]",
+      "Options": [
+        "[Correct option]",
+        "[Wrong option]",
+        "[Correct option]",
+        "[Wrong option]"
+      ],
+      "CorrectIndices": [0, 2],
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch3-q1",
+      "Type": "multiple-choice",
+      "ChapterRef": 3,
+      "Difficulty": "medium",
+      "Points": 2,
+      "Question": "[Question from Chapter 3 content]",
+      "Options": ["[A]", "[B]", "[C]", "[D]"],
+      "CorrectIndex": 0,
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch4-q1",
+      "Type": "fill-blank",
+      "ChapterRef": 4,
+      "Difficulty": "medium",
+      "Points": 2,
+      "Question": "[Fill in the blank from Chapter 4: _______ is...]",
+      "CorrectAnswers": ["answer", "Answer"],
+      "CaseSensitive": false,
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch5-q1",
+      "Type": "multiple-choice",
+      "ChapterRef": 5,
+      "Difficulty": "medium",
+      "Points": 2,
+      "Question": "[Question from Chapter 5 content]",
+      "Options": ["[A]", "[B]", "[C]", "[D]"],
+      "CorrectIndex": 1,
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch6-q1",
+      "Type": "true-false",
+      "ChapterRef": 6,
+      "Difficulty": "hard",
+      "Points": 3,
+      "Question": "[Complex true/false from Chapter 6]",
+      "CorrectAnswer": false,
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch7-q1",
+      "Type": "multiple-choice",
+      "ChapterRef": 7,
+      "Difficulty": "hard",
+      "Points": 3,
+      "Question": "[Question from Chapter 7 content]",
+      "Options": ["[A]", "[B]", "[C]", "[D]"],
+      "CorrectIndex": 2,
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch8-q1",
+      "Type": "multiple-select",
+      "ChapterRef": 8,
+      "Difficulty": "hard",
+      "Points": 3,
+      "Question": "[Select ALL from Chapter 8]",
+      "Options": ["[A]", "[B]", "[C]", "[D]"],
+      "CorrectIndices": [1, 3],
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch9-q1",
+      "Type": "multiple-choice",
+      "ChapterRef": 9,
+      "Difficulty": "hard",
+      "Points": 3,
+      "Question": "[Question from Chapter 9 content]",
+      "Options": ["[A]", "[B]", "[C]", "[D]"],
+      "CorrectIndex": 0,
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-ch10-q1",
+      "Type": "multiple-choice",
+      "ChapterRef": 10,
+      "Difficulty": "hard",
+      "Points": 3,
+      "Question": "[Synthesis question from Chapter 10]",
+      "Options": ["[A]", "[B]", "[C]", "[D]"],
+      "CorrectIndex": 3,
+      "Explanation": "[Explanation]"
+    },
+    {
+      "ID": "final-synthesis-q1",
+      "Type": "multiple-choice",
+      "ChapterRef": null,
+      "Difficulty": "hard",
+      "Points": 5,
+      "Question": "[Cross-chapter synthesis question requiring knowledge from multiple chapters]",
+      "Options": ["[A]", "[B]", "[C]", "[D]"],
+      "CorrectIndex": 1,
+      "Explanation": "[Explanation referencing multiple chapters]"
+    }
+  ],
+  "Scoring": {
+    "TotalPoints": 30,
+    "PassingPoints": 21,
+    "Grades": [
+      {"min": 90, "max": 100, "grade": "A", "label": "Excellent"},
+      {"min": 80, "max": 89, "grade": "B", "label": "Good"},
+      {"min": 70, "max": 79, "grade": "C", "label": "Satisfactory"},
+      {"min": 0, "max": 69, "grade": "F", "label": "Needs Review"}
+    ]
+  },
+  "Certificate": {
+    "RequirePass": true,
+    "MinScore": 70
+  }
+}

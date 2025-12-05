@@ -1,0 +1,45 @@
+{
+  "Questions": [
+    {
+      "ID": "ch1-q1",
+      "Type": "multiple-choice",
+      "Question": "[Question based on chapter content - reference diagrams/text with 'According to...']",
+      "Options": [
+        "[Wrong answer - plausible distractor]",
+        "[Correct answer]",
+        "[Wrong answer - plausible distractor]",
+        "[Wrong answer - plausible distractor]"
+      ],
+      "CorrectIndex": 1,
+      "Explanation": "[Explanation referencing the specific content that teaches this]"
+    },
+    {
+      "ID": "ch1-q2",
+      "Type": "true-false",
+      "Question": "[Statement that is either true or false based on lesson content]",
+      "CorrectAnswer": true,
+      "Explanation": "[Explanation referencing the content - e.g., 'The lesson states that...']"
+    },
+    {
+      "ID": "ch1-q3",
+      "Type": "multiple-select",
+      "Question": "[Question where multiple answers are correct - 'Select ALL that apply']",
+      "Options": [
+        "[Correct option 1]",
+        "[Wrong option]",
+        "[Correct option 2]",
+        "[Wrong option]"
+      ],
+      "CorrectIndices": [0, 2],
+      "Explanation": "[Explanation of why these options are correct]"
+    },
+    {
+      "ID": "ch1-q4",
+      "Type": "fill-blank",
+      "Question": "In Hexagonal Architecture, _______ define how the domain communicates with the outside world.",
+      "CorrectAnswers": ["ports", "Ports", "PORTS"],
+      "CaseSensitive": false,
+      "Explanation": "[Explanation referencing where this term was taught]"
+    }
+  ]
+}
