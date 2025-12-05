@@ -9,6 +9,6 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 echo "Stopping development services..."
 
 cd "$PROJECT_ROOT/infra"
-docker-compose down
+docker compose down
 
 echo "All services stopped."

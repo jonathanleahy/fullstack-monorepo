@@ -1,4 +1,4 @@
-# Storybook Dockerfile
+# Storybook Dockerfile for pnpm monorepo
 FROM node:20-alpine
 
 WORKDIR /app
@@ -6,14 +6,21 @@ WORKDIR /app
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy workspace root files
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 
-# Install dependencies
-RUN pnpm install
+# Copy workspace packages
+COPY design-tokens/ ./design-tokens/
+COPY shared/ ./shared/
+COPY playbook/ ./playbook/
 
-# Copy source code
-COPY . .
+# Install dependencies from workspace root
+RUN pnpm install --frozen-lockfile
+
+# Build design tokens first (playbook depends on it)
+RUN pnpm --filter @repo/design-tokens build
+
+WORKDIR /app/playbook
 
 # Expose port
 EXPOSE 6006
