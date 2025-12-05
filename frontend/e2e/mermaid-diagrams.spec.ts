@@ -44,7 +44,7 @@ test.describe('Mermaid Diagram Rendering', () => {
 
       // Look for the lesson that should have a Mermaid diagram
       // The "Big Picture" lesson or similar should have a hexagon/flowchart
-      const lessonContent = page.locator('.prose');
+      const lessonContent = page.locator('.prose').first();
       await expect(lessonContent).toBeVisible();
 
       // Check for rendered Mermaid SVG
