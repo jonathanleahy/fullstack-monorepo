@@ -4,16 +4,20 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+
 	"github.com/project/backend/adapters/db"
 	"github.com/project/backend/adapters/graphql"
+	httpAdapter "github.com/project/backend/adapters/http"
 	"github.com/project/backend/application/usecases"
 	"github.com/project/backend/config"
+	"github.com/project/backend/domain/services"
 )
 
 func main() {
@@ -43,12 +47,17 @@ func main() {
 	// Initialize repositories
 	userRepo := db.NewUserRepository(database)
 
+	// Initialize auth service
+	authService := services.NewAuthService(cfg.JWTSecret)
+
 	// Initialize use cases
 	userUseCase := usecases.NewUserUseCase(userRepo)
+	authUseCase := usecases.NewAuthUseCase(userRepo, authService)
 
 	// Initialize GraphQL resolver
 	resolver := &graphql.Resolver{
 		UserUseCase: userUseCase,
+		AuthUseCase: authUseCase,
 	}
 
 	// Create GraphQL server
@@ -73,10 +82,13 @@ func main() {
 		MaxAge:           300,
 	}))
 
+	// Auth middleware - extracts JWT and adds user to context
+	r.Use(httpAdapter.AuthMiddleware(authService))
+
 	// Health check
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	// GraphQL endpoints
@@ -85,9 +97,18 @@ func main() {
 	}
 	r.Handle("/graphql", srv)
 
+	// Create server with timeouts
+	server := &http.Server{
+		Addr:         ":" + cfg.Port,
+		Handler:      r,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
 	// Start server
 	slog.Info("Starting server", "port", cfg.Port, "playground", cfg.EnablePlayground)
-	if err := http.ListenAndServe(":"+cfg.Port, r); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		slog.Error("Server failed", "error", err)
 		os.Exit(1)
 	}

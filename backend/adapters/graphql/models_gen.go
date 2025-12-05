@@ -6,9 +6,20 @@ import (
 	"github.com/project/backend/domain/entities"
 )
 
+type AuthPayload struct {
+	User         *entities.User `json:"user"`
+	AccessToken  string         `json:"accessToken"`
+	RefreshToken string         `json:"refreshToken"`
+}
+
 type CreateUserInput struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
+type LoginInput struct {
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -21,6 +32,17 @@ type PaginationInput struct {
 }
 
 type Query struct {
+}
+
+type RegisterInput struct {
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
+type TokenPayload struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type UpdateUserInput struct {

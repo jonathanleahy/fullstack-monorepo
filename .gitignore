@@ -40,3 +40,4 @@ logs/
 
 # Generated
 frontend/src/generated/
+backend/data/
