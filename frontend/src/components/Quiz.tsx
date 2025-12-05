@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { Quiz as QuizType, QuizQuestion } from '../types/course';
+import type { Quiz as QuizType } from '../types/course';
 import { Button, Card, CardHeader, CardTitle, CardContent, Progress } from '@repo/playbook';
 
 interface QuizProps {

@@ -6,13 +6,13 @@
 ## Overview
 
 Implementing 7 major features in one sprint:
-1. Course Import - JSON import functionality
-2. Rich Text Editor - Markdown support for lessons
-3. Progress Tracking - Charts, certificates, statistics
-4. User Roles/Permissions - Authors can only edit own courses
-5. Search & Filter - Tags/categories for courses
-6. Lesson Navigation - Better in-course navigation
-7. Dashboard - User dashboard with enrolled courses and progress
+1. Course Import - JSON import functionality - **DONE** (ImportCoursePage.tsx)
+2. Rich Text Editor - Markdown support for lessons - **DONE** (MarkdownEditor.tsx with @uiw/react-md-editor)
+3. Progress Tracking - Charts, certificates, statistics - **DONE** (Certificate.tsx, ProgressChart.tsx)
+4. User Roles/Permissions - Authors can only edit own courses - **DONE** (backend resolvers check authorId)
+5. Search & Filter - Tags/categories for courses - **DONE** (tags field, coursesByTag query)
+6. Lesson Navigation - Better in-course navigation - **DONE** (keyboard shortcuts, hierarchical lessons)
+7. Dashboard - User dashboard with enrolled courses and progress - **DONE** (DashboardPage.tsx)
 
 ## Implementation Strategy
 

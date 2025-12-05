@@ -10,6 +10,7 @@ import { BookmarkButton } from '../components/BookmarkButton';
 import { EnrollButton } from '../components/EnrollButton';
 import { LessonProgress } from '../components/LessonProgress';
 import { Quiz } from '../components/Quiz';
+import { Certificate } from '../components/Certificate';
 import { Card, CardHeader, CardTitle, CardContent, Badge, Progress, Button } from '@repo/playbook';
 
 const difficultyColors: Record<Difficulty, string> = {
@@ -440,6 +441,16 @@ export function CourseDetailPage() {
                   Completed on {new Date(userCourse.completedAt).toLocaleDateString()}
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Certificate (if completed) */}
+          {isCompleted && userCourse && user && (
+            <div className="mb-6">
+              <Certificate
+                userCourse={userCourse}
+                userName={user.name || user.email}
+              />
             </div>
           )}
 
