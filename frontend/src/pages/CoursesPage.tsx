@@ -2,11 +2,23 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLibraryCourses } from '../hooks/useCourses';
 import type { Difficulty } from '../types/course';
+import {
+  Button,
+  Input,
+  Select,
+  Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@repo/playbook';
 
-const difficultyColors: Record<Difficulty, string> = {
-  BEGINNER: 'bg-green-100 text-green-800',
-  INTERMEDIATE: 'bg-yellow-100 text-yellow-800',
-  ADVANCED: 'bg-red-100 text-red-800',
+const difficultyVariant: Record<Difficulty, 'success' | 'warning' | 'danger'> = {
+  BEGINNER: 'success',
+  INTERMEDIATE: 'warning',
+  ADVANCED: 'danger',
 };
 
 export function CoursesPage() {
@@ -42,40 +54,32 @@ export function CoursesPage() {
       {/* Filters */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
         <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search courses..."
-            className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-1"
           />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
+          <Button type="submit">
             Search
-          </button>
+          </Button>
           {searchQuery && (
-            <button
-              type="button"
-              onClick={clearSearch}
-              className="px-4 py-2 border rounded-md hover:bg-accent transition-colors"
-            >
+            <Button type="button" variant="outline" onClick={clearSearch}>
               Clear
-            </button>
+            </Button>
           )}
         </form>
 
-        <select
+        <Select
           value={selectedDifficulty}
           onChange={(e) => setSelectedDifficulty(e.target.value as Difficulty | '')}
-          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="">All Difficulties</option>
           <option value="BEGINNER">Beginner</option>
           <option value="INTERMEDIATE">Intermediate</option>
           <option value="ADVANCED">Advanced</option>
-        </select>
+        </Select>
       </div>
 
       {/* Loading state */}
@@ -88,9 +92,11 @@ export function CoursesPage() {
 
       {/* Error state */}
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
-          {error}
-        </div>
+        <Card className="bg-red-50 border-red-200 mb-6">
+          <CardContent className="pt-6 text-red-600">
+            {error}
+          </CardContent>
+        </Card>
       )}
 
       {/* Results count */}
@@ -104,27 +110,29 @@ export function CoursesPage() {
       {!isLoading && !error && (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
-            <Link
-              key={course.id}
-              to={`/courses/${course.id}`}
-              className="block border rounded-lg p-6 hover:shadow-lg transition-shadow"
-            >
-              <div className="flex items-start justify-between mb-2">
-                <h2 className="text-xl font-semibold">{course.title}</h2>
-                <span className={`px-2 py-1 text-xs rounded-full ${difficultyColors[course.difficulty]}`}>
-                  {course.difficulty.toLowerCase()}
-                </span>
-              </div>
-              <p className="text-muted-foreground mb-4 line-clamp-2">
-                {course.description}
-              </p>
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>By {course.author}</span>
-                <span>{course.estimatedHours}h</span>
-              </div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                {course.lessons.length} lesson{course.lessons.length !== 1 ? 's' : ''}
-              </div>
+            <Link key={course.id} to={`/courses/${course.id}`}>
+              <Card className="h-full hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-xl">{course.title}</CardTitle>
+                    <Badge variant={difficultyVariant[course.difficulty]}>
+                      {course.difficulty.toLowerCase()}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="line-clamp-2 mb-4">
+                    {course.description}
+                  </CardDescription>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>By {course.author}</span>
+                    <span>{course.estimatedHours}h</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="text-sm text-muted-foreground">
+                  {course.lessons.length} lesson{course.lessons.length !== 1 ? 's' : ''}
+                </CardFooter>
+              </Card>
             </Link>
           ))}
         </div>
@@ -135,12 +143,9 @@ export function CoursesPage() {
         <div className="text-center py-12">
           <p className="text-muted-foreground">No courses found.</p>
           {searchQuery && (
-            <button
-              onClick={clearSearch}
-              className="mt-2 text-primary hover:underline"
-            >
+            <Button variant="link" onClick={clearSearch} className="mt-2">
               Clear search
-            </button>
+            </Button>
           )}
         </div>
       )}
