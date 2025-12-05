@@ -46,6 +46,8 @@ func main() {
 
 	// Initialize repositories
 	userRepo := db.NewUserRepository(database)
+	libraryCourseRepo := db.NewLibraryCourseRepository(database)
+	userCourseRepo := db.NewUserCourseRepository(database)
 
 	// Initialize auth service
 	authService := services.NewAuthService(cfg.JWTSecret)
@@ -56,8 +58,10 @@ func main() {
 
 	// Initialize GraphQL resolver
 	resolver := &graphql.Resolver{
-		UserUseCase: userUseCase,
-		AuthUseCase: authUseCase,
+		UserUseCase:       userUseCase,
+		AuthUseCase:       authUseCase,
+		LibraryCourseRepo: libraryCourseRepo,
+		UserCourseRepo:    userCourseRepo,
 	}
 
 	// Create GraphQL server

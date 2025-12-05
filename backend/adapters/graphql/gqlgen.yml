@@ -30,3 +30,18 @@ models:
     fields:
       password:
         resolver: false
+  Difficulty:
+    model:
+      - github.com/project/backend/domain/entities.Difficulty
+  Lesson:
+    model:
+      - github.com/project/backend/domain/entities.Lesson
+  LibraryCourse:
+    model:
+      - github.com/project/backend/domain/entities.LibraryCourse
+  UserCourse:
+    model:
+      - github.com/project/backend/domain/entities.UserCourse
+    fields:
+      libraryCourse:
+        resolver: true

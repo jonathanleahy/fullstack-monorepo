@@ -61,6 +61,32 @@ func (s *SQLiteDB) Migrate() error {
 			updated_at DATETIME NOT NULL
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
+		`CREATE TABLE IF NOT EXISTS library_courses (
+			id TEXT PRIMARY KEY,
+			title TEXT NOT NULL,
+			description TEXT,
+			lessons TEXT NOT NULL,
+			author TEXT NOT NULL,
+			difficulty TEXT NOT NULL,
+			estimated_hours INTEGER NOT NULL,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_library_courses_difficulty ON library_courses(difficulty)`,
+		`CREATE TABLE IF NOT EXISTS user_courses (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			library_course_id TEXT NOT NULL,
+			progress INTEGER NOT NULL DEFAULT 0,
+			current_lesson_index INTEGER NOT NULL DEFAULT 0,
+			started_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL,
+			completed_at DATETIME,
+			FOREIGN KEY (library_course_id) REFERENCES library_courses(id) ON DELETE CASCADE,
+			UNIQUE(user_id, library_course_id)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_courses_user_id ON user_courses(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_courses_library_course_id ON user_courses(library_course_id)`,
 	}
 
 	for _, migration := range migrations {

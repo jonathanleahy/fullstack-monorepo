@@ -57,11 +57,107 @@ input PaginationInput {
   limit: Int
 }
 
+# Course types
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+type Lesson {
+  title: String!
+  content: String!
+  order: Int!
+}
+
+type LibraryCourse {
+  id: ID!
+  title: String!
+  description: String!
+  lessons: [Lesson!]!
+  author: String!
+  difficulty: Difficulty!
+  estimatedHours: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type UserCourse {
+  id: ID!
+  userId: ID!
+  libraryCourseId: ID!
+  libraryCourse: LibraryCourse
+  progress: Int!
+  currentLessonIndex: Int!
+  startedAt: DateTime!
+  updatedAt: DateTime!
+  completedAt: DateTime
+}
+
+type LibraryCourseConnection {
+  courses: [LibraryCourse!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  hasMore: Boolean!
+}
+
+type UserCourseConnection {
+  courses: [UserCourse!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  hasMore: Boolean!
+}
+
+input CreateLibraryCourseInput {
+  title: String!
+  description: String!
+  lessons: [LessonInput!]!
+  author: String!
+  difficulty: Difficulty!
+  estimatedHours: Int!
+}
+
+input LessonInput {
+  title: String!
+  content: String!
+  order: Int!
+}
+
+input UpdateLibraryCourseInput {
+  title: String
+  description: String
+  lessons: [LessonInput!]
+  author: String
+  difficulty: Difficulty
+  estimatedHours: Int
+}
+
+input StartCourseInput {
+  libraryCourseId: ID!
+}
+
+input UpdateProgressInput {
+  userCourseId: ID!
+  progress: Int!
+  currentLessonIndex: Int
+}
+
 type Query {
   user(id: ID!): User
   users(pagination: PaginationInput): UserConnection!
   # Auth queries
   me: User
+  # Course queries
+  libraryCourse(id: ID!): LibraryCourse
+  libraryCourses(pagination: PaginationInput, difficulty: Difficulty): LibraryCourseConnection!
+  searchLibraryCourses(query: String!, pagination: PaginationInput): LibraryCourseConnection!
+  # User course queries (requires auth)
+  myCourses(pagination: PaginationInput): UserCourseConnection!
+  myCompletedCourses(pagination: PaginationInput): UserCourseConnection!
+  myInProgressCourses(pagination: PaginationInput): UserCourseConnection!
+  userCourse(id: ID!): UserCourse
 }
 
 type Mutation {
@@ -72,4 +168,12 @@ type Mutation {
   register(input: RegisterInput!): AuthPayload!
   login(input: LoginInput!): AuthPayload!
   refreshToken(refreshToken: String!): TokenPayload!
+  # Library course mutations (admin)
+  createLibraryCourse(input: CreateLibraryCourseInput!): LibraryCourse!
+  updateLibraryCourse(id: ID!, input: UpdateLibraryCourseInput!): LibraryCourse!
+  deleteLibraryCourse(id: ID!): Boolean!
+  # User course mutations (requires auth)
+  startCourse(input: StartCourseInput!): UserCourse!
+  updateProgress(input: UpdateProgressInput!): UserCourse!
+  dropCourse(id: ID!): Boolean!
 }
