@@ -41,6 +41,8 @@ type Config struct {
 
 type ResolverRoot interface {
 	Attachment() AttachmentResolver
+	Lesson() LessonResolver
+	LibraryCourse() LibraryCourseResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	UserCourse() UserCourseResolver
@@ -87,23 +89,26 @@ type ComplexityRoot struct {
 	}
 
 	Lesson struct {
-		Content func(childComplexity int) int
-		Order   func(childComplexity int) int
-		Title   func(childComplexity int) int
+		Content       func(childComplexity int) int
+		HasSublessons func(childComplexity int) int
+		Order         func(childComplexity int) int
+		Sublessons    func(childComplexity int) int
+		Title         func(childComplexity int) int
 	}
 
 	LibraryCourse struct {
-		Author         func(childComplexity int) int
-		AuthorID       func(childComplexity int) int
-		CreatedAt      func(childComplexity int) int
-		Description    func(childComplexity int) int
-		Difficulty     func(childComplexity int) int
-		EstimatedHours func(childComplexity int) int
-		ID             func(childComplexity int) int
-		Lessons        func(childComplexity int) int
-		Tags           func(childComplexity int) int
-		Title          func(childComplexity int) int
-		UpdatedAt      func(childComplexity int) int
+		Author           func(childComplexity int) int
+		AuthorID         func(childComplexity int) int
+		CreatedAt        func(childComplexity int) int
+		Description      func(childComplexity int) int
+		Difficulty       func(childComplexity int) int
+		EstimatedHours   func(childComplexity int) int
+		ID               func(childComplexity int) int
+		Lessons          func(childComplexity int) int
+		Tags             func(childComplexity int) int
+		Title            func(childComplexity int) int
+		TotalLessonCount func(childComplexity int) int
+		UpdatedAt        func(childComplexity int) int
 	}
 
 	LibraryCourseConnection struct {
@@ -206,6 +211,12 @@ type ComplexityRoot struct {
 
 type AttachmentResolver interface {
 	DownloadURL(ctx context.Context, obj *entities.Attachment) (string, error)
+}
+type LessonResolver interface {
+	HasSublessons(ctx context.Context, obj *entities.Lesson) (bool, error)
+}
+type LibraryCourseResolver interface {
+	TotalLessonCount(ctx context.Context, obj *entities.LibraryCourse) (int, error)
 }
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input CreateUserInput) (*entities.User, error)
@@ -429,12 +440,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Lesson.Content(childComplexity), true
+	case "Lesson.hasSublessons":
+		if e.complexity.Lesson.HasSublessons == nil {
+			break
+		}
+
+		return e.complexity.Lesson.HasSublessons(childComplexity), true
 	case "Lesson.order":
 		if e.complexity.Lesson.Order == nil {
 			break
 		}
 
 		return e.complexity.Lesson.Order(childComplexity), true
+	case "Lesson.sublessons":
+		if e.complexity.Lesson.Sublessons == nil {
+			break
+		}
+
+		return e.complexity.Lesson.Sublessons(childComplexity), true
 	case "Lesson.title":
 		if e.complexity.Lesson.Title == nil {
 			break
@@ -502,6 +525,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LibraryCourse.Title(childComplexity), true
+	case "LibraryCourse.totalLessonCount":
+		if e.complexity.LibraryCourse.TotalLessonCount == nil {
+			break
+		}
+
+		return e.complexity.LibraryCourse.TotalLessonCount(childComplexity), true
 	case "LibraryCourse.updatedAt":
 		if e.complexity.LibraryCourse.UpdatedAt == nil {
 			break
@@ -2584,6 +2613,76 @@ func (ec *executionContext) fieldContext_Lesson_order(_ context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Lesson_sublessons(ctx context.Context, field graphql.CollectedField, obj *entities.Lesson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Lesson_sublessons,
+		func(ctx context.Context) (any, error) {
+			return obj.Sublessons, nil
+		},
+		nil,
+		ec.marshalOLesson2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐLessonᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Lesson_sublessons(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Lesson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "title":
+				return ec.fieldContext_Lesson_title(ctx, field)
+			case "content":
+				return ec.fieldContext_Lesson_content(ctx, field)
+			case "order":
+				return ec.fieldContext_Lesson_order(ctx, field)
+			case "sublessons":
+				return ec.fieldContext_Lesson_sublessons(ctx, field)
+			case "hasSublessons":
+				return ec.fieldContext_Lesson_hasSublessons(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Lesson", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Lesson_hasSublessons(ctx context.Context, field graphql.CollectedField, obj *entities.Lesson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Lesson_hasSublessons,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Lesson().HasSublessons(ctx, obj)
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Lesson_hasSublessons(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Lesson",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LibraryCourse_id(ctx context.Context, field graphql.CollectedField, obj *entities.LibraryCourse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2701,6 +2800,10 @@ func (ec *executionContext) fieldContext_LibraryCourse_lessons(_ context.Context
 				return ec.fieldContext_Lesson_content(ctx, field)
 			case "order":
 				return ec.fieldContext_Lesson_order(ctx, field)
+			case "sublessons":
+				return ec.fieldContext_Lesson_sublessons(ctx, field)
+			case "hasSublessons":
+				return ec.fieldContext_Lesson_hasSublessons(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Lesson", field.Name)
 		},
@@ -2853,6 +2956,35 @@ func (ec *executionContext) fieldContext_LibraryCourse_estimatedHours(_ context.
 	return fc, nil
 }
 
+func (ec *executionContext) _LibraryCourse_totalLessonCount(ctx context.Context, field graphql.CollectedField, obj *entities.LibraryCourse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LibraryCourse_totalLessonCount,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.LibraryCourse().TotalLessonCount(ctx, obj)
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LibraryCourse_totalLessonCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LibraryCourse",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LibraryCourse_createdAt(ctx context.Context, field graphql.CollectedField, obj *entities.LibraryCourse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2953,6 +3085,8 @@ func (ec *executionContext) fieldContext_LibraryCourseConnection_courses(_ conte
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
 				return ec.fieldContext_LibraryCourse_estimatedHours(ctx, field)
+			case "totalLessonCount":
+				return ec.fieldContext_LibraryCourse_totalLessonCount(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_LibraryCourse_createdAt(ctx, field)
 			case "updatedAt":
@@ -3415,6 +3549,8 @@ func (ec *executionContext) fieldContext_Mutation_createLibraryCourse(ctx contex
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
 				return ec.fieldContext_LibraryCourse_estimatedHours(ctx, field)
+			case "totalLessonCount":
+				return ec.fieldContext_LibraryCourse_totalLessonCount(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_LibraryCourse_createdAt(ctx, field)
 			case "updatedAt":
@@ -3480,6 +3616,8 @@ func (ec *executionContext) fieldContext_Mutation_updateLibraryCourse(ctx contex
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
 				return ec.fieldContext_LibraryCourse_estimatedHours(ctx, field)
+			case "totalLessonCount":
+				return ec.fieldContext_LibraryCourse_totalLessonCount(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_LibraryCourse_createdAt(ctx, field)
 			case "updatedAt":
@@ -3586,6 +3724,8 @@ func (ec *executionContext) fieldContext_Mutation_importCourses(ctx context.Cont
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
 				return ec.fieldContext_LibraryCourse_estimatedHours(ctx, field)
+			case "totalLessonCount":
+				return ec.fieldContext_LibraryCourse_totalLessonCount(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_LibraryCourse_createdAt(ctx, field)
 			case "updatedAt":
@@ -4373,6 +4513,8 @@ func (ec *executionContext) fieldContext_Query_libraryCourse(ctx context.Context
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
 				return ec.fieldContext_LibraryCourse_estimatedHours(ctx, field)
+			case "totalLessonCount":
+				return ec.fieldContext_LibraryCourse_totalLessonCount(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_LibraryCourse_createdAt(ctx, field)
 			case "updatedAt":
@@ -5826,6 +5968,8 @@ func (ec *executionContext) fieldContext_UserCourse_libraryCourse(_ context.Cont
 				return ec.fieldContext_LibraryCourse_difficulty(ctx, field)
 			case "estimatedHours":
 				return ec.fieldContext_LibraryCourse_estimatedHours(ctx, field)
+			case "totalLessonCount":
+				return ec.fieldContext_LibraryCourse_totalLessonCount(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_LibraryCourse_createdAt(ctx, field)
 			case "updatedAt":
@@ -7768,7 +7912,7 @@ func (ec *executionContext) unmarshalInputLessonInput(ctx context.Context, obj a
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "content", "order"}
+	fieldsInOrder := [...]string{"title", "content", "order", "sublessons"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7796,6 +7940,13 @@ func (ec *executionContext) unmarshalInputLessonInput(ctx context.Context, obj a
 				return it, err
 			}
 			it.Order = data
+		case "sublessons":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sublessons"))
+			data, err := ec.unmarshalOLessonInput2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐLessonInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Sublessons = data
 		}
 	}
 
@@ -8388,18 +8539,56 @@ func (ec *executionContext) _Lesson(ctx context.Context, sel ast.SelectionSet, o
 		case "title":
 			out.Values[i] = ec._Lesson_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "content":
 			out.Values[i] = ec._Lesson_content(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "order":
 			out.Values[i] = ec._Lesson_order(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "sublessons":
+			out.Values[i] = ec._Lesson_sublessons(ctx, field, obj)
+		case "hasSublessons":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Lesson_hasSublessons(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8437,57 +8626,93 @@ func (ec *executionContext) _LibraryCourse(ctx context.Context, sel ast.Selectio
 		case "id":
 			out.Values[i] = ec._LibraryCourse_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "title":
 			out.Values[i] = ec._LibraryCourse_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "description":
 			out.Values[i] = ec._LibraryCourse_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "lessons":
 			out.Values[i] = ec._LibraryCourse_lessons(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "author":
 			out.Values[i] = ec._LibraryCourse_author(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "authorId":
 			out.Values[i] = ec._LibraryCourse_authorId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "tags":
 			out.Values[i] = ec._LibraryCourse_tags(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "difficulty":
 			out.Values[i] = ec._LibraryCourse_difficulty(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "estimatedHours":
 			out.Values[i] = ec._LibraryCourse_estimatedHours(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "totalLessonCount":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LibraryCourse_totalLessonCount(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "createdAt":
 			out.Values[i] = ec._LibraryCourse_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._LibraryCourse_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -10972,6 +11197,53 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	_ = ctx
 	res := graphql.MarshalInt(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOLesson2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐLessonᚄ(ctx context.Context, sel ast.SelectionSet, v []entities.Lesson) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLesson2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐLesson(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOLessonInput2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐLessonInputᚄ(ctx context.Context, v any) ([]*LessonInput, error) {

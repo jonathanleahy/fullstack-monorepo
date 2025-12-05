@@ -36,9 +36,17 @@ models:
   Lesson:
     model:
       - github.com/project/backend/domain/entities.Lesson
+    fields:
+      hasSublessons:
+        resolver: true
+      sublessons:
+        fieldName: Sublessons
   LibraryCourse:
     model:
       - github.com/project/backend/domain/entities.LibraryCourse
+    fields:
+      totalLessonCount:
+        resolver: true
   UserCourse:
     model:
       - github.com/project/backend/domain/entities.UserCourse

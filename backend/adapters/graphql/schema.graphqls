@@ -68,6 +68,8 @@ type Lesson {
   title: String!
   content: String!
   order: Int!
+  sublessons: [Lesson!]
+  hasSublessons: Boolean!
 }
 
 type LibraryCourse {
@@ -80,6 +82,7 @@ type LibraryCourse {
   tags: [String!]!
   difficulty: Difficulty!
   estimatedHours: Int!
+  totalLessonCount: Int!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -127,6 +130,7 @@ input LessonInput {
   title: String!
   content: String!
   order: Int!
+  sublessons: [LessonInput!]
 }
 
 input UpdateLibraryCourseInput {

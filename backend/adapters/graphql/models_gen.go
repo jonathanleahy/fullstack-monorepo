@@ -33,9 +33,10 @@ type ImportCoursesInput struct {
 }
 
 type LessonInput struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	Order   int    `json:"order"`
+	Title      string         `json:"title"`
+	Content    string         `json:"content"`
+	Order      int            `json:"order"`
+	Sublessons []*LessonInput `json:"sublessons,omitempty"`
 }
 
 type LibraryCourseConnection struct {

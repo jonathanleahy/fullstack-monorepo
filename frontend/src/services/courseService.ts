@@ -12,11 +12,25 @@ import type {
   UpdateLibraryCourseInput,
 } from '../types/course';
 
-// Query fragments
+// Query fragments - recursive lesson fragment for sublessons support
+const SUBLESSON_FIELDS = `
+  title
+  content
+  order
+  hasSublessons
+`;
+
 const LESSON_FRAGMENT = `
   title
   content
   order
+  hasSublessons
+  sublessons {
+    ${SUBLESSON_FIELDS}
+    sublessons {
+      ${SUBLESSON_FIELDS}
+    }
+  }
 `;
 
 const LIBRARY_COURSE_FRAGMENT = `
@@ -31,6 +45,7 @@ const LIBRARY_COURSE_FRAGMENT = `
   tags
   difficulty
   estimatedHours
+  totalLessonCount
   createdAt
   updatedAt
 `;
