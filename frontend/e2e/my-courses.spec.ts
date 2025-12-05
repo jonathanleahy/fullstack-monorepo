@@ -44,10 +44,10 @@ test.describe('My Courses Page - Authenticated', () => {
     await registerAndLogin(page);
     await page.goto('/my-courses');
 
-    // Should have tabs
-    await expect(page.getByRole('button', { name: /all courses/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /in progress/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /completed/i })).toBeVisible();
+    // Should have tabs (using role='tab' for proper accessible tabs)
+    await expect(page.getByRole('tab', { name: /all courses/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /in progress/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /completed/i })).toBeVisible();
   });
 
   test('should switch between tabs', async ({ page }) => {
@@ -55,15 +55,15 @@ test.describe('My Courses Page - Authenticated', () => {
     await page.goto('/my-courses');
 
     // Click In Progress tab
-    await page.getByRole('button', { name: /in progress/i }).click();
+    await page.getByRole('tab', { name: /in progress/i }).click();
     await page.waitForTimeout(500);
 
     // Click Completed tab
-    await page.getByRole('button', { name: /completed/i }).click();
+    await page.getByRole('tab', { name: /completed/i }).click();
     await page.waitForTimeout(500);
 
     // Click All Courses tab
-    await page.getByRole('button', { name: /all courses/i }).click();
+    await page.getByRole('tab', { name: /all courses/i }).click();
     await page.waitForTimeout(500);
 
     // Page should still be functional
