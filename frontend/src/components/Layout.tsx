@@ -19,9 +19,14 @@ export function Layout({ children }: LayoutProps) {
             <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
               Home
             </Link>
-            <Link to="/users" className="text-muted-foreground hover:text-foreground transition-colors">
-              Users
+            <Link to="/courses" className="text-muted-foreground hover:text-foreground transition-colors">
+              Courses
             </Link>
+            {user && (
+              <Link to="/my-courses" className="text-muted-foreground hover:text-foreground transition-colors">
+                My Courses
+              </Link>
+            )}
             {user ? (
               <div className="flex items-center gap-4">
                 <span className="text-sm text-muted-foreground">{user.name}</span>

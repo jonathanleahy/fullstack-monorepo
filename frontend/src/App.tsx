@@ -5,6 +5,9 @@ import { HomePage } from './pages/HomePage';
 import { UsersPage } from './pages/UsersPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { CoursesPage } from './pages/CoursesPage';
+import { MyCoursesPage } from './pages/MyCoursesPage';
+import { CourseDetailPage } from './pages/CourseDetailPage';
 
 function App() {
   return (
@@ -23,7 +26,35 @@ function App() {
         }
       />
 
+      {/* Course routes - public browsing, auth required for enrollment */}
+      <Route
+        path="/courses"
+        element={
+          <Layout>
+            <CoursesPage />
+          </Layout>
+        }
+      />
+      <Route
+        path="/courses/:id"
+        element={
+          <Layout>
+            <CourseDetailPage />
+          </Layout>
+        }
+      />
+
       {/* Protected routes */}
+      <Route
+        path="/my-courses"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MyCoursesPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/users"
         element={
