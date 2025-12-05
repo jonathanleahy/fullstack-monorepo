@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMyCourses, useCourseActions } from '../hooks/useCourses';
 import type { Difficulty } from '../types/course';
+import { ProgressChart } from '../components/ProgressChart';
 import {
   Button,
   Badge,
@@ -16,7 +17,7 @@ import {
   TabsContent,
 } from '@repo/playbook';
 
-type TabType = 'all' | 'in-progress' | 'completed';
+type TabType = 'all' | 'in-progress' | 'completed' | 'stats';
 
 const difficultyVariant: Record<Difficulty, 'success' | 'warning' | 'danger'> = {
   BEGINNER: 'success',
@@ -37,6 +38,9 @@ export function MyCoursesPage() {
         break;
       case 'completed':
         fetchCompleted();
+        break;
+      case 'stats':
+        fetchMyCourses(); // Need all courses for stats
         break;
       default:
         fetchMyCourses();
@@ -185,6 +189,7 @@ export function MyCoursesPage() {
           <TabsTrigger value="all">All Courses</TabsTrigger>
           <TabsTrigger value="in-progress">In Progress</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="stats">Statistics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
@@ -197,6 +202,17 @@ export function MyCoursesPage() {
 
         <TabsContent value="completed">
           {renderCourseList()}
+        </TabsContent>
+
+        <TabsContent value="stats">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="mt-2 text-muted-foreground">Loading statistics...</p>
+            </div>
+          ) : (
+            <ProgressChart courses={courses} />
+          )}
         </TabsContent>
       </Tabs>
     </div>
