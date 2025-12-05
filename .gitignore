@@ -11,9 +11,10 @@ build/
 backend/bin/
 backend/tmp/
 
-# Database
-*.db
+# Database (exclude runtime db, but keep seed db)
+backend/data/app.db
 *.sqlite
+!backend/data/seed.db
 
 # Environment
 .env
@@ -44,4 +45,3 @@ logs/
 
 # Generated
 frontend/src/generated/
-backend/data/

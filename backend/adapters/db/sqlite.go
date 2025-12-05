@@ -2,6 +2,8 @@ package db
 
 import (
 	"database/sql"
+	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -19,6 +21,11 @@ func NewSQLiteDB(path string) (*SQLiteDB, error) {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return nil, err
+	}
+
+	// Check if we need to restore from seed database
+	if err := restoreFromSeedIfEmpty(path, dir); err != nil {
+		slog.Warn("failed to restore from seed database", "error", err)
 	}
 
 	db, err := sql.Open("sqlite3", path)
@@ -161,5 +168,40 @@ func (s *SQLiteDB) Migrate() error {
 	// Create index for author_id if it doesn't exist
 	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_library_courses_author_id ON library_courses(author_id)`)
 
+	return nil
+}
+
+// restoreFromSeedIfEmpty copies seed.db to app.db if app.db doesn't exist
+// This provides default content (like the Hexagonal Architecture course) for fresh installations
+func restoreFromSeedIfEmpty(dbPath, dataDir string) error {
+	// Check if app.db exists
+	if _, err := os.Stat(dbPath); err == nil {
+		// Database exists, no need to seed
+		return nil
+	}
+
+	// Check if seed.db exists
+	seedPath := filepath.Join(dataDir, "seed.db")
+	seedFile, err := os.Open(seedPath)
+	if err != nil {
+		// No seed file, that's okay - we'll start fresh
+		return nil
+	}
+	defer seedFile.Close()
+
+	slog.Info("restoring database from seed", "seedPath", seedPath, "dbPath", dbPath)
+
+	// Copy seed.db to app.db
+	destFile, err := os.Create(dbPath)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	if _, err := io.Copy(destFile, seedFile); err != nil {
+		return err
+	}
+
+	slog.Info("database restored from seed successfully")
 	return nil
 }
