@@ -1,475 +1,476 @@
+/**
+ * MAIN HOMEPAGE (V0): GENERAL AUDIENCE
+ *
+ * See full persona brief in: docs/website-brief.md → "V0 - HomePage.tsx (General Audience)"
+ *
+ * Target: Anyone interested in learning new skills (Age 25-45)
+ * Tone: Welcoming, clear, informative - "You can do this" energy
+ * Design: Blue primary, teal accents, soft shadows (shadow-lg shadow-slate-900/5)
+ * Effects: Solar flares (blue/teal), subtle gradient textures
+ * Sales: Low pressure, value-first, emphasize free signup
+ * Layout Flow: Hero (centered) → Split intro → 4-col categories → Horizontal steps →
+ *              Single testimonial spotlight → Stats row → Asymmetric split → CTA
+ */
 import { Link } from 'react-router-dom';
 import { Button, Badge } from '@repo/playbook/atoms';
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/playbook/molecules';
 import { useAuth } from '../hooks/useAuth';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { useRef } from 'react';
+import { DesignNavigation } from '../components/DesignNavigation';
 
-// Feature data
-const features = [
-  {
-    icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    ),
-    title: 'Rich Course Library',
-    description: 'Expertly crafted courses with structured lessons and downloadable resources.',
-  },
-  {
-    icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-      </svg>
-    ),
-    title: 'Interactive Quizzes',
-    description: 'Test knowledge with instant feedback and detailed explanations.',
-  },
-  {
-    icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
-    title: 'Progress Tracking',
-    description: 'Track your journey with detailed charts and completion metrics.',
-  },
-  {
-    icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-      </svg>
-    ),
-    title: 'Certificates',
-    description: 'Earn verifiable certificates to showcase your achievements.',
-  },
-  {
-    icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-      </svg>
-    ),
-    title: 'Smart Bookmarks',
-    description: 'Save favorites for quick access to important materials.',
-  },
-  {
-    icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
-    title: 'Analytics Dashboard',
-    description: 'Gain insights into learning patterns with recommendations.',
-  },
-];
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+  }
+};
 
-// Testimonials with Unsplash images
-const testimonials = [
-  {
-    quote: "This platform transformed how I learn. The interactive quizzes keep me motivated.",
-    author: "Sarah Chen",
-    role: "Software Developer",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
-  },
-  {
-    quote: "The course quality is exceptional. Each certification has directly helped my career.",
-    author: "Marcus Johnson",
-    role: "Data Analyst",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-  },
-  {
-    quote: "Finally, a learning platform that respects my time. Clear lessons and real results.",
-    author: "Emily Rodriguez",
-    role: "Product Manager",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-  },
-];
-
-// Stats
-const stats = [
-  { value: '10K+', label: 'Learners' },
-  { value: '500+', label: 'Courses' },
-  { value: '95%', label: 'Completion' },
-  { value: '4.9', label: 'Rating' },
-];
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" as const }
+  }
+};
 
 export function HomePage() {
   const { isAuthenticated } = useAuth();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef });
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+  const heroY = useTransform(smoothProgress, [0, 0.3], [0, -30]);
+
+  const courseCategories = [
+    { name: 'Web Development', courses: 45, icon: '💻', color: 'from-blue-500 to-blue-600' },
+    { name: 'Data Science', courses: 32, icon: '📊', color: 'from-teal-500 to-teal-600' },
+    { name: 'Design', courses: 28, icon: '🎨', color: 'from-pink-500 to-pink-600' },
+    { name: 'Business', courses: 24, icon: '📈', color: 'from-emerald-500 to-emerald-600' },
+  ];
+
+  const stats = [
+    { number: '50K+', label: 'Learners' },
+    { number: '200+', label: 'Courses' },
+    { number: '4.8', label: 'Avg Rating' },
+    { number: '95%', label: 'Completion' },
+  ];
 
   return (
-    <div className="min-h-screen overflow-hidden">
-      {/* Hero Section */}
-      <section className="relative py-16 lg:py-24">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
+    <div ref={containerRef} className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-slate-50">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link to="/" className="font-bold text-xl text-blue-600">Course Tutor</Link>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link to="/courses" className="text-slate-600 hover:text-slate-900 transition-colors">Courses</Link>
+            <a href="#" className="text-slate-600 hover:text-slate-900 transition-colors">About</a>
+            <a href="#" className="text-slate-600 hover:text-slate-900 transition-colors">Help</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            {isAuthenticated ? (
+              <Link to="/dashboard">
+                <Button variant="outline" size="sm">Dashboard</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="text-slate-600 hover:text-slate-900 text-sm transition-colors">Sign In</Link>
+                <Link to="/register">
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20">Sign Up</Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
 
-        <div className="container mx-auto px-4 relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left content */}
-            <div className="animate-fade-in-up">
-              <Badge variant="secondary" className="mb-4 animate-pulse-subtle">
-                Start Learning Today
-              </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-                Master Skills with
-                <span className="text-primary block">Interactive Learning</span>
-              </h1>
-              <p className="text-lg text-muted-foreground mb-8 max-w-lg">
-                Join thousands advancing their careers with structured courses,
-                hands-on quizzes, and personalized progress tracking.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                {isAuthenticated ? (
-                  <>
-                    <Link to="/dashboard">
-                      <Button size="lg" className="group">
-                        Go to Dashboard
-                        <svg className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </Button>
-                    </Link>
-                    <Link to="/courses">
-                      <Button variant="outline" size="lg">Browse Courses</Button>
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/register">
-                      <Button size="lg" className="group">
-                        Start Free
-                        <svg className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </Button>
-                    </Link>
-                    <Link to="/courses">
-                      <Button variant="outline" size="lg">Explore Courses</Button>
-                    </Link>
-                  </>
-                )}
-              </div>
+      {/* SECTION 1: Hero - Centered with solar flares and texture */}
+      <section className="relative py-24 lg:py-32 px-4 overflow-hidden">
+        {/* Texture background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.05]"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1920&q=80)' }}
+        />
+        {/* Faded hero image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.06]"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&q=80)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/90 via-white/80 to-white" />
 
-              {/* Trust badges */}
-              <div className="mt-10 flex items-center gap-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Free to start
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  No credit card
-                </div>
-              </div>
-            </div>
+        {/* Solar flares */}
+        <motion.div
+          className="absolute top-20 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-[100px]"
+          animate={{ scale: [1, 1.1, 1], opacity: [0.25, 0.35, 0.25] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" as const }}
+        />
+        <div className="absolute bottom-10 right-1/4 w-72 h-72 bg-teal-200/20 rounded-full blur-[80px]" />
 
-            {/* Right hero image */}
-            <div className="relative animate-fade-in-up animation-delay-200">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+        <motion.div style={{ y: heroY }} className="max-w-4xl mx-auto relative z-10 text-center">
+          <motion.div variants={containerVariants} initial="hidden" animate="visible">
+            <motion.div variants={itemVariants} className="mb-6">
+              <Badge className="bg-blue-100 text-blue-700 shadow-sm">Online Learning Platform</Badge>
+            </motion.div>
+
+            <motion.h1
+              variants={itemVariants}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6"
+            >
+              Learn New Skills with
+              <span className="block bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+                Course Tutor
+              </span>
+            </motion.h1>
+
+            <motion.p variants={itemVariants} className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Develop skills in web development, data science, design, and more through
+              video lessons, hands-on projects, and quizzes.
+            </motion.p>
+
+            <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4">
+              <Link to={isAuthenticated ? "/dashboard" : "/register"}>
+                <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-5 shadow-xl shadow-blue-500/25">
+                    Start Learning Free
+                  </Button>
+                </motion.div>
+              </Link>
+              <Link to="/courses">
+                <Button size="lg" variant="outline" className="px-8 py-5 border-slate-200 hover:bg-slate-50 shadow-lg shadow-slate-900/5">
+                  Browse Courses
+                </Button>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Wavy Divider */}
+      <div className="relative h-16 bg-gradient-to-b from-blue-50 to-white">
+        <svg viewBox="0 0 1440 100" className="absolute bottom-0 w-full h-16" preserveAspectRatio="none">
+          <path fill="#ffffff" d="M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z"/>
+        </svg>
+      </div>
+
+      {/* SECTION 2: What is Course Tutor - 2-column split with image */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 to-teal-500/10 rounded-2xl blur-xl" />
+              <div className="relative rounded-xl overflow-hidden shadow-xl shadow-slate-900/10">
                 <img
-                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop"
-                  alt="Students collaborating on learning"
-                  className="w-full h-auto object-cover"
+                  src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=450&fit=crop"
+                  alt="Person learning online"
+                  className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent pointer-events-none" />
               </div>
-
-              {/* Floating stats card */}
-              <div className="absolute -bottom-6 -left-6 bg-background border rounded-xl p-4 shadow-lg animate-float">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">95%</div>
-                    <div className="text-xs text-muted-foreground">Completion rate</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating users card */}
-              <div className="absolute -top-4 -right-4 bg-background border rounded-xl p-4 shadow-lg animate-float animation-delay-500">
-                <div className="flex -space-x-2">
-                  {[
-                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop&crop=face",
-                    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=40&h=40&fit=crop&crop=face",
-                    "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=40&h=40&fit=crop&crop=face",
-                  ].map((src, i) => (
-                    <img key={i} src={src} alt="" className="w-8 h-8 rounded-full border-2 border-background" />
-                  ))}
-                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center border-2 border-background font-medium">
-                    +5K
-                  </div>
-                </div>
-                <div className="text-xs text-muted-foreground mt-2">Active learners</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-8 border-y bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center gap-8 md:gap-16 flex-wrap">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
-                <div className="text-xs text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Powerful tools designed to maximize your learning potential.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map((feature, index) => (
-              <Card
-                key={index}
-                className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-default"
-              >
-                <CardHeader className="pb-2">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-                    {feature.icon}
-                  </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Visual break with image */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&h=600&fit=crop"
-            alt="Learning environment"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/80" />
-        </div>
-        <div className="container mx-auto px-4 relative">
-          <div className="max-w-lg">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Learn at Your Own Pace
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Access courses anytime, anywhere. Pick up where you left off and
-              track your progress as you go. No pressure, just learning.
-            </p>
-            <Link to="/courses">
-              <Button className="group">
-                View Courses
-                <svg className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="relative inline-block mb-4">
+                <h2 className="text-3xl font-bold text-slate-900">What is Course Tutor?</h2>
+                {/* Hand-drawn underline SVG */}
+                <svg className="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 300 12" preserveAspectRatio="none">
+                  <path d="M5,8 Q75,3 150,7 T295,8" stroke="#3b82f6" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.6"/>
                 </svg>
-              </Button>
+              </div>
+              <p className="text-lg text-slate-600 mb-6 leading-relaxed mt-6">
+                An online learning platform where you can take courses in web development,
+                data science, design, and more. Each course includes video lessons, hands-on
+                projects, and quizzes.
+              </p>
+              <ul className="space-y-3">
+                {['Learn at your own pace', 'No deadlines or pressure', 'Track your progress'].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-slate-600">
+                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center shadow-sm">
+                      <span className="text-blue-600 text-sm">✓</span>
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: Course Categories - 4-column grid with gradient cards */}
+      <section className="relative py-20 px-4 overflow-hidden">
+        {/* Subtle texture */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.03]"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1557683316-973673baf926?w=1920&q=80)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-50 to-white" />
+
+        <div className="max-w-5xl mx-auto relative z-10">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">What You Can Learn</h2>
+            <p className="text-slate-600">Explore our course categories</p>
+          </motion.div>
+
+          <motion.div
+            className="grid md:grid-cols-4 gap-5"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {courseCategories.map((category, i) => (
+              <motion.div
+                key={i}
+                variants={itemVariants}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="relative group"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className="relative bg-white rounded-xl p-6 border border-slate-100 shadow-lg shadow-slate-900/5 group-hover:bg-white/90 group-hover:shadow-xl group-hover:shadow-slate-900/10 transition-all duration-300 text-center">
+                  <div className="text-4xl mb-3">{category.icon}</div>
+                  <h3 className="font-semibold text-slate-900 mb-1">{category.name}</h3>
+                  <span className="text-sm text-blue-600 font-medium">{category.courses} courses</span>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <div className="text-center mt-10">
+            <Link to="/courses" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              View all courses →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-16 lg:py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Start in 3 Steps
-            </h2>
-          </div>
+      {/* SECTION 4: How It Works - Horizontal steps with connecting line */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">How It Works</h2>
+            <p className="text-slate-600">Simple steps to start learning</p>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-            {[
-              { step: '1', title: 'Sign Up', desc: 'Create your free account in seconds.' },
-              { step: '2', title: 'Choose', desc: 'Pick courses that match your goals.' },
-              { step: '3', title: 'Learn', desc: 'Study at your pace, earn certificates.' },
-            ].map((item, index) => (
-              <div key={index} className="text-center relative group">
-                <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground text-xl font-bold flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  {item.step}
+          <div className="relative">
+            {/* Connecting line */}
+            <div className="hidden md:block absolute top-8 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-blue-200 via-teal-200 to-blue-200" />
+
+            <motion.div
+              className="grid md:grid-cols-4 gap-8"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              {[
+                { step: '1', title: 'Sign Up', desc: 'Create your free account in seconds' },
+                { step: '2', title: 'Choose a Course', desc: 'Browse our catalog and pick a topic' },
+                { step: '3', title: 'Watch & Learn', desc: 'Study with video lessons at your pace' },
+                { step: '4', title: 'Build Projects', desc: 'Apply skills with hands-on exercises' },
+              ].map((step, i) => (
+                <motion.div key={i} variants={itemVariants} className="text-center relative">
+                  <motion.div
+                    className="w-16 h-16 bg-gradient-to-br from-blue-500 to-teal-500 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4 shadow-lg shadow-blue-500/25 relative z-10"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    {step.step}
+                  </motion.div>
+                  <h3 className="font-semibold text-slate-900 mb-2">{step.title}</h3>
+                  <p className="text-sm text-slate-600">{step.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5: Single Testimonial Spotlight - Large centered quote */}
+      <section className="relative py-24 px-4 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.05]"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-teal-50/50" />
+
+        {/* Solar flare for testimonial */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-[120px]" />
+
+        <motion.div
+          className="max-w-3xl mx-auto relative z-10 text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <div className="text-6xl text-blue-200 mb-6">"</div>
+          <p className="text-2xl text-slate-700 mb-8 italic leading-relaxed">
+            The web development course helped me land my first dev job. Clear lessons,
+            practical projects, and a supportive community. Couldn't recommend it more.
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center text-white text-xl font-semibold shadow-lg shadow-blue-500/20">
+              S
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-slate-900">Sarah Mitchell</div>
+              <div className="text-blue-600">Now a Frontend Developer at TechCorp</div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* SECTION 6: Stats Row - Large numbers in horizontal layout */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {stats.map((stat, i) => (
+              <motion.div
+                key={i}
+                variants={itemVariants}
+                className="text-center"
+              >
+                <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent mb-2">
+                  {stat.number}
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-                {index < 2 && (
-                  <div className="hidden md:block absolute top-7 left-[60%] w-[80%] border-t border-dashed border-muted-foreground/30" />
-                )}
-              </div>
+                <div className="text-slate-600">{stat.label}</div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Loved by Learners
-            </h2>
-          </div>
+      {/* SECTION 7: Learn Anywhere - Asymmetric split (text 1/3, images 2/3) */}
+      <section className="relative py-20 px-4 overflow-hidden">
+        {/* Subtle texture background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.04]"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1920&q=80)' }}
+        />
+        <div className="absolute inset-0 bg-slate-50/95" />
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex gap-0.5 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-6">"{testimonial.quote}"</p>
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.author}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <div className="font-medium text-sm">{testimonial.author}</div>
-                      <div className="text-xs text-muted-foreground">{testimonial.role}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 lg:py-20 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Start?
-          </h2>
-          <p className="text-lg opacity-90 mb-8 max-w-lg mx-auto">
-            Join thousands already advancing their careers.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            {isAuthenticated ? (
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid md:grid-cols-3 gap-8 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="md:col-span-1"
+            >
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Learn Anywhere</h2>
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                Access courses on any device. Your progress syncs automatically across
+                laptop, tablet, and phone.
+              </p>
               <Link to="/courses">
-                <Button size="lg" variant="secondary" className="group">
-                  Browse Courses
-                  <svg className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20">Explore Courses</Button>
               </Link>
-            ) : (
-              <>
-                <Link to="/register">
-                  <Button size="lg" variant="secondary" className="group">
-                    Get Started Free
-                    <svg className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </Button>
-                </Link>
-                <Link to="/login">
-                  <Button size="lg" variant="ghost" className="text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/10">
-                    Sign In
-                  </Button>
-                </Link>
-              </>
-            )}
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="md:col-span-2 grid grid-cols-2 gap-4"
+            >
+              <div className="relative rounded-xl overflow-hidden shadow-lg shadow-slate-900/10">
+                <img
+                  src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400&h=300&fit=crop"
+                  alt="Learning on laptop"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-teal-600/10 pointer-events-none" />
+              </div>
+              <div className="relative rounded-xl overflow-hidden shadow-lg shadow-slate-900/10 mt-8">
+                <img
+                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop"
+                  alt="Team collaboration"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tl from-teal-600/10 via-transparent to-blue-600/10 pointer-events-none" />
+              </div>
+            </motion.div>
           </div>
-          <p className="mt-6 text-sm opacity-70">
-            No credit card required
-          </p>
+        </div>
+      </section>
+
+      {/* Wavy Divider */}
+      <div className="relative h-16 bg-slate-50">
+        <svg viewBox="0 0 1440 100" className="absolute top-0 w-full h-16" preserveAspectRatio="none">
+          <path fill="#0ea5e9" d="M0,30 C480,80 960,10 1440,40 L1440,0 L0,0 Z"/>
+        </svg>
+      </div>
+
+      {/* SECTION 8: CTA - Full width with background image and solar flare */}
+      <section className="relative py-24 px-4 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1920&q=80)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/95 to-teal-600/95" />
+
+        {/* Solar flare on CTA */}
+        <div className="absolute top-0 right-1/4 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
+
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2
+              className="text-3xl md:text-4xl font-bold text-white mb-4"
+              style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+            >
+              Ready to Start Learning?
+            </h2>
+            <p className="text-blue-100 mb-8 text-lg">
+              Join thousands of learners building new skills every day.
+            </p>
+            <Link to={isAuthenticated ? "/courses" : "/register"}>
+              <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
+                <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 px-10 py-5 font-medium shadow-xl shadow-black/20">
+                  Get Started Free
+                </Button>
+              </motion.div>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-10 border-t">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Course Tutor. All rights reserved.
-            </div>
-            <div className="flex gap-6 text-sm text-muted-foreground">
-              <Link to="/courses" className="hover:text-foreground transition-colors">Courses</Link>
-              <a href="/graphql" className="hover:text-foreground transition-colors">API</a>
-              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-            </div>
+      <footer className="bg-slate-100 text-slate-700 py-8">
+        <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
+          <span className="font-semibold text-blue-600">Course Tutor</span>
+          <div className="flex gap-6 text-sm text-slate-500">
+            <Link to="/courses" className="hover:text-slate-900 transition-colors">Courses</Link>
+            <a href="#" className="hover:text-slate-900 transition-colors">About</a>
+            <a href="#" className="hover:text-slate-900 transition-colors">Help</a>
           </div>
         </div>
       </footer>
-
-      {/* CSS Animations */}
-      <style>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        @keyframes pulse-subtle {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.7;
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out forwards;
-        }
-
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-
-        .animate-pulse-subtle {
-          animation: pulse-subtle 2s ease-in-out infinite;
-        }
-
-        .animation-delay-200 {
-          animation-delay: 200ms;
-        }
-
-        .animation-delay-500 {
-          animation-delay: 500ms;
-        }
-      `}</style>
+      <DesignNavigation currentVersion={0} />
     </div>
   );
 }

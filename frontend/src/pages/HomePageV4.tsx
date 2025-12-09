@@ -1,261 +1,466 @@
 /**
- * VARIANT 4: PLAYFUL / CREATIVE
- * - Rounded shapes
- * - Fun illustrations/icons
- * - Bouncy animations
- * - Friendly copywriting
- * - Pastel colors
+ * VARIANT 4: CREATIVE HOBBYISTS
+ *
+ * Reference: docs/website-brief.md - V4 Persona Section
+ * Target: Creative hobbyists learning for fun and personal enrichment (Age 25-55)
+ * Motivation: New hobby, creative outlet, personal projects
+ *
+ * Tone: Warm, encouraging, "learning should be fun"
+ * No pressure, no deadlines, celebrates curiosity
+ *
+ * Design Style:
+ * - Aesthetic: Playful, colorful, inviting
+ * - Colors: Rose/pink/orange gradients, warm and fun
+ * - Shadows: Colored & layered (shadow-xl shadow-rose-500/20)
+ * - Border radius: Generous (12-20px)
+ * - Typography: Friendly, rounded feel
+ * - Effects: Solar flares (rose/pink), watercolor/artistic texture
+ *
+ * Sales Approach:
+ * - Emphasize enjoyment, not outcomes
+ * - Variety of topics (design, photography, video, etc.)
+ * - No career pressure - "Learn at your own pace"
+ * - Community and creativity angle
+ *
+ * Layout Flow:
+ * Centered hero with floating elements → Icon strip → Large image overlay →
+ * 3-col cards → Alternating testimonials → Colorful banner → 3-step how it works → CTA
  */
 import { Link } from 'react-router-dom';
 import { Button, Badge } from '@repo/playbook/atoms';
-import { Card, CardContent } from '@repo/playbook/molecules';
 import { useAuth } from '../hooks/useAuth';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { useRef } from 'react';
+import { DesignNavigation } from '../components/DesignNavigation';
 
-const steps = [
-  { emoji: '👋', title: 'Say Hello', desc: 'Create your free account in just a few clicks' },
-  { emoji: '🎯', title: 'Pick Your Path', desc: 'Choose courses that spark your curiosity' },
-  { emoji: '🚀', title: 'Blast Off!', desc: 'Start learning and watch yourself grow' },
-];
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.15 }
+  }
+};
 
-const testimonials = [
-  { name: 'Jamie', emoji: '🎨', text: "Learning here feels like playing a game. I'm actually excited to study!", role: 'Designer' },
-  { name: 'Sam', emoji: '💻', text: "Finally, courses that don't put me to sleep. Love the interactive bits!", role: 'Developer' },
-  { name: 'Alex', emoji: '📊', text: 'Went from confused to confident in just 2 weeks. Mind = blown!', role: 'Analyst' },
-];
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" as const }
+  }
+};
 
 export function HomePageV4() {
   const { isAuthenticated } = useAuth();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef });
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+  const heroY = useTransform(smoothProgress, [0, 0.3], [0, -25]);
+
+  const creativeCourses = [
+    { title: 'Photography Basics', duration: '4 weeks', icon: '📷' },
+    { title: 'Web Design for Beginners', duration: '6 weeks', icon: '🎨' },
+    { title: 'Video Editing', duration: '5 weeks', icon: '🎬' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50 via-pink-50 to-orange-50 dark:from-violet-950 dark:via-pink-950 dark:to-orange-950">
-      {/* Hero - Playful */}
-      <section className="pt-16 pb-24 px-4 relative overflow-hidden">
-        {/* Floating shapes */}
-        <div className="absolute top-20 left-10 text-6xl animate-bounce-slow">📚</div>
-        <div className="absolute top-40 right-20 text-5xl animate-bounce-slow-delayed">✨</div>
-        <div className="absolute bottom-40 left-1/4 text-4xl animate-float">🎓</div>
-        <div className="absolute top-1/3 right-1/4 text-5xl animate-spin-slow">⭐</div>
-
-        <div className="container mx-auto relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-block animate-wave text-6xl mb-6">👋</div>
-            <Badge className="bg-gradient-to-r from-violet-400 to-pink-400 text-white border-0 mb-6 animate-pulse">
-              psst... learning is fun here!
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="text-violet-600 dark:text-violet-400">Learn stuff.</span>
-              <br />
-              <span className="text-pink-500">Have fun.</span>
-              <br />
-              <span className="text-orange-500">Level up!</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-10">
-              No boring lectures. No snooze-fest videos.
-              <br className="hidden md:block" />
-              Just awesome courses that actually make sense. 🙌
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
+    <div ref={containerRef} className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-rose-50/30">
+      {/* Header - V4: Logo RIGHT, nav LEFT (reversed) */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <nav className="hidden md:flex items-center gap-6">
+              <Link to="/courses" className="text-slate-600 hover:text-slate-900 transition-colors">Courses</Link>
+              <Link to="/about" className="text-slate-600 hover:text-slate-900 transition-colors">About</Link>
+              <Link to="/help" className="text-slate-600 hover:text-slate-900 transition-colors">Help</Link>
+            </nav>
+            <div className="flex items-center gap-3">
               {isAuthenticated ? (
                 <Link to="/dashboard">
-                  <Button size="lg" className="bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-600 hover:to-pink-600 text-white rounded-full px-8 py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
-                    Let's Go! 🎉
-                  </Button>
+                  <Button variant="outline" size="sm">Dashboard</Button>
                 </Link>
               ) : (
                 <>
+                  <Link to="/login" className="text-slate-600 hover:text-slate-900 text-sm">Sign In</Link>
                   <Link to="/register">
-                    <Button size="lg" className="bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-600 hover:to-pink-600 text-white rounded-full px-8 py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
-                      Jump In Free! 🎉
-                    </Button>
-                  </Link>
-                  <Link to="/courses">
-                    <Button size="lg" variant="outline" className="rounded-full px-8 py-6 text-lg border-2 hover:bg-white/50">
-                      Peek Inside 👀
-                    </Button>
+                    <Button size="sm" className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 shadow-xl shadow-rose-500/20">Start Free</Button>
                   </Link>
                 </>
               )}
             </div>
           </div>
+          <Link to="/" className="font-bold text-xl text-rose-600">Course Tutor</Link>
         </div>
+      </header>
+
+      {/* SECTION 1: Centered hero with floating decorative elements */}
+      <section className="relative py-24 lg:py-32 px-4 overflow-hidden">
+        {/* Watercolor texture background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.10]"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1920&q=80)' }}
+        />
+
+        {/* Solar flares - animated */}
+        <motion.div
+          className="absolute top-20 left-1/4 w-96 h-96 bg-rose-200/30 rounded-full blur-[100px]"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.4, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut" as const,
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-1/4 w-72 h-72 bg-pink-200/25 rounded-full blur-[80px]"
+          animate={{
+            scale: [1, 1.15, 1],
+            opacity: [0.25, 0.35, 0.25],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut" as const,
+            delay: 1,
+          }}
+        />
+
+        {/* Floating emojis */}
+        <motion.div
+          className="absolute top-32 right-24 text-4xl"
+          animate={{ y: [0, -15, 0], rotate: [0, 10, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" as const }}
+        >
+          🎨
+        </motion.div>
+        <motion.div
+          className="absolute bottom-40 left-20 text-3xl"
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" as const, delay: 0.5 }}
+        >
+          💡
+        </motion.div>
+        <motion.div
+          className="absolute top-48 left-32 text-2xl"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" as const, delay: 1 }}
+        >
+          ✨
+        </motion.div>
+
+        <motion.div style={{ y: heroY }} className="max-w-3xl mx-auto relative z-10 text-center">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={itemVariants} className="mb-6">
+              <Badge className="bg-rose-100 text-rose-700 shadow-xl shadow-rose-500/20">Learn for Fun</Badge>
+            </motion.div>
+
+            <motion.h1
+              variants={itemVariants}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6"
+            >
+              Discover Your
+              <span className="block bg-gradient-to-r from-rose-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
+                Creative Side
+              </span>
+            </motion.h1>
+
+            <motion.p variants={itemVariants} className="text-lg text-slate-600 mb-8 max-w-xl mx-auto leading-relaxed">
+              Explore courses in design, photography, video, and more. Learn at your own pace,
+              no pressure. Just you and your creativity.
+            </motion.p>
+
+            <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4">
+              <Link to={isAuthenticated ? "/dashboard" : "/register"}>
+                <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
+                  <Button size="lg" className="bg-gradient-to-r from-rose-600 to-pink-600 text-white px-8 py-5 rounded-full shadow-xl shadow-rose-500/20 hover:shadow-2xl hover:shadow-rose-500/30 transition-shadow">
+                    Start Exploring
+                  </Button>
+                </motion.div>
+              </Link>
+              <Link to="/courses">
+                <Button size="lg" variant="outline" className="px-8 py-5 rounded-full border-rose-200 hover:bg-rose-50 shadow-lg shadow-rose-500/10">
+                  Browse Courses
+                </Button>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </section>
 
-      {/* How it works - Fun steps */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">
-              Easy as 1-2-3! 🎯
-            </h2>
-          </div>
+      {/* Wavy Divider */}
+      <svg className="w-full h-16" viewBox="0 0 1440 100" preserveAspectRatio="none">
+        <path fill="#ffffff" d="M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z"/>
+      </svg>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {steps.map((step, i) => (
-              <div
-                key={i}
-                className="text-center group"
-              >
-                <div className="w-24 h-24 rounded-3xl bg-white dark:bg-slate-800 shadow-lg flex items-center justify-center text-5xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                  {step.emoji}
-                </div>
-                <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-muted-foreground">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Fun image section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="bg-gradient-to-r from-violet-500 via-pink-500 to-orange-400 rounded-[3rem] p-1">
-            <div className="bg-white dark:bg-slate-900 rounded-[2.8rem] p-8 md:p-12">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div>
-                  <div className="text-5xl mb-4">🧠</div>
-                  <h3 className="text-2xl md:text-3xl font-black mb-4">
-                    Your brain will thank you
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    Interactive lessons, bite-sized content, and actual fun quizzes.
-                    We made learning not suck. You're welcome. 😎
-                  </p>
-                  <ul className="space-y-3">
-                    {['Video lessons that don\'t bore', 'Quizzes that actually help', 'Progress you can see'].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3">
-                        <span className="text-xl">✅</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop"
-                    alt="Happy learners"
-                    className="rounded-2xl shadow-xl"
-                  />
-                  <div className="absolute -bottom-4 -right-4 bg-yellow-400 text-black font-bold px-6 py-3 rounded-xl rotate-3 shadow-lg">
-                    Much wow! 🎊
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials - Playful cards */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">
-              People love us! 💕
-            </h2>
-            <p className="text-muted-foreground">Don't take our word for it (but do, we're great)</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {testimonials.map((t, i) => (
-              <Card
-                key={i}
-                className="border-0 shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 hover:rotate-1"
-              >
-                <CardContent className="p-6">
-                  <div className="text-4xl mb-4">{t.emoji}</div>
-                  <p className="mb-4">"{t.text}"</p>
-                  <div className="text-sm">
-                    <span className="font-bold">{t.name}</span>
-                    <span className="text-muted-foreground"> • {t.role}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats - Bubbly */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="flex flex-wrap justify-center gap-6">
+      {/* SECTION 2: Icon benefits strip */}
+      <section className="py-10 px-4 bg-white border-y border-slate-100">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            className="flex flex-wrap justify-center gap-10 md:gap-16"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
             {[
-              { value: '50K+', label: 'Happy Learners', emoji: '🎉' },
-              { value: '500+', label: 'Cool Courses', emoji: '📚' },
-              { value: '4.9★', label: 'Avg Rating', emoji: '⭐' },
-              { value: '∞', label: 'Good Vibes', emoji: '✨' },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-lg text-center min-w-[150px] hover:scale-105 transition-transform"
-              >
-                <div className="text-3xl mb-2">{stat.emoji}</div>
-                <div className="text-2xl font-black">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
+              { icon: '🎯', text: 'Self-paced learning' },
+              { icon: '🎨', text: 'Creative projects' },
+              { icon: '💬', text: 'Friendly community' },
+              { icon: '🏆', text: 'Certificates' },
+            ].map((item, i) => (
+              <motion.div key={i} variants={itemVariants} className="flex items-center gap-2 text-slate-700">
+                <span className="text-2xl">{item.icon}</span>
+                <span className="font-medium">{item.text}</span>
+              </motion.div>
             ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* SECTION 3: Large image with overlaid text */}
+      <section className="relative py-0 overflow-hidden">
+        <div className="relative h-[400px] md:h-[500px]">
+          <img
+            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&h=800&fit=crop"
+            alt="Creative learning"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-rose-900/80 via-rose-900/60 to-transparent" />
+          <div className="absolute inset-0 flex items-center">
+            <motion.div
+              className="max-w-2xl px-8 md:px-16"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" as const }}
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                What is Course Tutor?
+              </h2>
+              <p className="text-rose-100 text-lg leading-relaxed mb-6">
+                An online learning playground where you explore creativity at your own pace.
+                Video lessons, hands-on projects, and a supportive community of fellow hobbyists.
+              </p>
+              <Link to="/courses">
+                <Button className="bg-white text-rose-700 hover:bg-rose-50 rounded-full shadow-xl shadow-rose-500/20">
+                  Explore Courses
+                </Button>
+              </Link>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="bg-gradient-to-r from-violet-500 via-pink-500 to-orange-400 rounded-[3rem] p-12 text-center text-white relative overflow-hidden">
-            <div className="absolute top-4 left-8 text-4xl animate-bounce">🎈</div>
-            <div className="absolute bottom-4 right-8 text-4xl animate-bounce-slow">🎈</div>
+      {/* SECTION 4: 3-column course cards */}
+      <section className="py-20 px-4 bg-slate-50 relative overflow-hidden">
+        {/* Subtle watercolor texture */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.08]"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1920&q=80)' }}
+        />
 
-            <h2 className="text-3xl md:text-4xl font-black mb-4">
-              Ready to become awesome? 🚀
-            </h2>
-            <p className="text-white/90 mb-8 text-lg">
-              Spoiler: You already are. Let's just make it official.
-            </p>
-            <Link to={isAuthenticated ? "/courses" : "/register"}>
-              <Button size="lg" className="bg-white text-violet-600 hover:bg-yellow-300 hover:text-violet-700 rounded-full px-10 py-6 text-lg font-bold shadow-lg">
-                {isAuthenticated ? "See Courses 👀" : "Start Your Adventure 🌟"}
-              </Button>
+        <div className="max-w-5xl mx-auto relative z-10">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: "easeOut" as const }}
+          >
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">Popular Creative Courses</h2>
+            <p className="text-slate-600">Start your creative journey today</p>
+          </motion.div>
+
+          <motion.div
+            className="grid md:grid-cols-3 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {creativeCourses.map((course, i) => (
+              <motion.div
+                key={i}
+                variants={itemVariants}
+                whileHover={{ y: -8 }}
+                transition={{ duration: 0.3, ease: "easeOut" as const }}
+                className="bg-white rounded-2xl p-6 shadow-xl shadow-rose-500/20 border border-rose-100 hover:shadow-2xl hover:shadow-rose-500/30 transition-all duration-300 text-center"
+                style={{ transform: i === 1 ? 'rotate(-1deg)' : i === 2 ? 'rotate(-2deg)' : 'rotate(0deg)' }}
+              >
+                <div className="text-5xl mb-4">{course.icon}</div>
+                <h3 className="font-semibold text-slate-900 text-lg mb-2">{course.title}</h3>
+                <span className="text-rose-600 text-sm">{course.duration}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <div className="text-center mt-10">
+            <Link to="/courses" className="text-rose-600 hover:text-rose-700 font-medium transition-colors">
+              View all courses →
             </Link>
           </div>
         </div>
       </section>
 
+      {/* SECTION 5: Alternating testimonials */}
+      <section className="py-20 px-4 bg-white relative overflow-hidden">
+        {/* Solar flare accent */}
+        <div className="absolute top-10 right-1/4 w-80 h-80 bg-pink-200/20 rounded-full blur-[100px]" />
+
+        <div className="max-w-4xl mx-auto relative z-10">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: "easeOut" as const }}
+          >
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">Creative Success Stories</h2>
+          </motion.div>
+
+          <div className="space-y-8">
+            {[
+              { name: 'Lisa M.', quote: 'Started as a hobby, now I sell prints on Etsy! The photography course unlocked my creative eye.', role: 'Hobbyist → Freelance Photographer', align: 'left' },
+              { name: 'Tom K.', quote: 'Built my first website for my band. Never thought I could code but the lessons made it easy.', role: 'Musician → Side Project Developer', align: 'right' },
+            ].map((t, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: t.align === 'left' ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: "easeOut" as const }}
+                className={`flex ${t.align === 'right' ? 'justify-end' : ''}`}
+              >
+                <div className={`max-w-lg bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 border border-rose-100 shadow-xl shadow-rose-500/20 ${t.align === 'right' ? 'text-right' : ''}`}>
+                  <p className="text-slate-600 italic mb-4 leading-relaxed">"{t.quote}"</p>
+                  <div className={`flex items-center gap-3 ${t.align === 'right' ? 'flex-row-reverse' : ''}`}>
+                    <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold shadow-lg shadow-rose-500/30">
+                      {t.name.charAt(0)}
+                    </div>
+                    <div className={t.align === 'right' ? 'text-right' : ''}>
+                      <div className="font-medium text-slate-900">{t.name}</div>
+                      <div className="text-rose-600 text-sm">{t.role}</div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 6: Full-width colorful banner */}
+      <section className="py-16 px-4 bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 relative overflow-hidden">
+        {/* Watercolor texture overlay */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.12] mix-blend-overlay"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1920&q=80)' }}
+        />
+
+        <motion.div
+          className="max-w-3xl mx-auto text-center text-white relative z-10"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: "easeOut" as const }}
+        >
+          <div className="text-5xl mb-4">🎨 ✨ 📷</div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">Your Creative Journey Starts Here</h2>
+          <p className="text-white/90">No experience needed. Just bring your curiosity.</p>
+        </motion.div>
+      </section>
+
+      {/* SECTION 7: Simple 3-step how it works */}
+      <section className="py-20 px-4 bg-white relative overflow-hidden">
+        {/* Solar flare */}
+        <div className="absolute bottom-10 left-1/4 w-96 h-96 bg-rose-200/25 rounded-full blur-[100px]" />
+
+        <div className="max-w-4xl mx-auto relative z-10">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: "easeOut" as const }}
+          >
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">How It Works</h2>
+          </motion.div>
+
+          <motion.div
+            className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {[
+              { step: '1', title: 'Pick a Course', emoji: '🔍' },
+              { step: '2', title: 'Learn & Create', emoji: '🎨' },
+              { step: '3', title: 'Share Your Work', emoji: '🌟' },
+            ].map((s, i) => (
+              <motion.div key={i} variants={itemVariants} className="text-center">
+                <div className="text-4xl mb-3">{s.emoji}</div>
+                <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-bold mx-auto mb-2 shadow-lg shadow-rose-500/20">
+                  {s.step}
+                </div>
+                <h3 className="font-semibold text-slate-900">{s.title}</h3>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* SECTION 8: CTA */}
+      <section className="py-20 px-4 bg-gradient-to-br from-rose-600 to-pink-600 relative overflow-hidden">
+        {/* Watercolor texture */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.10] mix-blend-overlay"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1920&q=80)' }}
+        />
+
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: "easeOut" as const }}
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+              Ready to Get Creative?
+            </h2>
+            <p className="text-rose-100 mb-8">
+              Join thousands of hobbyists learning new skills every day.
+            </p>
+            <Link to={isAuthenticated ? "/courses" : "/register"}>
+              <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
+                <Button size="lg" className="bg-white text-rose-600 hover:bg-rose-50 px-10 py-5 font-medium rounded-full shadow-xl shadow-rose-900/30 hover:shadow-2xl hover:shadow-rose-900/40 transition-shadow">
+                  Start Free Today
+                </Button>
+              </motion.div>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="py-8 px-4">
-        <div className="container mx-auto text-center text-muted-foreground">
-          <p>Made with 💜 by Course Tutor • © 2024</p>
+      <footer className="bg-slate-100 text-slate-700 py-8">
+        <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
+          <span className="font-semibold text-rose-600">Course Tutor</span>
+          <div className="flex gap-6 text-sm text-slate-500">
+            <Link to="/courses" className="hover:text-slate-900 transition-colors">Courses</Link>
+            <Link to="/about" className="hover:text-slate-900 transition-colors">About</Link>
+            <Link to="/help" className="hover:text-slate-900 transition-colors">Help</Link>
+          </div>
         </div>
       </footer>
-
-      <style>{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
-        }
-        @keyframes bounce-slow-delayed {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(10deg); }
-        }
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes wave {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(20deg); }
-          75% { transform: rotate(-20deg); }
-        }
-        .animate-bounce-slow { animation: bounce-slow 3s ease-in-out infinite; }
-        .animate-bounce-slow-delayed { animation: bounce-slow-delayed 3.5s ease-in-out infinite 0.5s; }
-        .animate-float { animation: float 4s ease-in-out infinite; }
-        .animate-spin-slow { animation: spin-slow 20s linear infinite; }
-        .animate-wave { animation: wave 1s ease-in-out infinite; }
-      `}</style>
+      <DesignNavigation currentVersion={4} />
     </div>
   );
 }

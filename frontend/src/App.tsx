@@ -22,15 +22,8 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Public routes with layout */}
-      <Route
-        path="/"
-        element={
-          <Layout>
-            <HomePageSelector />
-          </Layout>
-        }
-      />
+      {/* Homepage - no layout wrapper, variants have their own design */}
+      <Route path="/" element={<HomePageSelector />} />
 
       {/* Course routes - public browsing, auth required for enrollment */}
       <Route

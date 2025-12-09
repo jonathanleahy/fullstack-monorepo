@@ -26,6 +26,7 @@
     "@uiw/react-md-editor": "^4.0.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "framer-motion": "^12.23.25",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
     "lucide-react": "^0.309.0",
