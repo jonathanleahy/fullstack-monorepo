@@ -29,7 +29,7 @@ func NewFolderCourseRepository(coursesPath string) *FolderCourseRepository {
 	return &FolderCourseRepository{
 		coursesPath: coursesPath,
 		cache:       make(map[string]*entities.LibraryCourse),
-		cacheTTL:    5 * time.Minute, // Reload courses every 5 minutes
+		cacheTTL:    30 * time.Second, // Reload courses every 30 seconds (dev mode)
 	}
 }
 

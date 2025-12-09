@@ -2,4 +2,5 @@
 export * from './atoms';
 export * from './molecules';
 export * from './organisms';
+export * from './content-blocks';
 export * from './lib/utils';

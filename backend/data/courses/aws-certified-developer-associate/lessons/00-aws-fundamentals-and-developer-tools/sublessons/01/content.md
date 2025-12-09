@@ -75,9 +75,15 @@ graph LR
         end
     end
 
+    DC1 <--> DC2
+    DC3 <--> DC4
+    DC5 <--> DC6
     DC1 <--> DC3
+    DC2 <--> DC4
     DC3 <--> DC5
+    DC4 <--> DC6
     DC1 <--> DC5
+    DC2 <--> DC6
 ```
 
 **Key Facts about AZs:**
@@ -131,11 +137,21 @@ flowchart TD
 
 Alex almost picked `ap-southeast-1` (Singapore) because it sounded cool. But with users in the US, that would mean 200+ ms latency for every request!
 
-```
-US User → Singapore → Database → Singapore → US User
-         ~100ms        ~5ms       ~100ms
+```mermaid
+sequenceDiagram
+    participant U as 🇺🇸 US User
+    participant S as 🇸🇬 Singapore
+    participant D as 💾 Database
 
-Total: ~205ms (Terrible user experience!)
+    U->>S: Request
+    Note right of U: ~100ms
+    S->>D: Query
+    Note right of S: ~5ms
+    D->>S: Data
+    S->>U: Response
+    Note left of S: ~100ms
+
+    Note over U,D: Total: ~205ms ❌
 ```
 
 ### Mistake 2: Assuming All Services Are Everywhere
@@ -147,9 +163,15 @@ Alex wanted to use Amazon Bedrock (AI service), but discovered it's not availabl
 # Then roll out to other regions over months
 ```
 
-### Mistake 3: Forgetting About Data Residency
+### Mistake 3: Forgetting About Data Residency 🔒
 
 While not relevant for PetTracker yet, Alex learned that some industries (healthcare, finance, government) have strict rules about where data can be stored.
+
+| Industry | Compliance | Requirement |
+|----------|------------|-------------|
+| 🏥 Healthcare | HIPAA | Specific regions only |
+| 🏦 Finance | PCI-DSS | Specific regions only |
+| 🏛️ Government | FedRAMP | GovCloud regions |
 
 ## Infrastructure Comparison
 
