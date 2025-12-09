@@ -8,6 +8,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { CoursesPage } from './pages/CoursesPage';
 import { MyCoursesPage } from './pages/MyCoursesPage';
 import { CourseDetailPage } from './pages/CourseDetailPage';
+import { CourseViewerPage } from './pages/CourseViewerPage';
 import { CreateCoursePage } from './pages/CreateCoursePage';
 import { EditCoursePage } from './pages/EditCoursePage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -56,6 +57,14 @@ function App() {
       />
       <Route
         path="/courses/:id"
+        element={
+          <ProtectedRoute>
+            <CourseViewerPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/courses/:id/info"
         element={
           <Layout>
             <CourseDetailPage />

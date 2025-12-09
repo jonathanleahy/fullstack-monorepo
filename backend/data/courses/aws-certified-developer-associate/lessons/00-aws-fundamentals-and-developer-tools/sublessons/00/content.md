@@ -17,11 +17,11 @@ After 30 frustrating minutes of clicking around, Alex hasn't accomplished anythi
 
 Determined to make progress, Alex decides to just start clicking. They create an EC2 instance without really understanding what they're doing:
 
-```
-✗ Launched in us-east-1 (didn't know there were other regions)
-✗ Used the default VPC (didn't know what a VPC was)
-✗ Left SSH open to 0.0.0.0/0 (security risk!)
-✗ Chose a t2.micro (correct, but by accident)
+```mistakes
+Launched in us-east-1 (didn't know there were other regions)
+Used the default VPC (didn't know what a VPC was)
+Left SSH open to 0.0.0.0/0 (security risk!)
+Chose a t2.micro (correct, but by accident)
 ```
 
 The instance launches! Alex feels accomplished... for about 5 minutes. Then the questions start:
