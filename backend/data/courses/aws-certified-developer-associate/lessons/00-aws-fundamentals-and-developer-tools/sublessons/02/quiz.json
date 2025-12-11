@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "subchapterId": "02",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "true_false",
+      "difficulty": 2,
+      "concept": "AZ Naming",
+      "question": "The Availability Zone name us-east-1a refers to the same physical data center for all AWS accounts.",
+      "correctAnswer": false,
+      "explanation": "AZ names are randomized per account to prevent everyone from choosing the same AZ. Use AZ IDs (like use1-az1) for consistency across accounts when coordinating resources."
+    },
+    {
+      "id": "q2",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "concept": "Multi-AZ Deployment",
+      "question": "What is the primary benefit of deploying resources across multiple Availability Zones?",
+      "options": [
+        "Reduced costs through load balancing",
+        "High availability and fault tolerance within a region",
+        "Faster deployment times",
+        "Simplified configuration management"
+      ],
+      "correctIndex": 1,
+      "explanation": "Multi-AZ deployment provides high availability and fault tolerance. If one AZ experiences issues, your application continues running in other AZs with automatic failover."
+    },
+    {
+      "id": "q3",
+      "type": "code_analysis",
+      "difficulty": 4,
+      "concept": "AZ Information",
+      "question": "What information does this command provide?",
+      "codeSnippet": "aws ec2 describe-availability-zones --region us-east-1 \\\n  --query 'AvailabilityZones[*].[ZoneName,ZoneId]' \\\n  --output table",
+      "language": "bash",
+      "options": [
+        "A list of all regions and their endpoints",
+        "AZ names and their consistent AZ IDs for cross-account coordination",
+        "EC2 instance IDs in each availability zone",
+        "The number of data centers in each AZ"
+      ],
+      "correctIndex": 1,
+      "explanation": "This command lists AZ names (like us-east-1a) alongside their AZ IDs (like use1-az1). AZ IDs are consistent across accounts while names are randomized."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_select",
+      "difficulty": 3,
+      "concept": "Global vs Regional Services",
+      "question": "Which of the following are GLOBAL AWS services (not region-specific)? (Select ALL that apply)",
+      "options": [
+        "IAM (Identity and Access Management)",
+        "EC2 (Elastic Compute Cloud)",
+        "Route 53 (DNS)",
+        "S3 (Simple Storage Service)",
+        "CloudFront (CDN)"
+      ],
+      "correctIndices": [0, 2, 4],
+      "minSelections": 2,
+      "maxSelections": 5,
+      "explanation": "IAM, Route 53, and CloudFront are global services. EC2 and S3 (despite globally unique bucket names) are regional services where you must select a specific region."
+    },
+    {
+      "id": "q5",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "concept": "Data Transfer Costs",
+      "question": "What is the cost of data transfer between EC2 and RDS in DIFFERENT Availability Zones within the same region?",
+      "options": [
+        "Free - same region means no charge",
+        "$0.01 per GB in each direction",
+        "$0.02 per GB outbound only",
+        "$0.09 per GB like internet transfer"
+      ],
+      "correctIndex": 1,
+      "explanation": "Cross-AZ data transfer costs $0.01/GB in each direction (so $0.02/GB round trip). Same-AZ transfer is free. This is worth considering but shouldn't compromise availability."
+    },
+    {
+      "id": "q6",
+      "type": "ordering",
+      "difficulty": 4,
+      "concept": "Disaster Recovery Scope",
+      "question": "Arrange these failure scenarios from smallest to largest scope:",
+      "items": [
+        "Regional outage (entire region down)",
+        "Single server failure",
+        "Availability Zone failure",
+        "Global AWS outage"
+      ],
+      "correctOrder": [1, 2, 0, 3],
+      "explanation": "Single server < AZ failure < Regional outage < Global outage. Multi-AZ protects against AZ failures; multi-region protects against regional failures."
+    }
+  ]
+}

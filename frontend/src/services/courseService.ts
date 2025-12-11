@@ -25,6 +25,36 @@ const QUIZ_FIELDS = `
   }
 `;
 
+// Extended quiz fields for new quiz system
+const EXTENDED_QUIZ_FIELDS = `
+  extendedQuiz {
+    version
+    subchapterId
+    lessonId
+    questions {
+      id
+      type
+      difficulty
+      concept
+      question
+      explanation
+      options
+      correctIndex
+      correctAnswer
+      correctIndices
+      minSelections
+      maxSelections
+      codeSnippet
+      language
+      leftColumn
+      rightColumn
+      correctPairs
+      items
+      correctOrder
+    }
+  }
+`;
+
 // Query fragments - recursive lesson fragment for sublessons support
 const SUBLESSON_FIELDS = `
   title
@@ -32,6 +62,7 @@ const SUBLESSON_FIELDS = `
   order
   hasSublessons
   ${QUIZ_FIELDS}
+  ${EXTENDED_QUIZ_FIELDS}
 `;
 
 const LESSON_FRAGMENT = `
@@ -40,6 +71,7 @@ const LESSON_FRAGMENT = `
   order
   hasSublessons
   ${QUIZ_FIELDS}
+  ${EXTENDED_QUIZ_FIELDS}
   sublessons {
     ${SUBLESSON_FIELDS}
     sublessons {

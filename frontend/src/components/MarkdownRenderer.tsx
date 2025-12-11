@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import mermaid from 'mermaid';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { TerminalBlock, MistakeList, CheckList, Callout } from '@repo/playbook';
+import { TerminalBlock, MistakeList, CheckList, Callout, PagerAlert } from '@repo/playbook';
 
 // Image with expand button
 interface ExpandableImageProps {
@@ -139,10 +139,10 @@ function MermaidDiagram({ chart }: MermaidDiagramProps) {
     <>
       <div
         ref={containerRef}
-        className="mermaid my-4 flex justify-center relative group w-full"
+        className="mermaid my-4 relative group"
         data-mermaid
       >
-        <div className="w-full [&>svg]:w-full [&>svg]:max-w-full [&>svg]:h-auto" dangerouslySetInnerHTML={{ __html: svg }} />
+        <div className="flex justify-center" dangerouslySetInnerHTML={{ __html: svg }} />
         <button
           onClick={() => setIsExpanded(true)}
           className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
@@ -227,6 +227,23 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
 
             if (language === 'danger' || language === 'critical') {
               return <Callout variant="danger" content={codeString} />;
+            }
+
+            // Pager/notification alerts - sketch style
+            if (language === 'pager' || language === 'alert' || language === 'notification') {
+              // Parse optional metadata from first line: variant|time|source
+              const firstLine = codeString.split('\n')[0];
+              const metaMatch = firstLine.match(/^@(critical|warning|info|success)(?:\s*\|\s*(.+?))?(?:\s*\|\s*(.+?))?$/);
+
+              if (metaMatch) {
+                const variant = metaMatch[1] as 'critical' | 'warning' | 'info' | 'success';
+                const time = metaMatch[2]?.trim();
+                const source = metaMatch[3]?.trim();
+                const content = codeString.split('\n').slice(1).join('\n');
+                return <PagerAlert variant={variant} time={time} source={source} content={content} />;
+              }
+
+              return <PagerAlert content={codeString} />;
             }
 
             // Check for inline code (no className means inline)

@@ -3,11 +3,13 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLibraryCourse } from '../hooks/useCourses';
 import { courseService } from '../services/courseService';
 import { useAuth } from '../hooks/useAuth';
-import type { Difficulty, UserCourse, Lesson } from '../types/course';
+import type { Difficulty, UserCourse, Lesson, ExtendedQuiz as ExtendedQuizType } from '../types/course';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { LessonProgress } from '../components/LessonProgress';
 import { Quiz } from '../components/Quiz';
+import { QuizContainer } from '../components/quiz';
+import type { Quiz as NewQuizType, QuizQuestion as NewQuizQuestion } from '../components/quiz/types';
 import { Progress, Button } from '@repo/playbook';
 
 const difficultyColors: Record<Difficulty, string> = {
@@ -15,6 +17,67 @@ const difficultyColors: Record<Difficulty, string> = {
   INTERMEDIATE: 'bg-yellow-100 text-yellow-800',
   ADVANCED: 'bg-red-100 text-red-800',
 };
+
+// Convert ExtendedQuiz from course types to the new Quiz format
+function convertToQuizFormat(extendedQuiz: ExtendedQuizType): NewQuizType {
+  return {
+    version: extendedQuiz.version || '1.0',
+    subchapterId: extendedQuiz.subchapterId || '',
+    lessonId: extendedQuiz.lessonId || '',
+    questions: extendedQuiz.questions.map((q): NewQuizQuestion => {
+      const base = {
+        id: q.id,
+        difficulty: q.difficulty,
+        concept: q.concept || '',
+        question: q.question,
+        explanation: q.explanation || '',
+      };
+
+      switch (q.type) {
+        case 'multiple_choice':
+          return { ...base, type: 'multiple_choice', options: q.options, correctIndex: q.correctIndex };
+        case 'true_false':
+          return { ...base, type: 'true_false', correctAnswer: q.correctAnswer };
+        case 'multiple_select':
+          return {
+            ...base,
+            type: 'multiple_select',
+            options: q.options,
+            correctIndices: q.correctIndices,
+            minSelections: q.minSelections,
+            maxSelections: q.maxSelections,
+          };
+        case 'code_analysis':
+          return {
+            ...base,
+            type: 'code_analysis',
+            codeSnippet: q.codeSnippet,
+            language: q.language || 'bash',
+            options: q.options,
+            correctIndex: q.correctIndex,
+          };
+        case 'matching':
+          return {
+            ...base,
+            type: 'matching',
+            leftColumn: q.leftColumn,
+            rightColumn: q.rightColumn,
+            correctPairs: q.correctPairs,
+          };
+        case 'ordering':
+          return {
+            ...base,
+            type: 'ordering',
+            items: q.items,
+            correctOrder: q.correctOrder,
+          };
+        default:
+          // Fallback to multiple choice for any unknown type
+          return { ...base, type: 'multiple_choice', options: [], correctIndex: 0 };
+      }
+    }),
+  };
+}
 
 interface FlatLesson {
   lesson: Lesson;
@@ -525,8 +588,25 @@ export function CourseViewerPage() {
                 <MarkdownRenderer content={currentLesson.content} />
               </article>
 
-              {/* Quiz Section */}
-              {currentLesson.quiz && currentLesson.quiz.questions.length > 0 && (
+              {/* Quiz Section - New Extended Quiz System */}
+              {currentLesson.extendedQuiz && currentLesson.extendedQuiz.questions.length > 0 && (
+                <div className="mt-10 pt-8 border-t">
+                  <QuizContainer
+                    key={`quiz-${selectedLesson}-${currentLesson.extendedQuiz.subchapterId}`}
+                    quiz={convertToQuizFormat(currentLesson.extendedQuiz)}
+                    onComplete={(score, _total, percentage) => {
+                      console.log(`Quiz completed: ${score} points, ${percentage}%`);
+                      // TODO: Save to backend via GraphQL
+                    }}
+                    onAbandon={() => {
+                      // User chose to continue learning
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Legacy Quiz Section */}
+              {!currentLesson.extendedQuiz && currentLesson.quiz && currentLesson.quiz.questions.length > 0 && (
                 <div className="mt-10 pt-8 border-t">
                   {!showQuiz ? (
                     <div className="bg-primary/5 rounded-lg p-6 text-center">

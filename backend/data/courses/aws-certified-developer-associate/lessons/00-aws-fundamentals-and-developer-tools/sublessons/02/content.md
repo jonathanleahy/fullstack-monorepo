@@ -47,30 +47,81 @@ graph TB
 
 Alex discovers something surprising: **AZ names are randomized per account!**
 
+What does this mean? When you create an AWS account, AWS randomly assigns which physical data centers map to which AZ names (`us-east-1a`, `us-east-1b`, etc.). This mapping is different for every AWS account.
+
+So `us-east-1a` in your account might point to Physical Data Center X, while `us-east-1a` in your colleague's account points to Physical Data Center Y - a completely different building!
+
+```mermaid
+graph TB
+    subgraph "Account A (Your AWS Account)"
+        A1["us-east-1a"] --> AX["Physical Data Center X"]
+        A2["us-east-1b"] --> AY["Physical Data Center Y"]
+        A3["us-east-1c"] --> AZ["Physical Data Center Z"]
+    end
+
+    subgraph "Account B (Someone Else's Account)"
+        B1["us-east-1a"] --> BY["Physical Data Center Y"]
+        B2["us-east-1b"] --> BX["Physical Data Center X"]
+        B3["us-east-1c"] --> BZ["Physical Data Center Z"]
+    end
+
+    style A1 fill:#e1f5fe
+    style B1 fill:#fff3e0
+    style AX fill:#c8e6c9
+    style BY fill:#c8e6c9
 ```
-Account A:
-  us-east-1a → Physical location X
-  us-east-1b → Physical location Y
 
-Account B:
-  us-east-1a → Physical location Y  ← Different!
-  us-east-1b → Physical location X
-```
+> **Notice:** Both accounts have `us-east-1a`, but they point to **different physical locations**!
 
-**Why?** To prevent everyone from choosing "a" and overloading one AZ.
+#### Why Does AWS Do This?
 
-**Solution:** Use **AZ IDs** for consistency:
+Without randomization, everyone would instinctively pick `us-east-1a` (because "a" comes first), causing:
+- Uneven load distribution across data centers
+- One AZ becoming overloaded while others sit idle
+- Potential capacity issues in the "popular" AZ
+
+By randomizing the mapping, AWS ensures even distribution across all physical data centers.
+
+#### The Problem This Creates
+
+Imagine you're coordinating with a partner company and you say "Deploy to us-east-1a". Because AZ names are randomized per account, you might end up in different physical data centers!
+
+#### The Solution: AZ IDs
+
+To solve this problem, AWS provides **AZ IDs** (Availability Zone Identifiers).
+
+**What are AZ IDs?** They are unique identifiers that refer directly to a physical data center, not a randomized name. Unlike AZ names (like `us-east-1a`), AZ IDs (like `use1-az1`) are the same across ALL AWS accounts.
+
+The format is: `{region-code}-az{number}` — for example, `use1-az1` means "US East 1, Availability Zone 1".
+
+**Why does this help?** When you and a partner both use `use1-az1`, you're guaranteed to be talking about the exact same physical data center.
 
 ```bash
-aws ec2 describe-availability-zones --region us-east-1 \
-  --query 'AvailabilityZones[*].[ZoneName,ZoneId]' \
-  --output table
-
-# Output:
-# us-east-1a    use1-az1
-# us-east-1b    use1-az2
-# us-east-1c    use1-az4
+# Find the AZ ID for each AZ name in your account
+$ aws ec2 describe-availability-zones --region us-east-1 \
+    --query 'AvailabilityZones[*].[ZoneName,ZoneId]' \
+    --output table
 ```
+
+**Example Output:**
+
+| Zone Name | Zone ID |
+|-----------|---------|
+| us-east-1a | use1-az1 |
+| us-east-1b | use1-az2 |
+| us-east-1c | use1-az4 |
+| us-east-1d | use1-az6 |
+| us-east-1e | use1-az3 |
+| us-east-1f | use1-az5 |
+
+Now that you know about AZ IDs, here's the difference:
+
+| Scenario | Your Account | Partner's Account | Result |
+|----------|-------------|-------------------|--------|
+| You say "Deploy to us-east-1a" | Data Center X | Data Center Y | **Different locations!** |
+| You say "Deploy to use1-az1" | Data Center X | Data Center X | **Same location!** |
+
+> **Key Insight:** The Zone ID (like `use1-az1`) is the same across ALL AWS accounts. Use this when coordinating deployments with external teams!
 
 ## Alex Redesigns for High Availability
 
@@ -179,7 +230,7 @@ Alex sets up a database that survives AZ failures:
 
 ```bash
 # Create Multi-AZ RDS instance
-aws rds create-db-instance \
+$ aws rds create-db-instance \
     --db-instance-identifier pettracker-db \
     --db-instance-class db.t3.micro \
     --engine postgres \
@@ -200,12 +251,11 @@ aws rds create-db-instance \
 
 Alex deploys EC2 in us-east-1a and RDS in us-east-1b. The bill arrives:
 
-```
-Data Transfer: $47.00
-  - Inter-AZ data transfer: 500 GB × $0.01/GB = $5.00
-  - Actually, that's each way: $5.00 × 2 = $10.00
-  - Wait, this happened all month... $47.00
-```
+| Line Item | Calculation | Cost |
+|-----------|-------------|------|
+| Inter-AZ data transfer | 500 GB × $0.01/GB | $5.00 |
+| Wait, it's charged **both ways** | $5.00 × 2 | $10.00 |
+| This happened every week... | $10.00 × 4.7 weeks | **$47.00** |
 
 **Lesson learned:** Cross-AZ data transfer isn't free! Design to minimize it when possible, but don't sacrifice availability for small savings.
 
@@ -271,12 +321,12 @@ Try these commands to explore your region:
 
 ```bash
 # List all AZs in your region
-aws ec2 describe-availability-zones \
+$ aws ec2 describe-availability-zones \
     --query 'AvailabilityZones[*].[ZoneName,State,ZoneId]' \
     --output table
 
 # Check which AZs support specific instance types
-aws ec2 describe-instance-type-offerings \
+$ aws ec2 describe-instance-type-offerings \
     --location-type availability-zone \
     --filters Name=instance-type,Values=t3.micro \
     --query 'InstanceTypeOfferings[*].[Location,InstanceType]' \

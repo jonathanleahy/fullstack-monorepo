@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "subchapterId": "07",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "SDK Purpose",
+      "question": "What is the primary purpose of AWS SDKs?",
+      "options": [
+        "To replace the AWS Management Console",
+        "To interact with AWS services programmatically from application code",
+        "To provide a graphical interface for AWS services",
+        "To monitor AWS costs and usage"
+      ],
+      "correctIndex": 1,
+      "explanation": "AWS SDKs let you interact with AWS services directly from your application code in various programming languages, enabling automation and integration."
+    },
+    {
+      "id": "q2",
+      "type": "code_analysis",
+      "difficulty": 3,
+      "concept": "Credential Best Practices",
+      "question": "What is wrong with this Python code?",
+      "codeSnippet": "import boto3\nclient = boto3.client(\n    's3',\n    aws_access_key_id='AKIAXXXXXX',\n    aws_secret_access_key='secretkey'\n)",
+      "language": "python",
+      "options": [
+        "The region is not specified",
+        "Credentials are hardcoded - they should be resolved automatically",
+        "The boto3 import is incorrect",
+        "Nothing is wrong with this code"
+      ],
+      "correctIndex": 1,
+      "explanation": "Never hardcode credentials! Let the SDK resolve them automatically through the credential chain (environment variables, config files, IAM roles). Hardcoded keys can be leaked in code repositories."
+    },
+    {
+      "id": "q3",
+      "type": "ordering",
+      "difficulty": 4,
+      "concept": "Credential Resolution Chain",
+      "question": "Arrange the SDK credential sources in order of priority (first checked to last):",
+      "items": [
+        "~/.aws/credentials file",
+        "Environment variables (AWS_ACCESS_KEY_ID)",
+        "EC2 Instance Profile",
+        "Credentials passed in code"
+      ],
+      "correctOrder": [3, 1, 0, 2],
+      "explanation": "SDKs check: 1) Explicitly passed credentials, 2) Environment variables, 3) Shared credentials file, 4) Instance profile (for EC2/Lambda). Higher priority sources override lower ones."
+    },
+    {
+      "id": "q4",
+      "type": "true_false",
+      "difficulty": 2,
+      "concept": "SDK Retries",
+      "question": "AWS SDKs automatically retry failed requests with exponential backoff.",
+      "correctAnswer": true,
+      "explanation": "SDKs automatically retry transient failures (like throttling or network issues) with exponential backoff. This is built-in behavior but can be configured."
+    },
+    {
+      "id": "q5",
+      "type": "multiple_select",
+      "difficulty": 3,
+      "concept": "Available SDKs",
+      "question": "Which programming languages have official AWS SDKs? (Select ALL that apply)",
+      "options": [
+        "Python (Boto3)",
+        "JavaScript/Node.js",
+        "Java",
+        "Go",
+        "COBOL"
+      ],
+      "correctIndices": [0, 1, 2, 3],
+      "minSelections": 2,
+      "maxSelections": 5,
+      "explanation": "AWS provides official SDKs for Python (Boto3), JavaScript, Java, Go, .NET, PHP, Ruby, Rust, C++, and Swift. There is no official COBOL SDK."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "concept": "JavaScript SDK Versions",
+      "question": "Why is AWS SDK for JavaScript v3 recommended over v2?",
+      "options": [
+        "v3 is free while v2 costs money",
+        "v3 has modular imports, better TypeScript support, and smaller bundle sizes",
+        "v3 works only in the browser",
+        "v2 is no longer maintained or functional"
+      ],
+      "correctIndex": 1,
+      "explanation": "SDK v3 offers modular imports (install only what you need), first-class TypeScript support, better tree-shaking, and middleware customization. v2 still works but v3 is the modern approach."
+    }
+  ]
+}

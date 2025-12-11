@@ -83,6 +83,7 @@ type Lesson {
   sublessons: [Lesson!]
   hasSublessons: Boolean!
   quiz: Quiz
+  extendedQuiz: ExtendedQuiz
 }
 
 type LibraryCourse {
@@ -205,6 +206,11 @@ type Query {
   myAuthoredCoursesAnalytics: [CourseAnalytics!]!
   # Attachment queries
   lessonAttachments(libraryCourseId: ID!, lessonIndex: Int!): [Attachment!]!
+  # Quiz queries (requires auth)
+  quizStats(courseId: ID!, quizId: String!): QuizStats
+  courseQuizSummary(courseId: ID!): CourseQuizSummary
+  dashboardQuizStats(fromDate: String, toDate: String): DashboardQuizStats!
+  reviewQueue(courseId: ID!, limit: Int): [ReviewQueueItem!]!
 }
 
 input ImportCoursesInput {
@@ -239,6 +245,10 @@ type Mutation {
   recordCourseView(libraryCourseId: ID!): Boolean!
   # Attachment mutations
   deleteAttachment(id: ID!): Boolean!
+  # Quiz mutations (requires auth)
+  submitQuizAttempt(input: SubmitQuizAttemptInput!): QuizAttempt!
+  addToReviewQueue(courseId: ID!, quizId: String!, questionId: String!, concept: String!): ReviewQueueItem!
+  removeFromReviewQueue(courseId: ID!, questionId: String!): Boolean!
 }
 
 # Bookmark types
@@ -272,4 +282,163 @@ type Attachment {
   size: Int!
   uploadedAt: DateTime!
   downloadUrl: String!
+}
+
+# Extended Quiz types for new quiz system
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  MULTIPLE_SELECT
+  CODE_ANALYSIS
+  MATCHING
+  ORDERING
+}
+
+enum MasteryLevel {
+  NOVICE
+  DEVELOPING
+  PROFICIENT
+  EXPERT
+}
+
+enum ConfidenceLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+type ExtendedQuizQuestion {
+  id: ID!
+  type: QuestionType!
+  difficulty: Int!
+  concept: String!
+  question: String!
+  explanation: String
+  # For multiple_choice and code_analysis
+  options: [String!]
+  correctIndex: Int
+  # For true_false
+  correctAnswer: Boolean
+  # For multiple_select
+  correctIndices: [Int!]
+  minSelections: Int
+  maxSelections: Int
+  # For code_analysis
+  codeSnippet: String
+  language: String
+  # For matching
+  leftColumn: [String!]
+  rightColumn: [String!]
+  correctPairs: [[Int!]!]
+  # For ordering
+  items: [String!]
+  correctOrder: [Int!]
+}
+
+type ExtendedQuiz {
+  version: String!
+  subchapterId: String!
+  lessonId: String!
+  questions: [ExtendedQuizQuestion!]!
+}
+
+type QuizAttempt {
+  id: ID!
+  userId: ID!
+  courseId: ID!
+  quizType: String!
+  quizId: String!
+  score: Int!
+  maxScore: Int!
+  totalQuestions: Int!
+  correctCount: Int!
+  percentage: Float!
+  masteryLevel: MasteryLevel!
+  completedAt: DateTime!
+}
+
+type QuizResponse {
+  id: ID!
+  attemptId: ID!
+  questionId: ID!
+  userAnswer: String!
+  isCorrect: Boolean!
+  pointsEarned: Int!
+  pointsPossible: Int!
+  confidence: ConfidenceLevel
+  timeTakenSeconds: Int
+}
+
+type QuizStats {
+  quizId: String!
+  bestScore: Float
+  latestScore: Float
+  attemptCount: Int!
+  bestMastery: MasteryLevel!
+  history: [QuizAttempt!]!
+}
+
+type CourseQuizSummary {
+  courseId: ID!
+  courseTitle: String!
+  totalQuizzes: Int!
+  completedQuizzes: Int!
+  averageScore: Float!
+  overallMastery: MasteryLevel!
+  subchapterStats: [QuizStats!]!
+  chapterStats: [QuizStats!]!
+  weakConcepts: [String!]!
+  strongConcepts: [String!]!
+  reviewQueueSize: Int!
+}
+
+type DashboardQuizStats {
+  totalQuizzesTaken: Int!
+  overallAverageScore: Float!
+  overallMastery: MasteryLevel!
+  courseSummaries: [CourseQuizSummary!]!
+  recentAttempts: [QuizAttempt!]!
+  totalWeakConcepts: [String!]!
+  totalStrongConcepts: [String!]!
+  scoreHistory: [ScoreDataPoint!]!
+}
+
+type ScoreDataPoint {
+  date: String!
+  score: Float!
+  courseId: ID!
+  courseName: String!
+}
+
+type ReviewQueueItem {
+  id: ID!
+  userId: ID!
+  courseId: ID!
+  quizId: String!
+  questionId: String!
+  concept: String!
+  wrongCount: Int!
+  lastAttempt: DateTime!
+  nextReview: DateTime!
+}
+
+input QuizResponseInput {
+  questionId: ID!
+  userAnswer: String!
+  isCorrect: Boolean!
+  pointsEarned: Int!
+  pointsPossible: Int!
+  confidence: ConfidenceLevel
+  timeTakenSeconds: Int
+}
+
+input SubmitQuizAttemptInput {
+  courseId: ID!
+  quizType: String!
+  quizId: String!
+  score: Int!
+  maxScore: Int!
+  totalQuestions: Int!
+  correctCount: Int!
+  responses: [QuizResponseInput!]!
 }

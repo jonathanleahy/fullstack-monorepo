@@ -129,6 +129,56 @@ func (s *SQLiteDB) Migrate() error {
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_attachments_library_course_id ON attachments(library_course_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_attachments_lesson ON attachments(library_course_id, lesson_index)`,
+		// Quiz tables
+		`CREATE TABLE IF NOT EXISTS quiz_attempts (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			course_id TEXT NOT NULL,
+			quiz_type TEXT NOT NULL,
+			quiz_id TEXT NOT NULL,
+			score INTEGER NOT NULL,
+			max_score INTEGER NOT NULL,
+			total_questions INTEGER NOT NULL,
+			correct_count INTEGER NOT NULL,
+			percentage REAL NOT NULL,
+			mastery_level TEXT NOT NULL,
+			completed_at DATETIME NOT NULL,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user_id ON quiz_attempts(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_quiz_attempts_course_id ON quiz_attempts(course_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_quiz_attempts_quiz_id ON quiz_attempts(quiz_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user_course ON quiz_attempts(user_id, course_id)`,
+		`CREATE TABLE IF NOT EXISTS quiz_responses (
+			id TEXT PRIMARY KEY,
+			attempt_id TEXT NOT NULL,
+			question_id TEXT NOT NULL,
+			user_answer TEXT NOT NULL,
+			is_correct BOOLEAN NOT NULL,
+			points_earned INTEGER NOT NULL DEFAULT 0,
+			points_possible INTEGER NOT NULL DEFAULT 1,
+			confidence TEXT,
+			time_taken_seconds INTEGER,
+			FOREIGN KEY (attempt_id) REFERENCES quiz_attempts(id) ON DELETE CASCADE
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_quiz_responses_attempt_id ON quiz_responses(attempt_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_quiz_responses_question_id ON quiz_responses(question_id)`,
+		`CREATE TABLE IF NOT EXISTS review_queue (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			course_id TEXT NOT NULL,
+			quiz_id TEXT NOT NULL,
+			question_id TEXT NOT NULL,
+			concept TEXT NOT NULL,
+			wrong_count INTEGER NOT NULL DEFAULT 1,
+			last_attempt DATETIME NOT NULL,
+			next_review DATETIME NOT NULL,
+			stability REAL NOT NULL DEFAULT 1.0,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+			UNIQUE(user_id, course_id, question_id)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_review_queue_user_id ON review_queue(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_review_queue_next_review ON review_queue(next_review)`,
 	}
 
 	for _, migration := range migrations {

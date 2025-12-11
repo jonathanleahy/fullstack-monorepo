@@ -1,0 +1,80 @@
+{
+  "id": "11-sqs-and-sns",
+  "title": "SQS and SNS Messaging",
+  "slug": "sqs-and-sns",
+  "description": "Master AWS messaging services with Amazon SQS and SNS. Learn to build decoupled, scalable architectures using message queues, pub/sub patterns, and event-driven communication.",
+  "order": 11,
+  "estimatedMinutes": 210,
+  "objectives": [
+    "Understand message queuing fundamentals with SQS",
+    "Implement pub/sub messaging with SNS",
+    "Design decoupled microservices architectures",
+    "Configure dead letter queues for error handling",
+    "Use FIFO queues for ordered message processing",
+    "Implement fan-out patterns with SNS and SQS",
+    "Secure messaging with encryption and access policies"
+  ],
+  "keywords": ["sqs", "sns", "messaging", "queues", "pub-sub", "fan-out", "dead-letter-queue", "fifo", "decoupling", "event-driven"],
+  "sublessons": [
+    {
+      "id": "00-alexs-challenge",
+      "title": "Alex's Challenge: Lost Notifications",
+      "order": 0
+    },
+    {
+      "id": "01-sqs-fundamentals",
+      "title": "SQS Fundamentals",
+      "order": 1
+    },
+    {
+      "id": "02-sqs-message-lifecycle",
+      "title": "SQS Message Lifecycle",
+      "order": 2
+    },
+    {
+      "id": "03-sqs-advanced-features",
+      "title": "SQS Advanced Features",
+      "order": 3
+    },
+    {
+      "id": "04-sns-fundamentals",
+      "title": "SNS Fundamentals",
+      "order": 4
+    },
+    {
+      "id": "05-sns-subscriptions-and-filtering",
+      "title": "SNS Subscriptions and Message Filtering",
+      "order": 5
+    },
+    {
+      "id": "06-fan-out-pattern",
+      "title": "The Fan-Out Pattern",
+      "order": 6
+    },
+    {
+      "id": "07-dead-letter-queues",
+      "title": "Dead Letter Queues",
+      "order": 7
+    },
+    {
+      "id": "08-fifo-queues-and-ordering",
+      "title": "FIFO Queues and Message Ordering",
+      "order": 8
+    },
+    {
+      "id": "09-security-and-encryption",
+      "title": "Security and Encryption",
+      "order": 9
+    },
+    {
+      "id": "10-sqs-with-lambda",
+      "title": "SQS with Lambda",
+      "order": 10
+    },
+    {
+      "id": "11-chapter-summary",
+      "title": "Alex's Solution: Reliable Notifications",
+      "order": 11
+    }
+  ]
+}
