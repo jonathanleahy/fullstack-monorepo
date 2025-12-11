@@ -125,6 +125,7 @@ Alex pulls up the Lambda metrics. The graph shows a clear pattern: most invocati
 
 Here's exactly what happened during Alex's 2 AM incident:
 
+:::sidebyside:left:large
 ```mermaid
 sequenceDiagram
     participant Q as SQS Queue
@@ -146,7 +147,7 @@ sequenceDiagram
     Note over Q: User got email TWICE
 ```
 
-Let's walk through this step by step:
+**The sequence of events:**
 
 1. **Lambda 1 receives the message** at 2:47:00 AM. The message becomes in-flight with a 30-second visibility timeout.
 
@@ -161,10 +162,9 @@ Let's walk through this step by step:
 6. **Lambda 2 calls SendGrid** to send the same email. Now two emails are in flight to the same user.
 
 7. **Both Lambdas eventually succeed**. Both try to delete the message. The message is deleted (only once), but the user received two emails.
+:::
 
-"The visibility timeout expired while Lambda was still waiting for SendGrid," Alex realizes. "The message became visible again, another Lambda picked it up, and the user got two emails."
-
-"Exactly. And once that happens, both Lambdas succeed, both try to delete - the message is gone, but the damage is done."
+Exactly. And once that happens, both Lambdas succeed, both try to delete - the message is gone, but the damage is done.
 
 ---
 
