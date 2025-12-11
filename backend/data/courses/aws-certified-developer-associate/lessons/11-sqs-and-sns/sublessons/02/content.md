@@ -28,6 +28,7 @@ Every message in SQS exists in one of five states. Understanding these states is
 
 Sam draws on the whiteboard:
 
+:::sidebyside:right:medium
 ```mermaid
 stateDiagram-v2
     [*] --> Delayed: Message sent with delay
@@ -42,6 +43,17 @@ stateDiagram-v2
 ```
 
 "A message can be in one of five states," Sam explains. "Understanding these states is the key to understanding what happened last night."
+
+**The five states are:**
+
+1. **Delayed** - Message is hidden, waiting for delay to expire
+2. **Available** - Message can be received by consumers
+3. **In-Flight** - Message received, hidden during visibility timeout
+4. **Deleted** - Message permanently removed after successful processing
+5. **Expired** - Message automatically removed after retention period
+
+The most critical transition to understand is between **Available** and **In-Flight**. This is where Alex's duplicate problem originated.
+:::
 
 ### State 1: Delayed
 
@@ -287,6 +299,7 @@ The receipt handle is a long, opaque string that SQS generates when you receive 
 
 Here's why this matters:
 
+:::floating:right:medium
 ```mermaid
 graph TD
     subgraph "Message M1"
@@ -307,6 +320,7 @@ graph TD
 If the visibility timeout expires and another consumer receives the message, the new consumer gets a new receipt handle. The old receipt handle becomes invalid. If the original consumer tries to delete using the stale receipt handle, the operation silently fails (no error, but nothing happens).
 
 "This prevents race conditions," Sam continues. "If the first Lambda tries to delete with an old receipt handle after the message was re-delivered, the delete silently fails. No errors, no problems."
+:::
 
 "So even if two Lambdas process the same message, only one can delete it?"
 
