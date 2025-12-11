@@ -1,5 +1,7 @@
 package graphql
 
+//go:generate go run github.com/99designs/gqlgen generate
+
 import (
 	"github.com/project/backend/application/ports"
 	"github.com/project/backend/domain/repositories"
@@ -14,4 +16,5 @@ type Resolver struct {
 	BookmarkRepo      repositories.BookmarkRepository
 	AnalyticsRepo     repositories.AnalyticsRepository
 	AttachmentRepo    repositories.AttachmentRepository
+	QuizRepo          repositories.QuizRepository
 }

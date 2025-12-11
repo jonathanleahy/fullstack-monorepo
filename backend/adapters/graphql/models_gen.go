@@ -75,6 +75,16 @@ type QuizQuestionInput struct {
 	Explanation  *string  `json:"explanation,omitempty"`
 }
 
+type QuizResponseInput struct {
+	QuestionID       string                    `json:"questionId"`
+	UserAnswer       string                    `json:"userAnswer"`
+	IsCorrect        bool                      `json:"isCorrect"`
+	PointsEarned     int                       `json:"pointsEarned"`
+	PointsPossible   int                       `json:"pointsPossible"`
+	Confidence       *entities.ConfidenceLevel `json:"confidence,omitempty"`
+	TimeTakenSeconds *int                      `json:"timeTakenSeconds,omitempty"`
+}
+
 type RegisterInput struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
@@ -83,6 +93,17 @@ type RegisterInput struct {
 
 type StartCourseInput struct {
 	LibraryCourseID string `json:"libraryCourseId"`
+}
+
+type SubmitQuizAttemptInput struct {
+	CourseID       string               `json:"courseId"`
+	QuizType       string               `json:"quizType"`
+	QuizID         string               `json:"quizId"`
+	Score          int                  `json:"score"`
+	MaxScore       int                  `json:"maxScore"`
+	TotalQuestions int                  `json:"totalQuestions"`
+	CorrectCount   int                  `json:"correctCount"`
+	Responses      []*QuizResponseInput `json:"responses"`
 }
 
 type TokenPayload struct {

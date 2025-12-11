@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "subchapterId": "04",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "Credentials Storage",
+      "question": "Where does the AWS CLI store credentials after running 'aws configure'?",
+      "options": [
+        "/etc/aws/credentials",
+        "~/.aws/credentials",
+        "~/.bashrc",
+        "/usr/local/aws/config"
+      ],
+      "correctIndex": 1,
+      "explanation": "The AWS CLI stores credentials in ~/.aws/credentials and configuration settings in ~/.aws/config. These are in your home directory and are user-specific."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "difficulty": 1,
+      "concept": "Root Account Security",
+      "question": "It's recommended to create access keys for the root account for CLI access.",
+      "correctAnswer": false,
+      "explanation": "Never create access keys for the root account. Root has unrestricted access and can't be limited by IAM policies. Always create IAM users with appropriate permissions instead."
+    },
+    {
+      "id": "q3",
+      "type": "code_analysis",
+      "difficulty": 3,
+      "concept": "CLI Identity Check",
+      "question": "What information does this command return?",
+      "codeSnippet": "aws sts get-caller-identity",
+      "language": "bash",
+      "options": [
+        "The current AWS region setting",
+        "The UserId, Account number, and ARN of the current credentials",
+        "A list of all IAM users in the account",
+        "The access key being used"
+      ],
+      "correctIndex": 1,
+      "explanation": "get-caller-identity returns the UserId, Account number, and ARN of the entity making the call. It's the 'who am I?' command for AWS - essential for verifying which credentials are active."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_select",
+      "difficulty": 3,
+      "concept": "CLI Output Formats",
+      "question": "Which output formats are supported by the AWS CLI? (Select ALL that apply)",
+      "options": [
+        "json",
+        "table",
+        "text",
+        "yaml",
+        "csv"
+      ],
+      "correctIndices": [0, 1, 2, 3],
+      "minSelections": 2,
+      "maxSelections": 5,
+      "explanation": "AWS CLI supports json (default), table (human-readable), text (scriptable), and yaml. CSV is not a native output format."
+    },
+    {
+      "id": "q5",
+      "type": "ordering",
+      "difficulty": 4,
+      "concept": "Credential Resolution",
+      "question": "Arrange the AWS CLI credential sources in order of priority (highest to lowest):",
+      "items": [
+        "~/.aws/credentials file",
+        "Command line --profile option",
+        "EC2 Instance Profile",
+        "Environment variables (AWS_ACCESS_KEY_ID)"
+      ],
+      "correctOrder": [1, 3, 0, 2],
+      "explanation": "Command line options have highest priority, then environment variables, then credentials file, and finally instance profile (lowest). This allows overriding at any level."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "Best Practices",
+      "question": "What is the recommended way for an application on EC2 to access AWS services?",
+      "options": [
+        "Store access keys in environment variables on the instance",
+        "Hardcode access keys in the application code",
+        "Use an IAM instance profile (IAM role)",
+        "Use the root account access keys"
+      ],
+      "correctIndex": 2,
+      "explanation": "IAM instance profiles (roles) are the recommended way. Credentials are automatically rotated by AWS, never stored on disk, and can be managed through IAM policies."
+    }
+  ]
+}

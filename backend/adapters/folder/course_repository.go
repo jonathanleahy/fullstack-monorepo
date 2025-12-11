@@ -29,7 +29,7 @@ func NewFolderCourseRepository(coursesPath string) *FolderCourseRepository {
 	return &FolderCourseRepository{
 		coursesPath: coursesPath,
 		cache:       make(map[string]*entities.LibraryCourse),
-		cacheTTL:    30 * time.Second, // Reload courses every 30 seconds (dev mode)
+		cacheTTL:    10 * time.Second, // Reload courses every 10 seconds (dev mode)
 	}
 }
 
@@ -70,7 +70,7 @@ type lessonJSON struct {
 	LearningObjectives []string `json:"learning_objectives"`
 }
 
-// quizJSON represents the quiz.json file structure
+// quizJSON represents the legacy quiz.json file structure (capitalized keys)
 type quizJSON struct {
 	Questions []quizQuestionJSON `json:"Questions"`
 }
@@ -85,6 +85,36 @@ type quizQuestionJSON struct {
 	CorrectIndices []int    `json:"CorrectIndices"`  // For multiple-select
 	CorrectAnswers []string `json:"CorrectAnswers"`  // For fill-blank
 	Explanation    string   `json:"Explanation"`
+}
+
+// extendedQuizJSON represents the new quiz.json file structure (lowercase keys)
+type extendedQuizJSON struct {
+	Version      string                     `json:"version"`
+	SubchapterID string                     `json:"subchapterId"`
+	LessonID     string                     `json:"lessonId"`
+	Questions    []extendedQuizQuestionJSON `json:"questions"`
+}
+
+type extendedQuizQuestionJSON struct {
+	ID             string   `json:"id"`
+	Type           string   `json:"type"`
+	Difficulty     int      `json:"difficulty"`
+	Concept        string   `json:"concept"`
+	Question       string   `json:"question"`
+	Explanation    string   `json:"explanation"`
+	Options        []string `json:"options,omitempty"`
+	CorrectIndex   int      `json:"correctIndex,omitempty"`
+	CorrectAnswer  *bool    `json:"correctAnswer,omitempty"`
+	CorrectIndices []int    `json:"correctIndices,omitempty"`
+	MinSelections  int      `json:"minSelections,omitempty"`
+	MaxSelections  int      `json:"maxSelections,omitempty"`
+	CodeSnippet    string   `json:"codeSnippet,omitempty"`
+	Language       string   `json:"language,omitempty"`
+	LeftColumn     []string `json:"leftColumn,omitempty"`
+	RightColumn    []string `json:"rightColumn,omitempty"`
+	CorrectPairs   [][]int  `json:"correctPairs,omitempty"`
+	Items          []string `json:"items,omitempty"`
+	CorrectOrder   []int    `json:"correctOrder,omitempty"`
 }
 
 // loadCourses loads all courses from the folder structure
@@ -278,10 +308,17 @@ func (r *FolderCourseRepository) loadLesson(ctx context.Context, lessonPath stri
 		content = []byte("")
 	}
 
-	// Load quiz if present
+	// Load quiz if present - try extended format first, then legacy
 	var quiz *entities.Quiz
+	var extendedQuiz *entities.ExtendedQuiz
 	quizPath := filepath.Join(lessonPath, "quiz.json")
-	quiz, _ = r.loadQuiz(quizPath)
+
+	// Try loading as extended quiz first
+	extendedQuiz, err = r.loadExtendedQuiz(quizPath)
+	if err != nil {
+		// Fall back to legacy quiz format
+		quiz, _ = r.loadQuiz(quizPath)
+	}
 
 	// Load sublessons
 	sublessonsPath := filepath.Join(lessonPath, "sublessons")
@@ -292,11 +329,12 @@ func (r *FolderCourseRepository) loadLesson(ctx context.Context, lessonPath stri
 	}
 
 	lesson := &entities.Lesson{
-		Title:      lj.Title,
-		Content:    string(content),
-		Order:      lj.Order,
-		Sublessons: sublessons,
-		Quiz:       quiz,
+		Title:        lj.Title,
+		Content:      string(content),
+		Order:        lj.Order,
+		Sublessons:   sublessons,
+		Quiz:         quiz,
+		ExtendedQuiz: extendedQuiz,
 	}
 
 	// If title is empty, derive from folder name
@@ -338,17 +376,25 @@ func (r *FolderCourseRepository) loadSublessons(ctx context.Context, sublessonsP
 			content = []byte("")
 		}
 
-		// Load quiz if present
+		// Load quiz if present - try extended format first, then legacy
 		var quiz *entities.Quiz
+		var extendedQuiz *entities.ExtendedQuiz
 		quizPath := filepath.Join(sublessonPath, "quiz.json")
-		quiz, _ = r.loadQuiz(quizPath)
+
+		// Try loading as extended quiz first
+		extendedQuiz, err = r.loadExtendedQuiz(quizPath)
+		if err != nil {
+			// Fall back to legacy quiz format
+			quiz, _ = r.loadQuiz(quizPath)
+		}
 
 		sublesson := entities.Lesson{
-			Title:      entry.Name(),
-			Content:    string(content),
-			Order:      i,
-			Sublessons: nil, // Sublessons don't have nested sublessons
-			Quiz:       quiz,
+			Title:        entry.Name(),
+			Content:      string(content),
+			Order:        i,
+			Sublessons:   nil, // Sublessons don't have nested sublessons
+			Quiz:         quiz,
+			ExtendedQuiz: extendedQuiz,
 		}
 
 		sublessons = append(sublessons, sublesson)
@@ -382,6 +428,57 @@ func (r *FolderCourseRepository) loadQuiz(quizPath string) (*entities.Quiz, erro
 	}
 
 	return &entities.Quiz{Questions: questions}, nil
+}
+
+// loadExtendedQuiz loads an extended quiz from a quiz.json file (new format with lowercase keys)
+func (r *FolderCourseRepository) loadExtendedQuiz(quizPath string) (*entities.ExtendedQuiz, error) {
+	data, err := os.ReadFile(quizPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var eqj extendedQuizJSON
+	if err := json.Unmarshal(data, &eqj); err != nil {
+		return nil, fmt.Errorf("failed to parse quiz.json: %w", err)
+	}
+
+	// Check if this is the new format (has version or lowercase questions)
+	if eqj.Version == "" && len(eqj.Questions) == 0 {
+		return nil, fmt.Errorf("not an extended quiz format")
+	}
+
+	var questions []entities.ExtendedQuizQuestion
+	for _, q := range eqj.Questions {
+		question := entities.ExtendedQuizQuestion{
+			ID:             q.ID,
+			Type:           entities.QuestionType(q.Type),
+			Difficulty:     q.Difficulty,
+			Concept:        q.Concept,
+			Question:       q.Question,
+			Explanation:    q.Explanation,
+			Options:        q.Options,
+			CorrectIndex:   q.CorrectIndex,
+			CorrectAnswer:  q.CorrectAnswer,
+			CorrectIndices: q.CorrectIndices,
+			MinSelections:  q.MinSelections,
+			MaxSelections:  q.MaxSelections,
+			CodeSnippet:    q.CodeSnippet,
+			Language:       q.Language,
+			LeftColumn:     q.LeftColumn,
+			RightColumn:    q.RightColumn,
+			CorrectPairs:   q.CorrectPairs,
+			Items:          q.Items,
+			CorrectOrder:   q.CorrectOrder,
+		}
+		questions = append(questions, question)
+	}
+
+	return &entities.ExtendedQuiz{
+		Version:      eqj.Version,
+		SubchapterID: eqj.SubchapterID,
+		LessonID:     eqj.LessonID,
+		Questions:    questions,
+	}, nil
 }
 
 // ---- LibraryCourseRepository Interface Implementation ----

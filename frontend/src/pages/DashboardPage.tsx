@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { courseService } from '../services/courseService';
+import { quizStatsService } from '../services/quizStatsService';
 import type { UserCourse, LibraryCourse } from '../types/course';
+import type { DashboardQuizStats as DashboardQuizStatsType } from '../services/quizStatsService';
 import {
   Button,
   Card,
@@ -13,13 +15,38 @@ import {
   Progress,
   Badge,
 } from '@repo/playbook';
+import {
+  QuizStatsCard,
+  OverallStatsCard,
+  ScoreTrendChart,
+  WeakAreasPanel,
+  TimeFilter,
+  RecentAttemptsPanel,
+} from '../components/dashboard';
+import type { TimeRange } from '../components/dashboard';
 
 export function DashboardPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [enrolledCourses, setEnrolledCourses] = useState<UserCourse[]>([]);
   const [authoredCourses, setAuthoredCourses] = useState<LibraryCourse[]>([]);
+  const [quizStats, setQuizStats] = useState<DashboardQuizStatsType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [timeRange, setTimeRange] = useState<TimeRange>('all');
+  const [fromDate, setFromDate] = useState<string | undefined>();
+  const [toDate, setToDate] = useState<string | undefined>();
+
+  const fetchQuizStats = useCallback(async (from?: string, to?: string) => {
+    try {
+      const stats = await quizStatsService.getDashboardQuizStats(from, to);
+      setQuizStats(stats);
+    } catch (err) {
+      console.error('Failed to fetch quiz stats:', err);
+      // Don't set error for quiz stats - show empty state instead
+      setQuizStats(null);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,6 +57,9 @@ export function DashboardPage() {
         ]);
         setEnrolledCourses(enrolled.slice(0, 5));
         setAuthoredCourses(authored.courses);
+
+        // Fetch quiz stats
+        await fetchQuizStats();
       } catch (err) {
         setError('Failed to load dashboard data');
       } finally {
@@ -38,14 +68,24 @@ export function DashboardPage() {
     };
 
     fetchData();
-  }, []);
+  }, [fetchQuizStats]);
+
+  const handleTimeFilterChange = (range: TimeRange, from?: string, to?: string) => {
+    setTimeRange(range);
+    setFromDate(from);
+    setToDate(to);
+    fetchQuizStats(from, to);
+  };
 
   // Calculate stats
   const completedCount = enrolledCourses.filter(c => c.completedAt).length;
   const inProgressCount = enrolledCourses.filter(c => !c.completedAt && c.progress > 0).length;
-  const totalProgress = enrolledCourses.length > 0
-    ? Math.round(enrolledCourses.reduce((sum, c) => sum + c.progress, 0) / enrolledCourses.length)
-    : 0;
+
+  // Build course title map for recent attempts
+  const courseTitles: Record<string, string> = {};
+  quizStats?.courseSummaries.forEach(summary => {
+    courseTitles[summary.courseId] = summary.courseTitle;
+  });
 
   if (isLoading) {
     return (
@@ -93,11 +133,89 @@ export function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Average Progress</CardDescription>
-            <CardTitle className="text-3xl">{totalProgress}%</CardTitle>
+            <CardDescription>Quizzes Taken</CardDescription>
+            <CardTitle className="text-3xl text-purple-600">
+              {quizStats?.totalQuizzesTaken ?? 0}
+            </CardTitle>
           </CardHeader>
         </Card>
       </div>
+
+      {/* Quiz Stats Section */}
+      {quizStats && quizStats.totalQuizzesTaken > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Quiz Performance</h2>
+            <TimeFilter
+              value={timeRange}
+              onChange={handleTimeFilterChange}
+              customFromDate={fromDate}
+              customToDate={toDate}
+            />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3 mb-4">
+            <div className="lg:col-span-2">
+              <OverallStatsCard
+                totalQuizzesTaken={quizStats.totalQuizzesTaken}
+                overallAverageScore={quizStats.overallAverageScore}
+                overallMastery={quizStats.overallMastery}
+                totalCourses={quizStats.courseSummaries.length}
+              />
+            </div>
+            <div>
+              <ScoreTrendChart data={quizStats.scoreHistory} height={180} />
+            </div>
+          </div>
+
+          {/* Per-Course Stats */}
+          {quizStats.courseSummaries.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-lg font-medium mb-3">By Course</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                {quizStats.courseSummaries.map((summary) => (
+                  <QuizStatsCard
+                    key={summary.courseId}
+                    summary={summary}
+                    onClick={() => navigate(`/courses/${summary.courseId}`)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Study Recommendations & Recent Activity */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <WeakAreasPanel courseSummaries={quizStats.courseSummaries} />
+            <RecentAttemptsPanel
+              attempts={quizStats.recentAttempts}
+              courseTitles={courseTitles}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* No Quiz Data State */}
+      {(!quizStats || quizStats.totalQuizzesTaken === 0) && (
+        <Card className="mb-8 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="text-center py-6">
+              <div className="text-4xl mb-4">📝</div>
+              <h3 className="text-lg font-semibold mb-2">No Quiz Activity Yet</h3>
+              <p className="text-muted-foreground mb-4">
+                Take quizzes in your courses to see your performance stats, progress trends, and study recommendations.
+              </p>
+              {enrolledCourses.length > 0 && (
+                <Button asChild>
+                  <Link to={`/courses/${enrolledCourses[0].libraryCourseId}`}>
+                    Continue Learning
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Enrolled Courses */}

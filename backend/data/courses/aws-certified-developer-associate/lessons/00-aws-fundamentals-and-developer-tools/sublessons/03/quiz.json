@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "subchapterId": "03",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "Edge Locations Purpose",
+      "question": "What is the primary purpose of AWS Edge Locations?",
+      "options": [
+        "Running EC2 instances closer to users",
+        "Caching content and serving it with low latency to users globally",
+        "Storing S3 data redundantly",
+        "Managing IAM permissions at the edge"
+      ],
+      "correctIndex": 1,
+      "explanation": "Edge Locations are AWS's globally distributed network of servers (400+) designed primarily for caching content closer to users via CloudFront, reducing latency significantly."
+    },
+    {
+      "id": "q2",
+      "type": "multiple_select",
+      "difficulty": 3,
+      "concept": "Edge Services",
+      "question": "Which AWS services operate at Edge Locations? (Select ALL that apply)",
+      "options": [
+        "CloudFront",
+        "EC2",
+        "Route 53",
+        "Lambda@Edge",
+        "RDS"
+      ],
+      "correctIndices": [0, 2, 3],
+      "minSelections": 2,
+      "maxSelections": 5,
+      "explanation": "CloudFront (CDN), Route 53 (DNS), and Lambda@Edge run at edge locations. EC2 and RDS run in regional data centers, not at edge locations."
+    },
+    {
+      "id": "q3",
+      "type": "true_false",
+      "difficulty": 2,
+      "concept": "Edge Location Count",
+      "question": "AWS has more Edge Locations than Availability Zones.",
+      "correctAnswer": true,
+      "explanation": "AWS has 400+ Edge Locations compared to 100+ Availability Zones. This extensive edge network enables low-latency content delivery to users worldwide."
+    },
+    {
+      "id": "q4",
+      "type": "matching",
+      "difficulty": 4,
+      "concept": "Edge vs Region Capabilities",
+      "question": "Match each capability with where it runs:",
+      "leftColumn": ["Content caching", "Full EC2 instances", "Lambda@Edge functions", "DynamoDB tables"],
+      "rightColumn": ["Edge Locations", "Regions only", "Edge Locations", "Regions only"],
+      "correctPairs": [[0, 0], [1, 1], [2, 2], [3, 3]],
+      "explanation": "Content caching and Lambda@Edge run at Edge Locations. Full compute (EC2) and databases (DynamoDB) run in Regions only."
+    },
+    {
+      "id": "q5",
+      "type": "multiple_choice",
+      "difficulty": 4,
+      "concept": "Lambda@Edge vs CloudFront Functions",
+      "question": "When should you use CloudFront Functions instead of Lambda@Edge?",
+      "options": [
+        "When you need to make network calls to external services",
+        "When you need simple, fast transformations with sub-millisecond execution",
+        "When you need access to the request body",
+        "When you need up to 30 seconds of execution time"
+      ],
+      "correctIndex": 1,
+      "explanation": "CloudFront Functions are ideal for simple, lightweight operations (URL rewrites, header manipulation) with sub-millisecond execution and lower cost. Lambda@Edge is for complex logic requiring network access or longer execution."
+    },
+    {
+      "id": "q6",
+      "type": "code_analysis",
+      "difficulty": 3,
+      "concept": "CloudFront CLI",
+      "question": "What does this command do?",
+      "codeSnippet": "aws cloudfront create-distribution \\\n    --origin-domain-name pettracker-images.s3.amazonaws.com \\\n    --default-root-object index.html",
+      "language": "bash",
+      "options": [
+        "Creates an S3 bucket named pettracker-images",
+        "Creates a CloudFront distribution with S3 as the origin",
+        "Uploads index.html to an existing CloudFront distribution",
+        "Lists all CloudFront distributions in the account"
+      ],
+      "correctIndex": 1,
+      "explanation": "This creates a CloudFront distribution using the S3 bucket as the origin. Content from pettracker-images.s3.amazonaws.com will be cached at edge locations globally."
+    }
+  ]
+}

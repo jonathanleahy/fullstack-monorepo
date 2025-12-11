@@ -1,0 +1,91 @@
+{
+  "version": "1.0",
+  "subchapterId": "01",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "AWS Regions",
+      "question": "What is an AWS Region?",
+      "options": [
+        "A single data center building",
+        "A physical geographic location with multiple Availability Zones",
+        "A virtual network within AWS",
+        "An edge caching location for CloudFront"
+      ],
+      "correctIndex": 1,
+      "explanation": "A Region is a physical geographic location (like N. Virginia or Ireland) containing multiple isolated Availability Zones. Each Region is completely independent and isolated from other Regions."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "difficulty": 1,
+      "concept": "Service Availability",
+      "question": "All AWS services are available in every AWS Region.",
+      "correctAnswer": false,
+      "explanation": "New services typically launch in us-east-1 first, then expand to other regions over time. Always check service availability in your chosen region before designing your architecture."
+    },
+    {
+      "id": "q3",
+      "type": "multiple_select",
+      "difficulty": 3,
+      "concept": "Region Selection",
+      "question": "Which factors should influence your choice of AWS Region? (Select ALL that apply)",
+      "options": [
+        "Proximity to your users (latency)",
+        "Data residency and compliance requirements",
+        "Service availability for features you need",
+        "The region name sounds interesting"
+      ],
+      "correctIndices": [0, 1, 2],
+      "minSelections": 2,
+      "maxSelections": 4,
+      "explanation": "Region selection should be based on latency (closer to users is better), compliance requirements (data residency laws), and service availability. The region name is not a technical consideration."
+    },
+    {
+      "id": "q4",
+      "type": "code_analysis",
+      "difficulty": 4,
+      "concept": "AWS CLI Regions",
+      "question": "What will this AWS CLI command output?",
+      "codeSnippet": "aws ec2 describe-regions --output table",
+      "language": "bash",
+      "options": [
+        "A list of Availability Zones in the current region",
+        "A table showing all available AWS Regions and their endpoints",
+        "Information about EC2 instances in all regions",
+        "Error: region parameter required"
+      ],
+      "correctIndex": 1,
+      "explanation": "The describe-regions command lists all available AWS Regions with their endpoints. The --output table flag formats it as a human-readable table."
+    },
+    {
+      "id": "q5",
+      "type": "matching",
+      "difficulty": 3,
+      "concept": "Infrastructure Components",
+      "question": "Match each AWS infrastructure component with its purpose:",
+      "leftColumn": ["Regions", "Availability Zones", "Edge Locations"],
+      "rightColumn": ["Fault-tolerant data centers within a region", "Content caching close to users", "Geographic isolation for compliance and latency"],
+      "correctPairs": [[0, 2], [1, 0], [2, 1]],
+      "explanation": "Regions provide geographic isolation. AZs provide fault tolerance within a region. Edge Locations cache content closer to users for low latency."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "Availability Zones",
+      "question": "How are Availability Zones within the same Region connected?",
+      "options": [
+        "Public internet with VPN encryption",
+        "High-speed, low-latency private fiber with less than 2ms latency",
+        "Satellite communication links",
+        "They are not connected to each other"
+      ],
+      "correctIndex": 1,
+      "explanation": "AZs within a region are connected via high-speed, low-latency private fiber connections with less than 2ms latency. This enables synchronous replication while maintaining physical isolation."
+    }
+  ]
+}

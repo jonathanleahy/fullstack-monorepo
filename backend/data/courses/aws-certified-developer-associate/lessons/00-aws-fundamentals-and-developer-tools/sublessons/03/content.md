@@ -11,18 +11,25 @@ Alex checks the setup:
 - Images: S3 bucket in us-east-1
 - Australian user distance: ~15,000 km
 
-```
-User in Sydney → S3 in Virginia → Back to Sydney
-     ~150ms    +    ~150ms     =   ~300ms per image
+| Step | Journey | Latency |
+|------|---------|---------|
+| 1 | User in Sydney → S3 in Virginia | ~150ms |
+| 2 | S3 in Virginia → Back to Sydney | ~150ms |
+| | **Total per image** | **~300ms** |
 
-     Loading 10 pet photos = 3+ seconds just for images!
-```
+Loading 10 pet photos = **3+ seconds** just for images!
 
 "There has to be a better way," Alex thinks. That's when Alex discovers **Edge Locations**.
 
 ## What Are Edge Locations?
 
-Edge Locations are AWS's globally distributed network of servers designed for:
+To solve latency problems for global users, AWS built a worldwide network called **Edge Locations**.
+
+**What are Edge Locations?** They are small data centers positioned in major cities around the world, much closer to end users than AWS Regions. While AWS has ~33 Regions, there are **400+ Edge Locations** globally.
+
+**Why do they exist?** Physics limits how fast data can travel. Light takes ~150ms to travel from Sydney to Virginia. Edge Locations bring cached content and compute closer to users, reducing that distance dramatically.
+
+**What can they do?**
 
 1. **Caching content** closer to users (CloudFront)
 2. **DNS resolution** with lowest latency (Route 53)
@@ -71,6 +78,12 @@ graph TB
 
 ## Alex Implements CloudFront
 
+To fix the Australian user's slow experience, Alex decides to use **CloudFront**.
+
+**What is CloudFront?** It's AWS's Content Delivery Network (CDN) service. A CDN stores copies of your content at Edge Locations around the world, so users download from a nearby server instead of your origin.
+
+**How does it work?** When a user requests content, CloudFront checks if it has a cached copy at the nearest Edge Location. If yes, it serves it immediately (~10ms). If no, it fetches from your origin, caches it, then serves it.
+
 ### Before: Direct S3 Access
 
 ```mermaid
@@ -111,7 +124,7 @@ sequenceDiagram
 
 ```bash
 # Alex creates a CloudFront distribution
-aws cloudfront create-distribution \
+$ aws cloudfront create-distribution \
     --origin-domain-name pettracker-images.s3.amazonaws.com \
     --default-root-object index.html
 ```
@@ -125,7 +138,11 @@ aws cloudfront create-distribution \
 
 ## Points of Presence (PoPs)
 
-AWS uses the term **Points of Presence** to describe their edge infrastructure:
+You'll often see the term **Points of Presence (PoPs)** in AWS documentation.
+
+**What is a Point of Presence?** It's the umbrella term for AWS's edge infrastructure. Each PoP contains one or more Edge Locations plus supporting infrastructure.
+
+**Why the different name?** "Point of Presence" is the industry-standard networking term. AWS uses both terms, but they essentially refer to the same concept - locations where AWS has servers close to end users.
 
 ```mermaid
 graph TB
@@ -148,17 +165,24 @@ Between Edge Locations and your origin, AWS has **Regional Edge Caches**:
 - Reduces origin fetches
 - Located in major metro areas
 
-```
-User Request Flow:
-1. Edge Location (closest) - Miss
-2. Regional Edge Cache - Miss
-3. Origin (your server/S3) - Fetch
-4. Response cached at both levels
-```
+**User Request Flow (on cache miss):**
+
+| Step | Location | Result |
+|------|----------|--------|
+| 1 | Edge Location (closest) | Cache miss |
+| 2 | Regional Edge Cache | Cache miss |
+| 3 | Origin (your server/S3) | Fetch content |
+| 4 | Response cached | At both Edge and Regional levels |
 
 ## Lambda@Edge: Code at the Edge
 
-Alex discovers you can run code at Edge Locations:
+Alex discovers you can run code at Edge Locations, not just cache static content.
+
+**What is Lambda@Edge?** It's a feature that lets you run Lambda functions at CloudFront Edge Locations. Your code executes close to users, reducing latency for dynamic operations.
+
+**Why use it?** Sometimes you need to modify requests or responses on the fly - resize images, authenticate users, rewrite URLs, or personalize content. Lambda@Edge lets you do this at the edge instead of making a round-trip to your origin.
+
+**How does it work?** You attach Lambda functions to CloudFront events: viewer request, origin request, origin response, or viewer response. Your function runs at the Edge Location handling that request.
 
 ```javascript
 // Lambda@Edge function to resize images on the fly
@@ -234,13 +258,17 @@ graph TB
 
 ## Global Accelerator: Beyond Caching
 
-Alex learns about another edge service: **AWS Global Accelerator**
+Alex learns about another edge service for different use cases.
 
-Unlike CloudFront (which caches content), Global Accelerator:
-- Provides static IP addresses
-- Routes traffic over AWS's private network
-- Works for non-HTTP traffic (TCP, UDP)
-- Ideal for gaming, IoT, VoIP
+**What is Global Accelerator?** It's an AWS service that improves application performance by routing traffic through AWS's private global network instead of the public internet.
+
+**How is it different from CloudFront?** CloudFront caches content at the edge. Global Accelerator doesn't cache anything - it provides a faster network path. Think of CloudFront as a "copy machine at local offices" and Global Accelerator as a "private highway instead of public roads."
+
+**When should you use it?**
+- Non-HTTP traffic (TCP, UDP) - gaming, IoT, VoIP
+- Applications that need static IP addresses
+- Real-time applications where caching doesn't help
+- Failover between regions
 
 ```mermaid
 graph LR
@@ -263,32 +291,38 @@ graph LR
 Alex checks the pricing:
 
 ### CloudFront Pricing
-```
-Data Transfer Out (per GB):
-- First 10 TB/month:   $0.085
-- Next 40 TB/month:    $0.080
-- Next 100 TB/month:   $0.060
 
-HTTP Requests:
-- $0.0075 per 10,000 requests
-```
+| Data Transfer Out | Price per GB |
+|-------------------|--------------|
+| First 10 TB/month | $0.085 |
+| Next 40 TB/month | $0.080 |
+| Next 100 TB/month | $0.060 |
+
+| Request Type | Price |
+|--------------|-------|
+| HTTP requests | $0.0075 per 10,000 |
+| HTTPS requests | $0.01 per 10,000 |
 
 ### Alex's Cost Analysis
 
-```
-Before CloudFront:
-- S3 data transfer: 500 GB × $0.09 = $45/month
-- S3 requests: 1M × $0.0004 = $0.40/month
-- Total: ~$45/month
+**Before CloudFront (direct S3):**
 
-After CloudFront:
-- CloudFront: 500 GB × $0.085 = $42.50/month
-- S3 transfer to CloudFront: Often free (same region)
-- Requests: 1M × $0.00075 = $0.75/month
-- Total: ~$43/month
+| Item | Calculation | Cost |
+|------|-------------|------|
+| S3 data transfer | 500 GB × $0.09 | $45.00 |
+| S3 requests | 1M × $0.0004 | $0.40 |
+| **Total** | | **~$45/month** |
 
-Plus: 10x faster for global users! Worth it.
-```
+**After CloudFront:**
+
+| Item | Calculation | Cost |
+|------|-------------|------|
+| CloudFront transfer | 500 GB × $0.085 | $42.50 |
+| S3 to CloudFront | Same region | Free |
+| Requests | 1M × $0.00075 | $0.75 |
+| **Total** | | **~$43/month** |
+
+**Result:** Similar cost, but **10x faster** for global users!
 
 ## Exam Tips
 
@@ -314,15 +348,15 @@ Plus: 10x faster for global users! Worth it.
 ## Hands-On Challenge
 
 ```bash
-# List CloudFront edge locations
-aws cloudfront list-distributions
+# List CloudFront distributions
+$ aws cloudfront list-distributions
 
 # Create a simple CloudFront distribution for your S3 bucket
-aws cloudfront create-distribution \
+$ aws cloudfront create-distribution \
     --distribution-config file://cf-config.json
 
-# Check cache hit ratio
-aws cloudfront get-distribution \
+# Check your distribution's domain name
+$ aws cloudfront get-distribution \
     --id YOUR_DISTRIBUTION_ID \
     --query 'Distribution.DomainName'
 ```

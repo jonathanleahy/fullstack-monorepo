@@ -1,0 +1,74 @@
+{
+  "version": "1.0",
+  "subchapterId": "00",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "true_false",
+      "difficulty": 1,
+      "concept": "AWS Service Count",
+      "question": "AWS has over 200 services available in the management console.",
+      "correctAnswer": true,
+      "explanation": "AWS offers over 200 fully-featured services covering compute, storage, databases, analytics, machine learning, and more. This is why it can be overwhelming for beginners."
+    },
+    {
+      "id": "q2",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "Getting Started with AWS",
+      "question": "What is the recommended first step before deploying any AWS resources?",
+      "options": [
+        "Create an EC2 instance immediately to start testing",
+        "Build a solid foundation by understanding AWS infrastructure and tools",
+        "Deploy to production right away and learn as you go",
+        "Use the most expensive instance types for better performance"
+      ],
+      "correctIndex": 1,
+      "explanation": "Understanding AWS infrastructure and tools before deploying saves hours of debugging later. Jumping in without basics leads to security risks, unexpected costs, and configuration errors."
+    },
+    {
+      "id": "q3",
+      "type": "multiple_select",
+      "difficulty": 2,
+      "concept": "Common Beginner Mistakes",
+      "question": "Which of the following are common mistakes when starting with AWS? (Select ALL that apply)",
+      "options": [
+        "Launching resources without understanding what they do",
+        "Leaving SSH open to 0.0.0.0/0",
+        "Using the default VPC without understanding it",
+        "Reading documentation before deploying"
+      ],
+      "correctIndices": [0, 1, 2],
+      "minSelections": 2,
+      "maxSelections": 4,
+      "explanation": "Common beginner mistakes include deploying without understanding, leaving security groups too open, and using defaults blindly. Reading documentation is actually a best practice, not a mistake."
+    },
+    {
+      "id": "q4",
+      "type": "matching",
+      "difficulty": 3,
+      "concept": "AWS Learning Path",
+      "question": "Match each learning area with what it helps you understand:",
+      "leftColumn": ["Regions & AZs", "AWS CLI", "IAM Basics"],
+      "rightColumn": ["Where to deploy and geographic redundancy", "Command-line automation and scripting", "Who can access what resources"],
+      "correctPairs": [[0, 0], [1, 1], [2, 2]],
+      "explanation": "Regions & AZs determine WHERE your resources run. CLI enables automation. IAM controls access and permissions."
+    },
+    {
+      "id": "q5",
+      "type": "ordering",
+      "difficulty": 3,
+      "concept": "AWS Learning Approach",
+      "question": "Arrange the recommended steps for learning AWS in the correct order:",
+      "items": [
+        "Deploy production workloads",
+        "Set up billing alerts",
+        "Understand global infrastructure",
+        "Learn developer tools (CLI, SDKs)"
+      ],
+      "correctOrder": [1, 2, 3, 0],
+      "explanation": "First set up billing protection, then understand AWS infrastructure, then learn the tools, and finally deploy production workloads when you're confident."
+    }
+  ]
+}

@@ -40,11 +40,12 @@ type Quiz struct {
 // Lesson represents a single lesson within a course
 // Lessons can have sublessons to create a hierarchical chapter structure
 type Lesson struct {
-	Title      string
-	Content    string
-	Order      int
-	Sublessons []Lesson // Nested subchapters/sublessons
-	Quiz       *Quiz    // Optional quiz for this lesson
+	Title        string
+	Content      string
+	Order        int
+	Sublessons   []Lesson      // Nested subchapters/sublessons
+	Quiz         *Quiz         // Optional legacy quiz for this lesson
+	ExtendedQuiz *ExtendedQuiz // Optional extended quiz with multiple question types
 }
 
 // Validate checks if the lesson has valid data

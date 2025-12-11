@@ -49,6 +49,8 @@ models:
         fieldName: Sublessons
       quiz:
         fieldName: Quiz
+      extendedQuiz:
+        fieldName: ExtendedQuiz
   LibraryCourse:
     model:
       - github.com/project/backend/domain/entities.LibraryCourse
@@ -61,3 +63,39 @@ models:
     fields:
       libraryCourse:
         resolver: true
+  QuizAttempt:
+    model:
+      - github.com/project/backend/domain/entities.QuizAttempt
+  QuizResponse:
+    model:
+      - github.com/project/backend/domain/entities.QuizResponse
+  QuizStats:
+    model:
+      - github.com/project/backend/domain/entities.QuizStats
+  CourseQuizSummary:
+    model:
+      - github.com/project/backend/domain/entities.CourseQuizSummary
+  ReviewQueueItem:
+    model:
+      - github.com/project/backend/domain/entities.ReviewQueueItem
+  MasteryLevel:
+    model:
+      - github.com/project/backend/domain/entities.MasteryLevel
+  ConfidenceLevel:
+    model:
+      - github.com/project/backend/domain/entities.ConfidenceLevel
+  QuestionType:
+    model:
+      - github.com/project/backend/domain/entities.QuestionType
+  ExtendedQuizQuestion:
+    model:
+      - github.com/project/backend/domain/entities.ExtendedQuizQuestion
+  ExtendedQuiz:
+    model:
+      - github.com/project/backend/domain/entities.ExtendedQuiz
+  DashboardQuizStats:
+    model:
+      - github.com/project/backend/domain/entities.DashboardQuizStats
+  ScoreDataPoint:
+    model:
+      - github.com/project/backend/domain/entities.ScoreDataPoint

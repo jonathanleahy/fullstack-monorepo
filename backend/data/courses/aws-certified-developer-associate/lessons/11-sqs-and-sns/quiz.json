@@ -1,0 +1,144 @@
+{
+  "questions": [
+    {
+      "id": "sqs-sns-q1",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "question": "According to the lesson, what was the main problem with PetTracker's original notification system on National Pet Day?",
+      "options": [
+        "The database couldn't handle the queries",
+        "The notification service called external APIs synchronously, causing messages to be lost when APIs slowed down",
+        "Users were sending too many requests",
+        "The frontend crashed from too many users"
+      ],
+      "correctIndex": 1,
+      "explanation": "As described in Alex's Challenge, the notification service called SendGrid and Twilio APIs synchronously. When these APIs slowed down, requests piled up in memory, causing crashes and 38,000 lost notifications (76% failure rate)."
+    },
+    {
+      "id": "sqs-sns-q2",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "question": "According to the lesson, what is the key difference between Standard and FIFO SQS queues?",
+      "options": [
+        "Standard queues are free, FIFO queues cost extra",
+        "Standard queues have unlimited throughput with at-least-once delivery; FIFO queues guarantee exactly-once processing and strict ordering",
+        "Standard queues only work with Lambda, FIFO queues work with EC2",
+        "Standard queues are newer than FIFO queues"
+      ],
+      "correctIndex": 1,
+      "explanation": "The comparison table shows Standard queues offer unlimited throughput with best-effort ordering and at-least-once delivery, while FIFO queues guarantee exactly-once processing and strict ordering but are limited to 300 msg/sec (3000 with batching)."
+    },
+    {
+      "id": "sqs-sns-q3",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "question": "Based on the visibility timeout diagram, what happens when a consumer fails to delete a message before the visibility timeout expires?",
+      "options": [
+        "The message is permanently deleted",
+        "The message is moved to the dead letter queue",
+        "The message becomes visible again and can be received by another consumer",
+        "The message is sent back to the producer"
+      ],
+      "correctIndex": 2,
+      "explanation": "According to the visibility timeout sequence diagram, when processing fails and the consumer doesn't delete the message, it becomes visible again after the timeout expires. This allows another consumer (or the same one) to retry processing."
+    },
+    {
+      "id": "sqs-sns-q4",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "question": "According to the lesson, why should you enable long polling instead of short polling for SQS?",
+      "options": [
+        "Long polling is required for FIFO queues",
+        "Long polling queries all servers and waits for messages, reducing empty responses and API costs",
+        "Short polling doesn't work with Lambda",
+        "Long polling automatically encrypts messages"
+      ],
+      "correctIndex": 1,
+      "explanation": "The lesson explains that short polling samples only a subset of servers and returns immediately (often empty), while long polling (WaitTimeSeconds=1-20) queries ALL servers and waits, reducing empty responses, API calls, and costs."
+    },
+    {
+      "id": "sqs-sns-q5",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "question": "According to the fan-out pattern diagram, what is the main advantage of using SNS with multiple SQS queues instead of making direct API calls?",
+      "options": [
+        "It's less expensive",
+        "The API returns immediately (~10ms), each service processes independently with automatic retry, and adding new processors requires no code changes",
+        "It uses less memory",
+        "It's required by AWS best practices"
+      ],
+      "correctIndex": 1,
+      "explanation": "The fan-out comparison shows that with SNS+SQS: API latency drops to ~10ms, failures are independent, services scale independently, and adding/removing processors only requires subscription changes - no code changes needed."
+    },
+    {
+      "id": "sqs-sns-q6",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "question": "According to the lesson, what is the purpose of a Dead Letter Queue (DLQ)?",
+      "options": [
+        "To store messages that have been successfully processed",
+        "To encrypt messages at rest",
+        "To capture messages that have failed processing too many times, so they can be investigated instead of retrying forever",
+        "To prioritize important messages"
+      ],
+      "correctIndex": 2,
+      "explanation": "The DLQ lesson explains that without a DLQ, problematic 'poison messages' consume resources indefinitely. A DLQ isolates failures after maxReceiveCount is reached, allowing investigation while the system continues processing other messages."
+    },
+    {
+      "id": "sqs-sns-q7",
+      "type": "multiple_choice",
+      "difficulty": 4,
+      "question": "According to the FIFO queues lesson, what is the purpose of Message Group ID?",
+      "options": [
+        "To encrypt messages",
+        "To enable parallel processing of different groups while maintaining order within each group",
+        "To set the message priority",
+        "To route messages to specific queues"
+      ],
+      "correctIndex": 1,
+      "explanation": "The diagram shows that Message Group ID enables parallel processing - different groups (like different order IDs) process simultaneously, but messages within the same group maintain strict FIFO order. This is the key insight Alex realizes about FIFO queues."
+    },
+    {
+      "id": "sqs-sns-q8",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "question": "According to the SNS filter policy examples, which filter policy syntax would route only high-priority messages (priority >= 5)?",
+      "options": [
+        "{\"priority\": [5]}",
+        "{\"priority\": [{\"numeric\": [\">=\", 5]}]}",
+        "{\"priority\": \"high\"}",
+        "{\"high_priority\": true}"
+      ],
+      "correctIndex": 1,
+      "explanation": "The filter policy syntax section shows numeric matching uses the format {\"priority\": [{\"numeric\": [\">=\", 5]}]}. This matches messages where the priority attribute is greater than or equal to 5."
+    },
+    {
+      "id": "sqs-sns-q9",
+      "type": "multiple_choice",
+      "difficulty": 4,
+      "question": "Based on the Lambda integration lesson, what is the recommended visibility timeout for an SQS queue when using Lambda, and why?",
+      "options": [
+        "Same as Lambda timeout for efficiency",
+        "At least 6 times the Lambda timeout to prevent duplicate processing during retries",
+        "Maximum (12 hours) for safety",
+        "Minimum (0 seconds) for faster processing"
+      ],
+      "correctIndex": 1,
+      "explanation": "The lesson emphasizes setting visibility timeout to at least 6x the Lambda timeout. If it's too short, the message becomes visible while still being processed, causing duplicate processing as shown in the sequence diagram."
+    },
+    {
+      "id": "sqs-sns-q10",
+      "type": "multiple_choice",
+      "difficulty": 4,
+      "question": "According to the security lesson, what must you configure for SNS to successfully send messages to an SQS queue?",
+      "options": [
+        "Enable encryption on both the topic and queue",
+        "Create an IAM role for SNS",
+        "Add a queue policy that allows sns.amazonaws.com to SendMessage with a condition on the source topic ARN",
+        "Configure VPC peering between SNS and SQS"
+      ],
+      "correctIndex": 2,
+      "explanation": "The security lesson shows a queue policy example that allows sns.amazonaws.com to perform sqs:SendMessage, with a condition restricting the source to a specific topic ARN. This is required for SNS to SQS integration."
+    }
+  ]
+}

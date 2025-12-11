@@ -1,0 +1,113 @@
+{
+  "id": "13-eventbridge",
+  "title": "EventBridge",
+  "slug": "eventbridge",
+  "description": "Master Amazon EventBridge - the serverless event bus that connects applications using events. Learn to build event-driven architectures with rules, patterns, scheduling, and integration with AWS services and SaaS applications.",
+  "order": 13,
+  "estimatedMinutes": 240,
+  "objectives": [
+    "Understand what events are and why they matter",
+    "Compare event-driven architecture vs direct integrations",
+    "Create and manage event buses and rules",
+    "Write effective event patterns for filtering",
+    "Integrate AWS services and SaaS applications",
+    "Use EventBridge Scheduler for time-based events",
+    "Implement EventBridge Pipes for point-to-point integration",
+    "Transform events with input transformers",
+    "Implement event archiving and replay",
+    "Secure event buses with IAM and resource policies"
+  ],
+  "keywords": ["eventbridge", "events", "event-bus", "rules", "patterns", "scheduler", "event-driven", "saas-integration", "archive", "replay", "pipes"],
+  "sublessons": [
+    {
+      "id": "00-what-are-events",
+      "title": "What Are Events?",
+      "order": 0,
+      "description": "Understanding the foundation of event-driven architecture"
+    },
+    {
+      "id": "01-the-problem",
+      "title": "The Problem: Event Spaghetti",
+      "order": 1,
+      "description": "How handling events without EventBridge creates complexity"
+    },
+    {
+      "id": "02-the-solution",
+      "title": "The Solution: How EventBridge Changes Everything",
+      "order": 2,
+      "description": "How EventBridge solves the event spaghetti problem"
+    },
+    {
+      "id": "03-event-buses",
+      "title": "Event Buses",
+      "order": 3,
+      "description": "Default, custom, and cross-account event buses"
+    },
+    {
+      "id": "04-rules-and-targets",
+      "title": "Rules and Targets",
+      "order": 4,
+      "description": "Routing events to the right destinations"
+    },
+    {
+      "id": "05-event-patterns",
+      "title": "Event Patterns: The Art of Filtering",
+      "order": 5,
+      "description": "Powerful content-based filtering with pattern matching"
+    },
+    {
+      "id": "06-aws-service-integration",
+      "title": "AWS Service Integration",
+      "order": 6,
+      "description": "Native events from 200+ AWS services"
+    },
+    {
+      "id": "07-custom-events",
+      "title": "Custom Events",
+      "order": 7,
+      "description": "Publishing your own events to EventBridge"
+    },
+    {
+      "id": "08-saas-integration",
+      "title": "SaaS Partner Integration",
+      "order": 8,
+      "description": "Integrating Stripe, Auth0, and other partners"
+    },
+    {
+      "id": "09-eventbridge-scheduler",
+      "title": "EventBridge Scheduler",
+      "order": 9,
+      "description": "Time-based events with cron and rate expressions"
+    },
+    {
+      "id": "10-eventbridge-pipes",
+      "title": "EventBridge Pipes",
+      "order": 10,
+      "description": "Point-to-point integration with filtering and enrichment"
+    },
+    {
+      "id": "11-input-transformation",
+      "title": "Input Transformation",
+      "order": 11,
+      "description": "Reshaping event data before delivery"
+    },
+    {
+      "id": "12-archive-and-replay",
+      "title": "Archive and Replay",
+      "order": 12,
+      "description": "Storing events for disaster recovery and reprocessing"
+    },
+    {
+      "id": "13-security",
+      "title": "Security and Access Control",
+      "order": 13,
+      "description": "IAM policies, resource policies, and encryption"
+    },
+    {
+      "id": "14-chapter-summary",
+      "title": "Alex's Solution: Unified Event Architecture",
+      "order": 14,
+      "description": "Bringing it all together with the complete solution"
+    }
+  ]
+}

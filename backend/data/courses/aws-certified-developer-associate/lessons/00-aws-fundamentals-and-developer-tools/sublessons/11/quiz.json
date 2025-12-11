@@ -1,0 +1,91 @@
+{
+  "version": "1.0",
+  "subchapterId": "11",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "Billing Alerts Priority",
+      "question": "What should you set up BEFORE starting any AWS development work?",
+      "options": [
+        "EC2 instances",
+        "Billing alerts and budgets",
+        "Lambda functions",
+        "CloudFront distributions"
+      ],
+      "correctIndex": 1,
+      "explanation": "Setting up billing alerts and budgets should be your FIRST action. This protects you from unexpected charges and surprise bills, especially when learning AWS."
+    },
+    {
+      "id": "q2",
+      "type": "multiple_select",
+      "difficulty": 3,
+      "concept": "AWS Free Tier Types",
+      "question": "What types of Free Tier offers does AWS provide? (Select ALL that apply)",
+      "options": [
+        "Always Free (forever)",
+        "12 Months Free (new accounts)",
+        "Short-term Trials (service-specific)",
+        "Unlimited Free (no restrictions)"
+      ],
+      "correctIndices": [0, 1, 2],
+      "minSelections": 2,
+      "maxSelections": 4,
+      "explanation": "AWS Free Tier has three types: Always Free (Lambda, DynamoDB limits), 12 Months Free for new accounts (EC2, S3), and Short-term Trials for specific services. There's no unlimited free tier."
+    },
+    {
+      "id": "q3",
+      "type": "matching",
+      "difficulty": 4,
+      "concept": "Cost Traps",
+      "question": "Match each resource with its common cost trap:",
+      "leftColumn": ["NAT Gateway", "Elastic IP", "CloudWatch Logs", "Cross-AZ data transfer"],
+      "rightColumn": ["Logs accumulate forever by default", "$0.01/GB each direction adds up", "Charges when not attached to running instance", "~$32/month minimum even if idle"],
+      "correctPairs": [[0, 3], [1, 2], [2, 0], [3, 1]],
+      "explanation": "NAT Gateway costs ~$32/month minimum. Unused Elastic IPs incur charges. CloudWatch Logs accumulate forever unless you set retention. Cross-AZ transfer costs $0.01/GB each way."
+    },
+    {
+      "id": "q4",
+      "type": "code_analysis",
+      "difficulty": 3,
+      "concept": "Log Retention",
+      "question": "What does this command prevent?",
+      "codeSnippet": "aws logs put-retention-policy \\\n    --log-group-name /aws/lambda/my-function \\\n    --retention-in-days 7",
+      "language": "bash",
+      "options": [
+        "Lambda functions from running longer than 7 days",
+        "CloudWatch Logs from accumulating indefinitely (sets 7-day retention)",
+        "API calls older than 7 days from being logged",
+        "IAM sessions from lasting longer than 7 days"
+      ],
+      "correctIndex": 1,
+      "explanation": "This sets a 7-day retention policy on CloudWatch Logs. By default, logs are kept forever and can accumulate significant storage costs. Set retention based on your compliance and debugging needs."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "difficulty": 2,
+      "concept": "Data Transfer",
+      "question": "Data transfer INTO AWS from the internet is generally free.",
+      "correctAnswer": true,
+      "explanation": "Inbound data transfer from the internet to AWS is typically free. However, outbound transfer TO the internet costs money ($0.09/GB for the first 10TB). Cross-region and cross-AZ transfers also have costs."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "concept": "VPC Endpoints",
+      "question": "How can you reduce costs when a Lambda in a VPC needs to access DynamoDB?",
+      "options": [
+        "Move Lambda outside the VPC",
+        "Use a NAT Gateway ($32+/month)",
+        "Create a VPC Endpoint for DynamoDB (~$7/month)",
+        "Use public internet routing"
+      ],
+      "correctIndex": 2,
+      "explanation": "VPC Endpoints provide private access to AWS services without NAT Gateway. They're much cheaper (~$7/month vs $32+/month for NAT) and keep traffic within AWS network."
+    }
+  ]
+}

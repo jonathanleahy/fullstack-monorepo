@@ -45,6 +45,7 @@ type ResolverRoot interface {
 	LibraryCourse() LibraryCourseResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	QuizResponse() QuizResponseResolver
 	UserCourse() UserCourseResolver
 }
 
@@ -88,8 +89,63 @@ type ComplexityRoot struct {
 		UniqueViews      func(childComplexity int) int
 	}
 
+	CourseQuizSummary struct {
+		AverageScore     func(childComplexity int) int
+		ChapterStats     func(childComplexity int) int
+		CompletedQuizzes func(childComplexity int) int
+		CourseID         func(childComplexity int) int
+		CourseTitle      func(childComplexity int) int
+		OverallMastery   func(childComplexity int) int
+		ReviewQueueSize  func(childComplexity int) int
+		StrongConcepts   func(childComplexity int) int
+		SubchapterStats  func(childComplexity int) int
+		TotalQuizzes     func(childComplexity int) int
+		WeakConcepts     func(childComplexity int) int
+	}
+
+	DashboardQuizStats struct {
+		CourseSummaries     func(childComplexity int) int
+		OverallAverageScore func(childComplexity int) int
+		OverallMastery      func(childComplexity int) int
+		RecentAttempts      func(childComplexity int) int
+		ScoreHistory        func(childComplexity int) int
+		TotalQuizzesTaken   func(childComplexity int) int
+		TotalStrongConcepts func(childComplexity int) int
+		TotalWeakConcepts   func(childComplexity int) int
+	}
+
+	ExtendedQuiz struct {
+		LessonID     func(childComplexity int) int
+		Questions    func(childComplexity int) int
+		SubchapterID func(childComplexity int) int
+		Version      func(childComplexity int) int
+	}
+
+	ExtendedQuizQuestion struct {
+		CodeSnippet    func(childComplexity int) int
+		Concept        func(childComplexity int) int
+		CorrectAnswer  func(childComplexity int) int
+		CorrectIndex   func(childComplexity int) int
+		CorrectIndices func(childComplexity int) int
+		CorrectOrder   func(childComplexity int) int
+		CorrectPairs   func(childComplexity int) int
+		Difficulty     func(childComplexity int) int
+		Explanation    func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Items          func(childComplexity int) int
+		Language       func(childComplexity int) int
+		LeftColumn     func(childComplexity int) int
+		MaxSelections  func(childComplexity int) int
+		MinSelections  func(childComplexity int) int
+		Options        func(childComplexity int) int
+		Question       func(childComplexity int) int
+		RightColumn    func(childComplexity int) int
+		Type           func(childComplexity int) int
+	}
+
 	Lesson struct {
 		Content       func(childComplexity int) int
+		ExtendedQuiz  func(childComplexity int) int
 		HasSublessons func(childComplexity int) int
 		Order         func(childComplexity int) int
 		Quiz          func(childComplexity int) int
@@ -121,34 +177,39 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddBookmark          func(childComplexity int, libraryCourseID string, lessonIndex int, note *string) int
-		CreateLibraryCourse  func(childComplexity int, input CreateLibraryCourseInput) int
-		CreateUser           func(childComplexity int, input CreateUserInput) int
-		DeleteAttachment     func(childComplexity int, id string) int
-		DeleteLibraryCourse  func(childComplexity int, id string) int
-		DeleteUser           func(childComplexity int, id string) int
-		DropCourse           func(childComplexity int, id string) int
-		EnrollInCourse       func(childComplexity int, libraryCourseID string) int
-		ImportCourses        func(childComplexity int, input ImportCoursesInput) int
-		Login                func(childComplexity int, input LoginInput) int
-		RecordCourseView     func(childComplexity int, libraryCourseID string) int
-		RefreshToken         func(childComplexity int, refreshToken string) int
-		Register             func(childComplexity int, input RegisterInput) int
-		RemoveBookmark       func(childComplexity int, libraryCourseID string, lessonIndex int) int
-		SetCurrentLesson     func(childComplexity int, libraryCourseID string, lessonIndex int) int
-		StartCourse          func(childComplexity int, input StartCourseInput) int
-		UnenrollFromCourse   func(childComplexity int, libraryCourseID string) int
-		UpdateCourseProgress func(childComplexity int, libraryCourseID string, lessonIndex int, completed bool) int
-		UpdateLibraryCourse  func(childComplexity int, id string, input UpdateLibraryCourseInput) int
-		UpdateProgress       func(childComplexity int, input UpdateProgressInput) int
-		UpdateUser           func(childComplexity int, id string, input UpdateUserInput) int
+		AddBookmark           func(childComplexity int, libraryCourseID string, lessonIndex int, note *string) int
+		AddToReviewQueue      func(childComplexity int, courseID string, quizID string, questionID string, concept string) int
+		CreateLibraryCourse   func(childComplexity int, input CreateLibraryCourseInput) int
+		CreateUser            func(childComplexity int, input CreateUserInput) int
+		DeleteAttachment      func(childComplexity int, id string) int
+		DeleteLibraryCourse   func(childComplexity int, id string) int
+		DeleteUser            func(childComplexity int, id string) int
+		DropCourse            func(childComplexity int, id string) int
+		EnrollInCourse        func(childComplexity int, libraryCourseID string) int
+		ImportCourses         func(childComplexity int, input ImportCoursesInput) int
+		Login                 func(childComplexity int, input LoginInput) int
+		RecordCourseView      func(childComplexity int, libraryCourseID string) int
+		RefreshToken          func(childComplexity int, refreshToken string) int
+		Register              func(childComplexity int, input RegisterInput) int
+		RemoveBookmark        func(childComplexity int, libraryCourseID string, lessonIndex int) int
+		RemoveFromReviewQueue func(childComplexity int, courseID string, questionID string) int
+		SetCurrentLesson      func(childComplexity int, libraryCourseID string, lessonIndex int) int
+		StartCourse           func(childComplexity int, input StartCourseInput) int
+		SubmitQuizAttempt     func(childComplexity int, input SubmitQuizAttemptInput) int
+		UnenrollFromCourse    func(childComplexity int, libraryCourseID string) int
+		UpdateCourseProgress  func(childComplexity int, libraryCourseID string, lessonIndex int, completed bool) int
+		UpdateLibraryCourse   func(childComplexity int, id string, input UpdateLibraryCourseInput) int
+		UpdateProgress        func(childComplexity int, input UpdateProgressInput) int
+		UpdateUser            func(childComplexity int, id string, input UpdateUserInput) int
 	}
 
 	Query struct {
 		AllTags                      func(childComplexity int) int
 		CourseAnalytics              func(childComplexity int, libraryCourseID string) int
 		CourseBookmarks              func(childComplexity int, libraryCourseID string) int
+		CourseQuizSummary            func(childComplexity int, courseID string) int
 		CoursesByTag                 func(childComplexity int, tag string, pagination *PaginationInput) int
+		DashboardQuizStats           func(childComplexity int, fromDate *string, toDate *string) int
 		GetUserCourseByLibraryCourse func(childComplexity int, libraryCourseID string) int
 		LessonAttachments            func(childComplexity int, libraryCourseID string, lessonIndex int) int
 		LibraryCourse                func(childComplexity int, id string) int
@@ -161,6 +222,8 @@ type ComplexityRoot struct {
 		MyCourses                    func(childComplexity int, pagination *PaginationInput) int
 		MyEnrolledCourses            func(childComplexity int) int
 		MyInProgressCourses          func(childComplexity int, pagination *PaginationInput) int
+		QuizStats                    func(childComplexity int, courseID string, quizID string) int
+		ReviewQueue                  func(childComplexity int, courseID string, limit *int) int
 		SearchLibraryCourses         func(childComplexity int, query string, pagination *PaginationInput) int
 		User                         func(childComplexity int, id string) int
 		UserCourse                   func(childComplexity int, id string) int
@@ -171,12 +234,67 @@ type ComplexityRoot struct {
 		Questions func(childComplexity int) int
 	}
 
+	QuizAttempt struct {
+		CompletedAt    func(childComplexity int) int
+		CorrectCount   func(childComplexity int) int
+		CourseID       func(childComplexity int) int
+		ID             func(childComplexity int) int
+		MasteryLevel   func(childComplexity int) int
+		MaxScore       func(childComplexity int) int
+		Percentage     func(childComplexity int) int
+		QuizID         func(childComplexity int) int
+		QuizType       func(childComplexity int) int
+		Score          func(childComplexity int) int
+		TotalQuestions func(childComplexity int) int
+		UserID         func(childComplexity int) int
+	}
+
 	QuizQuestion struct {
 		CorrectIndex func(childComplexity int) int
 		Explanation  func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Options      func(childComplexity int) int
 		Question     func(childComplexity int) int
+	}
+
+	QuizResponse struct {
+		AttemptID        func(childComplexity int) int
+		Confidence       func(childComplexity int) int
+		ID               func(childComplexity int) int
+		IsCorrect        func(childComplexity int) int
+		PointsEarned     func(childComplexity int) int
+		PointsPossible   func(childComplexity int) int
+		QuestionID       func(childComplexity int) int
+		TimeTakenSeconds func(childComplexity int) int
+		UserAnswer       func(childComplexity int) int
+	}
+
+	QuizStats struct {
+		AttemptCount func(childComplexity int) int
+		BestMastery  func(childComplexity int) int
+		BestScore    func(childComplexity int) int
+		History      func(childComplexity int) int
+		LatestScore  func(childComplexity int) int
+		QuizID       func(childComplexity int) int
+	}
+
+	ReviewQueueItem struct {
+		Concept     func(childComplexity int) int
+		CourseID    func(childComplexity int) int
+		ID          func(childComplexity int) int
+		LastAttempt func(childComplexity int) int
+		NextReview  func(childComplexity int) int
+		QuestionID  func(childComplexity int) int
+		QuizID      func(childComplexity int) int
+		UserID      func(childComplexity int) int
+		WrongCount  func(childComplexity int) int
+	}
+
+	ScoreDataPoint struct {
+		CourseID   func(childComplexity int) int
+		CourseName func(childComplexity int) int
+		Date       func(childComplexity int) int
+		Score      func(childComplexity int) int
 	}
 
 	TokenPayload struct {
@@ -253,6 +371,9 @@ type MutationResolver interface {
 	RemoveBookmark(ctx context.Context, libraryCourseID string, lessonIndex int) (bool, error)
 	RecordCourseView(ctx context.Context, libraryCourseID string) (bool, error)
 	DeleteAttachment(ctx context.Context, id string) (bool, error)
+	SubmitQuizAttempt(ctx context.Context, input SubmitQuizAttemptInput) (*entities.QuizAttempt, error)
+	AddToReviewQueue(ctx context.Context, courseID string, quizID string, questionID string, concept string) (*entities.ReviewQueueItem, error)
+	RemoveFromReviewQueue(ctx context.Context, courseID string, questionID string) (bool, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, id string) (*entities.User, error)
@@ -275,6 +396,15 @@ type QueryResolver interface {
 	CourseAnalytics(ctx context.Context, libraryCourseID string) (*entities.CourseAnalytics, error)
 	MyAuthoredCoursesAnalytics(ctx context.Context) ([]*entities.CourseAnalytics, error)
 	LessonAttachments(ctx context.Context, libraryCourseID string, lessonIndex int) ([]*entities.Attachment, error)
+	QuizStats(ctx context.Context, courseID string, quizID string) (*entities.QuizStats, error)
+	CourseQuizSummary(ctx context.Context, courseID string) (*entities.CourseQuizSummary, error)
+	DashboardQuizStats(ctx context.Context, fromDate *string, toDate *string) (*entities.DashboardQuizStats, error)
+	ReviewQueue(ctx context.Context, courseID string, limit *int) ([]*entities.ReviewQueueItem, error)
+}
+type QuizResponseResolver interface {
+	UserAnswer(ctx context.Context, obj *entities.QuizResponse) (string, error)
+
+	TimeTakenSeconds(ctx context.Context, obj *entities.QuizResponse) (*int, error)
 }
 type UserCourseResolver interface {
 	LibraryCourse(ctx context.Context, obj *entities.UserCourse) (*entities.LibraryCourse, error)
@@ -447,12 +577,274 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.CourseAnalytics.UniqueViews(childComplexity), true
 
+	case "CourseQuizSummary.averageScore":
+		if e.complexity.CourseQuizSummary.AverageScore == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.AverageScore(childComplexity), true
+	case "CourseQuizSummary.chapterStats":
+		if e.complexity.CourseQuizSummary.ChapterStats == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.ChapterStats(childComplexity), true
+	case "CourseQuizSummary.completedQuizzes":
+		if e.complexity.CourseQuizSummary.CompletedQuizzes == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.CompletedQuizzes(childComplexity), true
+	case "CourseQuizSummary.courseId":
+		if e.complexity.CourseQuizSummary.CourseID == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.CourseID(childComplexity), true
+	case "CourseQuizSummary.courseTitle":
+		if e.complexity.CourseQuizSummary.CourseTitle == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.CourseTitle(childComplexity), true
+	case "CourseQuizSummary.overallMastery":
+		if e.complexity.CourseQuizSummary.OverallMastery == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.OverallMastery(childComplexity), true
+	case "CourseQuizSummary.reviewQueueSize":
+		if e.complexity.CourseQuizSummary.ReviewQueueSize == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.ReviewQueueSize(childComplexity), true
+	case "CourseQuizSummary.strongConcepts":
+		if e.complexity.CourseQuizSummary.StrongConcepts == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.StrongConcepts(childComplexity), true
+	case "CourseQuizSummary.subchapterStats":
+		if e.complexity.CourseQuizSummary.SubchapterStats == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.SubchapterStats(childComplexity), true
+	case "CourseQuizSummary.totalQuizzes":
+		if e.complexity.CourseQuizSummary.TotalQuizzes == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.TotalQuizzes(childComplexity), true
+	case "CourseQuizSummary.weakConcepts":
+		if e.complexity.CourseQuizSummary.WeakConcepts == nil {
+			break
+		}
+
+		return e.complexity.CourseQuizSummary.WeakConcepts(childComplexity), true
+
+	case "DashboardQuizStats.courseSummaries":
+		if e.complexity.DashboardQuizStats.CourseSummaries == nil {
+			break
+		}
+
+		return e.complexity.DashboardQuizStats.CourseSummaries(childComplexity), true
+	case "DashboardQuizStats.overallAverageScore":
+		if e.complexity.DashboardQuizStats.OverallAverageScore == nil {
+			break
+		}
+
+		return e.complexity.DashboardQuizStats.OverallAverageScore(childComplexity), true
+	case "DashboardQuizStats.overallMastery":
+		if e.complexity.DashboardQuizStats.OverallMastery == nil {
+			break
+		}
+
+		return e.complexity.DashboardQuizStats.OverallMastery(childComplexity), true
+	case "DashboardQuizStats.recentAttempts":
+		if e.complexity.DashboardQuizStats.RecentAttempts == nil {
+			break
+		}
+
+		return e.complexity.DashboardQuizStats.RecentAttempts(childComplexity), true
+	case "DashboardQuizStats.scoreHistory":
+		if e.complexity.DashboardQuizStats.ScoreHistory == nil {
+			break
+		}
+
+		return e.complexity.DashboardQuizStats.ScoreHistory(childComplexity), true
+	case "DashboardQuizStats.totalQuizzesTaken":
+		if e.complexity.DashboardQuizStats.TotalQuizzesTaken == nil {
+			break
+		}
+
+		return e.complexity.DashboardQuizStats.TotalQuizzesTaken(childComplexity), true
+	case "DashboardQuizStats.totalStrongConcepts":
+		if e.complexity.DashboardQuizStats.TotalStrongConcepts == nil {
+			break
+		}
+
+		return e.complexity.DashboardQuizStats.TotalStrongConcepts(childComplexity), true
+	case "DashboardQuizStats.totalWeakConcepts":
+		if e.complexity.DashboardQuizStats.TotalWeakConcepts == nil {
+			break
+		}
+
+		return e.complexity.DashboardQuizStats.TotalWeakConcepts(childComplexity), true
+
+	case "ExtendedQuiz.lessonId":
+		if e.complexity.ExtendedQuiz.LessonID == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuiz.LessonID(childComplexity), true
+	case "ExtendedQuiz.questions":
+		if e.complexity.ExtendedQuiz.Questions == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuiz.Questions(childComplexity), true
+	case "ExtendedQuiz.subchapterId":
+		if e.complexity.ExtendedQuiz.SubchapterID == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuiz.SubchapterID(childComplexity), true
+	case "ExtendedQuiz.version":
+		if e.complexity.ExtendedQuiz.Version == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuiz.Version(childComplexity), true
+
+	case "ExtendedQuizQuestion.codeSnippet":
+		if e.complexity.ExtendedQuizQuestion.CodeSnippet == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.CodeSnippet(childComplexity), true
+	case "ExtendedQuizQuestion.concept":
+		if e.complexity.ExtendedQuizQuestion.Concept == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.Concept(childComplexity), true
+	case "ExtendedQuizQuestion.correctAnswer":
+		if e.complexity.ExtendedQuizQuestion.CorrectAnswer == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.CorrectAnswer(childComplexity), true
+	case "ExtendedQuizQuestion.correctIndex":
+		if e.complexity.ExtendedQuizQuestion.CorrectIndex == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.CorrectIndex(childComplexity), true
+	case "ExtendedQuizQuestion.correctIndices":
+		if e.complexity.ExtendedQuizQuestion.CorrectIndices == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.CorrectIndices(childComplexity), true
+	case "ExtendedQuizQuestion.correctOrder":
+		if e.complexity.ExtendedQuizQuestion.CorrectOrder == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.CorrectOrder(childComplexity), true
+	case "ExtendedQuizQuestion.correctPairs":
+		if e.complexity.ExtendedQuizQuestion.CorrectPairs == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.CorrectPairs(childComplexity), true
+	case "ExtendedQuizQuestion.difficulty":
+		if e.complexity.ExtendedQuizQuestion.Difficulty == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.Difficulty(childComplexity), true
+	case "ExtendedQuizQuestion.explanation":
+		if e.complexity.ExtendedQuizQuestion.Explanation == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.Explanation(childComplexity), true
+	case "ExtendedQuizQuestion.id":
+		if e.complexity.ExtendedQuizQuestion.ID == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.ID(childComplexity), true
+	case "ExtendedQuizQuestion.items":
+		if e.complexity.ExtendedQuizQuestion.Items == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.Items(childComplexity), true
+	case "ExtendedQuizQuestion.language":
+		if e.complexity.ExtendedQuizQuestion.Language == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.Language(childComplexity), true
+	case "ExtendedQuizQuestion.leftColumn":
+		if e.complexity.ExtendedQuizQuestion.LeftColumn == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.LeftColumn(childComplexity), true
+	case "ExtendedQuizQuestion.maxSelections":
+		if e.complexity.ExtendedQuizQuestion.MaxSelections == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.MaxSelections(childComplexity), true
+	case "ExtendedQuizQuestion.minSelections":
+		if e.complexity.ExtendedQuizQuestion.MinSelections == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.MinSelections(childComplexity), true
+	case "ExtendedQuizQuestion.options":
+		if e.complexity.ExtendedQuizQuestion.Options == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.Options(childComplexity), true
+	case "ExtendedQuizQuestion.question":
+		if e.complexity.ExtendedQuizQuestion.Question == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.Question(childComplexity), true
+	case "ExtendedQuizQuestion.rightColumn":
+		if e.complexity.ExtendedQuizQuestion.RightColumn == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.RightColumn(childComplexity), true
+	case "ExtendedQuizQuestion.type":
+		if e.complexity.ExtendedQuizQuestion.Type == nil {
+			break
+		}
+
+		return e.complexity.ExtendedQuizQuestion.Type(childComplexity), true
+
 	case "Lesson.content":
 		if e.complexity.Lesson.Content == nil {
 			break
 		}
 
 		return e.complexity.Lesson.Content(childComplexity), true
+	case "Lesson.extendedQuiz":
+		if e.complexity.Lesson.ExtendedQuiz == nil {
+			break
+		}
+
+		return e.complexity.Lesson.ExtendedQuiz(childComplexity), true
 	case "Lesson.hasSublessons":
 		if e.complexity.Lesson.HasSublessons == nil {
 			break
@@ -599,6 +991,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.AddBookmark(childComplexity, args["libraryCourseId"].(string), args["lessonIndex"].(int), args["note"].(*string)), true
+	case "Mutation.addToReviewQueue":
+		if e.complexity.Mutation.AddToReviewQueue == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addToReviewQueue_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddToReviewQueue(childComplexity, args["courseId"].(string), args["quizId"].(string), args["questionId"].(string), args["concept"].(string)), true
 	case "Mutation.createLibraryCourse":
 		if e.complexity.Mutation.CreateLibraryCourse == nil {
 			break
@@ -742,6 +1145,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.RemoveBookmark(childComplexity, args["libraryCourseId"].(string), args["lessonIndex"].(int)), true
+	case "Mutation.removeFromReviewQueue":
+		if e.complexity.Mutation.RemoveFromReviewQueue == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeFromReviewQueue_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveFromReviewQueue(childComplexity, args["courseId"].(string), args["questionId"].(string)), true
 	case "Mutation.setCurrentLesson":
 		if e.complexity.Mutation.SetCurrentLesson == nil {
 			break
@@ -764,6 +1178,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.StartCourse(childComplexity, args["input"].(StartCourseInput)), true
+	case "Mutation.submitQuizAttempt":
+		if e.complexity.Mutation.SubmitQuizAttempt == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_submitQuizAttempt_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SubmitQuizAttempt(childComplexity, args["input"].(SubmitQuizAttemptInput)), true
 	case "Mutation.unenrollFromCourse":
 		if e.complexity.Mutation.UnenrollFromCourse == nil {
 			break
@@ -848,6 +1273,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.CourseBookmarks(childComplexity, args["libraryCourseId"].(string)), true
+	case "Query.courseQuizSummary":
+		if e.complexity.Query.CourseQuizSummary == nil {
+			break
+		}
+
+		args, err := ec.field_Query_courseQuizSummary_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CourseQuizSummary(childComplexity, args["courseId"].(string)), true
 	case "Query.coursesByTag":
 		if e.complexity.Query.CoursesByTag == nil {
 			break
@@ -859,6 +1295,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.CoursesByTag(childComplexity, args["tag"].(string), args["pagination"].(*PaginationInput)), true
+	case "Query.dashboardQuizStats":
+		if e.complexity.Query.DashboardQuizStats == nil {
+			break
+		}
+
+		args, err := ec.field_Query_dashboardQuizStats_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DashboardQuizStats(childComplexity, args["fromDate"].(*string), args["toDate"].(*string)), true
 	case "Query.getUserCourseByLibraryCourse":
 		if e.complexity.Query.GetUserCourseByLibraryCourse == nil {
 			break
@@ -971,6 +1418,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.MyInProgressCourses(childComplexity, args["pagination"].(*PaginationInput)), true
+	case "Query.quizStats":
+		if e.complexity.Query.QuizStats == nil {
+			break
+		}
+
+		args, err := ec.field_Query_quizStats_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QuizStats(childComplexity, args["courseId"].(string), args["quizId"].(string)), true
+	case "Query.reviewQueue":
+		if e.complexity.Query.ReviewQueue == nil {
+			break
+		}
+
+		args, err := ec.field_Query_reviewQueue_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ReviewQueue(childComplexity, args["courseId"].(string), args["limit"].(*int)), true
 	case "Query.searchLibraryCourses":
 		if e.complexity.Query.SearchLibraryCourses == nil {
 			break
@@ -1023,6 +1492,79 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Quiz.Questions(childComplexity), true
 
+	case "QuizAttempt.completedAt":
+		if e.complexity.QuizAttempt.CompletedAt == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.CompletedAt(childComplexity), true
+	case "QuizAttempt.correctCount":
+		if e.complexity.QuizAttempt.CorrectCount == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.CorrectCount(childComplexity), true
+	case "QuizAttempt.courseId":
+		if e.complexity.QuizAttempt.CourseID == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.CourseID(childComplexity), true
+	case "QuizAttempt.id":
+		if e.complexity.QuizAttempt.ID == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.ID(childComplexity), true
+	case "QuizAttempt.masteryLevel":
+		if e.complexity.QuizAttempt.MasteryLevel == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.MasteryLevel(childComplexity), true
+	case "QuizAttempt.maxScore":
+		if e.complexity.QuizAttempt.MaxScore == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.MaxScore(childComplexity), true
+	case "QuizAttempt.percentage":
+		if e.complexity.QuizAttempt.Percentage == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.Percentage(childComplexity), true
+	case "QuizAttempt.quizId":
+		if e.complexity.QuizAttempt.QuizID == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.QuizID(childComplexity), true
+	case "QuizAttempt.quizType":
+		if e.complexity.QuizAttempt.QuizType == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.QuizType(childComplexity), true
+	case "QuizAttempt.score":
+		if e.complexity.QuizAttempt.Score == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.Score(childComplexity), true
+	case "QuizAttempt.totalQuestions":
+		if e.complexity.QuizAttempt.TotalQuestions == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.TotalQuestions(childComplexity), true
+	case "QuizAttempt.userId":
+		if e.complexity.QuizAttempt.UserID == nil {
+			break
+		}
+
+		return e.complexity.QuizAttempt.UserID(childComplexity), true
+
 	case "QuizQuestion.correctIndex":
 		if e.complexity.QuizQuestion.CorrectIndex == nil {
 			break
@@ -1053,6 +1595,178 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.QuizQuestion.Question(childComplexity), true
+
+	case "QuizResponse.attemptId":
+		if e.complexity.QuizResponse.AttemptID == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.AttemptID(childComplexity), true
+	case "QuizResponse.confidence":
+		if e.complexity.QuizResponse.Confidence == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.Confidence(childComplexity), true
+	case "QuizResponse.id":
+		if e.complexity.QuizResponse.ID == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.ID(childComplexity), true
+	case "QuizResponse.isCorrect":
+		if e.complexity.QuizResponse.IsCorrect == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.IsCorrect(childComplexity), true
+	case "QuizResponse.pointsEarned":
+		if e.complexity.QuizResponse.PointsEarned == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.PointsEarned(childComplexity), true
+	case "QuizResponse.pointsPossible":
+		if e.complexity.QuizResponse.PointsPossible == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.PointsPossible(childComplexity), true
+	case "QuizResponse.questionId":
+		if e.complexity.QuizResponse.QuestionID == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.QuestionID(childComplexity), true
+	case "QuizResponse.timeTakenSeconds":
+		if e.complexity.QuizResponse.TimeTakenSeconds == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.TimeTakenSeconds(childComplexity), true
+	case "QuizResponse.userAnswer":
+		if e.complexity.QuizResponse.UserAnswer == nil {
+			break
+		}
+
+		return e.complexity.QuizResponse.UserAnswer(childComplexity), true
+
+	case "QuizStats.attemptCount":
+		if e.complexity.QuizStats.AttemptCount == nil {
+			break
+		}
+
+		return e.complexity.QuizStats.AttemptCount(childComplexity), true
+	case "QuizStats.bestMastery":
+		if e.complexity.QuizStats.BestMastery == nil {
+			break
+		}
+
+		return e.complexity.QuizStats.BestMastery(childComplexity), true
+	case "QuizStats.bestScore":
+		if e.complexity.QuizStats.BestScore == nil {
+			break
+		}
+
+		return e.complexity.QuizStats.BestScore(childComplexity), true
+	case "QuizStats.history":
+		if e.complexity.QuizStats.History == nil {
+			break
+		}
+
+		return e.complexity.QuizStats.History(childComplexity), true
+	case "QuizStats.latestScore":
+		if e.complexity.QuizStats.LatestScore == nil {
+			break
+		}
+
+		return e.complexity.QuizStats.LatestScore(childComplexity), true
+	case "QuizStats.quizId":
+		if e.complexity.QuizStats.QuizID == nil {
+			break
+		}
+
+		return e.complexity.QuizStats.QuizID(childComplexity), true
+
+	case "ReviewQueueItem.concept":
+		if e.complexity.ReviewQueueItem.Concept == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.Concept(childComplexity), true
+	case "ReviewQueueItem.courseId":
+		if e.complexity.ReviewQueueItem.CourseID == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.CourseID(childComplexity), true
+	case "ReviewQueueItem.id":
+		if e.complexity.ReviewQueueItem.ID == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.ID(childComplexity), true
+	case "ReviewQueueItem.lastAttempt":
+		if e.complexity.ReviewQueueItem.LastAttempt == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.LastAttempt(childComplexity), true
+	case "ReviewQueueItem.nextReview":
+		if e.complexity.ReviewQueueItem.NextReview == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.NextReview(childComplexity), true
+	case "ReviewQueueItem.questionId":
+		if e.complexity.ReviewQueueItem.QuestionID == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.QuestionID(childComplexity), true
+	case "ReviewQueueItem.quizId":
+		if e.complexity.ReviewQueueItem.QuizID == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.QuizID(childComplexity), true
+	case "ReviewQueueItem.userId":
+		if e.complexity.ReviewQueueItem.UserID == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.UserID(childComplexity), true
+	case "ReviewQueueItem.wrongCount":
+		if e.complexity.ReviewQueueItem.WrongCount == nil {
+			break
+		}
+
+		return e.complexity.ReviewQueueItem.WrongCount(childComplexity), true
+
+	case "ScoreDataPoint.courseId":
+		if e.complexity.ScoreDataPoint.CourseID == nil {
+			break
+		}
+
+		return e.complexity.ScoreDataPoint.CourseID(childComplexity), true
+	case "ScoreDataPoint.courseName":
+		if e.complexity.ScoreDataPoint.CourseName == nil {
+			break
+		}
+
+		return e.complexity.ScoreDataPoint.CourseName(childComplexity), true
+	case "ScoreDataPoint.date":
+		if e.complexity.ScoreDataPoint.Date == nil {
+			break
+		}
+
+		return e.complexity.ScoreDataPoint.Date(childComplexity), true
+	case "ScoreDataPoint.score":
+		if e.complexity.ScoreDataPoint.Score == nil {
+			break
+		}
+
+		return e.complexity.ScoreDataPoint.Score(childComplexity), true
 
 	case "TokenPayload.accessToken":
 		if e.complexity.TokenPayload.AccessToken == nil {
@@ -1237,8 +1951,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPaginationInput,
 		ec.unmarshalInputQuizInput,
 		ec.unmarshalInputQuizQuestionInput,
+		ec.unmarshalInputQuizResponseInput,
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputStartCourseInput,
+		ec.unmarshalInputSubmitQuizAttemptInput,
 		ec.unmarshalInputUpdateLibraryCourseInput,
 		ec.unmarshalInputUpdateProgressInput,
 		ec.unmarshalInputUpdateUserInput,
@@ -1376,6 +2092,32 @@ func (ec *executionContext) field_Mutation_addBookmark_args(ctx context.Context,
 		return nil, err
 	}
 	args["note"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_addToReviewQueue_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "courseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["courseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "quizId", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["quizId"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "questionId", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["questionId"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "concept", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["concept"] = arg3
 	return args, nil
 }
 
@@ -1527,6 +2269,22 @@ func (ec *executionContext) field_Mutation_removeBookmark_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_removeFromReviewQueue_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "courseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["courseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "questionId", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["questionId"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_setCurrentLesson_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1547,6 +2305,17 @@ func (ec *executionContext) field_Mutation_startCourse_args(ctx context.Context,
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNStartCourseInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐStartCourseInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_submitQuizAttempt_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSubmitQuizAttemptInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐSubmitQuizAttemptInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1662,6 +2431,17 @@ func (ec *executionContext) field_Query_courseBookmarks_args(ctx context.Context
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_courseQuizSummary_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "courseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["courseId"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_coursesByTag_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1675,6 +2455,22 @@ func (ec *executionContext) field_Query_coursesByTag_args(ctx context.Context, r
 		return nil, err
 	}
 	args["pagination"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_dashboardQuizStats_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "fromDate", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["fromDate"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "toDate", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["toDate"] = arg1
 	return args, nil
 }
 
@@ -1773,6 +2569,38 @@ func (ec *executionContext) field_Query_myInProgressCourses_args(ctx context.Con
 		return nil, err
 	}
 	args["pagination"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_quizStats_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "courseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["courseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "quizId", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["quizId"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_reviewQueue_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "courseId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["courseId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["limit"] = arg1
 	return args, nil
 }
 
@@ -2585,6 +3413,1352 @@ func (ec *executionContext) fieldContext_CourseAnalytics_averageProgress(_ conte
 	return fc, nil
 }
 
+func (ec *executionContext) _CourseQuizSummary_courseId(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_courseId,
+		func(ctx context.Context) (any, error) {
+			return obj.CourseID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_courseId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_courseTitle(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_courseTitle,
+		func(ctx context.Context) (any, error) {
+			return obj.CourseTitle, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_courseTitle(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_totalQuizzes(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_totalQuizzes,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalQuizzes, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_totalQuizzes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_completedQuizzes(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_completedQuizzes,
+		func(ctx context.Context) (any, error) {
+			return obj.CompletedQuizzes, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_completedQuizzes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_averageScore(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_averageScore,
+		func(ctx context.Context) (any, error) {
+			return obj.AverageScore, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_averageScore(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_overallMastery(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_overallMastery,
+		func(ctx context.Context) (any, error) {
+			return obj.OverallMastery, nil
+		},
+		nil,
+		ec.marshalNMasteryLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐMasteryLevel,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_overallMastery(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type MasteryLevel does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_subchapterStats(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_subchapterStats,
+		func(ctx context.Context) (any, error) {
+			return obj.SubchapterStats, nil
+		},
+		nil,
+		ec.marshalNQuizStats2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizStatsᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_subchapterStats(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "quizId":
+				return ec.fieldContext_QuizStats_quizId(ctx, field)
+			case "bestScore":
+				return ec.fieldContext_QuizStats_bestScore(ctx, field)
+			case "latestScore":
+				return ec.fieldContext_QuizStats_latestScore(ctx, field)
+			case "attemptCount":
+				return ec.fieldContext_QuizStats_attemptCount(ctx, field)
+			case "bestMastery":
+				return ec.fieldContext_QuizStats_bestMastery(ctx, field)
+			case "history":
+				return ec.fieldContext_QuizStats_history(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type QuizStats", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_chapterStats(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_chapterStats,
+		func(ctx context.Context) (any, error) {
+			return obj.ChapterStats, nil
+		},
+		nil,
+		ec.marshalNQuizStats2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizStatsᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_chapterStats(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "quizId":
+				return ec.fieldContext_QuizStats_quizId(ctx, field)
+			case "bestScore":
+				return ec.fieldContext_QuizStats_bestScore(ctx, field)
+			case "latestScore":
+				return ec.fieldContext_QuizStats_latestScore(ctx, field)
+			case "attemptCount":
+				return ec.fieldContext_QuizStats_attemptCount(ctx, field)
+			case "bestMastery":
+				return ec.fieldContext_QuizStats_bestMastery(ctx, field)
+			case "history":
+				return ec.fieldContext_QuizStats_history(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type QuizStats", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_weakConcepts(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_weakConcepts,
+		func(ctx context.Context) (any, error) {
+			return obj.WeakConcepts, nil
+		},
+		nil,
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_weakConcepts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_strongConcepts(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_strongConcepts,
+		func(ctx context.Context) (any, error) {
+			return obj.StrongConcepts, nil
+		},
+		nil,
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_strongConcepts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CourseQuizSummary_reviewQueueSize(ctx context.Context, field graphql.CollectedField, obj *entities.CourseQuizSummary) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_CourseQuizSummary_reviewQueueSize,
+		func(ctx context.Context) (any, error) {
+			return obj.ReviewQueueSize, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_CourseQuizSummary_reviewQueueSize(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CourseQuizSummary",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardQuizStats_totalQuizzesTaken(ctx context.Context, field graphql.CollectedField, obj *entities.DashboardQuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DashboardQuizStats_totalQuizzesTaken,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalQuizzesTaken, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DashboardQuizStats_totalQuizzesTaken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardQuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardQuizStats_overallAverageScore(ctx context.Context, field graphql.CollectedField, obj *entities.DashboardQuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DashboardQuizStats_overallAverageScore,
+		func(ctx context.Context) (any, error) {
+			return obj.OverallAverageScore, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DashboardQuizStats_overallAverageScore(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardQuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardQuizStats_overallMastery(ctx context.Context, field graphql.CollectedField, obj *entities.DashboardQuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DashboardQuizStats_overallMastery,
+		func(ctx context.Context) (any, error) {
+			return obj.OverallMastery, nil
+		},
+		nil,
+		ec.marshalNMasteryLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐMasteryLevel,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DashboardQuizStats_overallMastery(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardQuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type MasteryLevel does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardQuizStats_courseSummaries(ctx context.Context, field graphql.CollectedField, obj *entities.DashboardQuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DashboardQuizStats_courseSummaries,
+		func(ctx context.Context) (any, error) {
+			return obj.CourseSummaries, nil
+		},
+		nil,
+		ec.marshalNCourseQuizSummary2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseQuizSummaryᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DashboardQuizStats_courseSummaries(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardQuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "courseId":
+				return ec.fieldContext_CourseQuizSummary_courseId(ctx, field)
+			case "courseTitle":
+				return ec.fieldContext_CourseQuizSummary_courseTitle(ctx, field)
+			case "totalQuizzes":
+				return ec.fieldContext_CourseQuizSummary_totalQuizzes(ctx, field)
+			case "completedQuizzes":
+				return ec.fieldContext_CourseQuizSummary_completedQuizzes(ctx, field)
+			case "averageScore":
+				return ec.fieldContext_CourseQuizSummary_averageScore(ctx, field)
+			case "overallMastery":
+				return ec.fieldContext_CourseQuizSummary_overallMastery(ctx, field)
+			case "subchapterStats":
+				return ec.fieldContext_CourseQuizSummary_subchapterStats(ctx, field)
+			case "chapterStats":
+				return ec.fieldContext_CourseQuizSummary_chapterStats(ctx, field)
+			case "weakConcepts":
+				return ec.fieldContext_CourseQuizSummary_weakConcepts(ctx, field)
+			case "strongConcepts":
+				return ec.fieldContext_CourseQuizSummary_strongConcepts(ctx, field)
+			case "reviewQueueSize":
+				return ec.fieldContext_CourseQuizSummary_reviewQueueSize(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CourseQuizSummary", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardQuizStats_recentAttempts(ctx context.Context, field graphql.CollectedField, obj *entities.DashboardQuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DashboardQuizStats_recentAttempts,
+		func(ctx context.Context) (any, error) {
+			return obj.RecentAttempts, nil
+		},
+		nil,
+		ec.marshalNQuizAttempt2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizAttemptᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DashboardQuizStats_recentAttempts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardQuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_QuizAttempt_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_QuizAttempt_userId(ctx, field)
+			case "courseId":
+				return ec.fieldContext_QuizAttempt_courseId(ctx, field)
+			case "quizType":
+				return ec.fieldContext_QuizAttempt_quizType(ctx, field)
+			case "quizId":
+				return ec.fieldContext_QuizAttempt_quizId(ctx, field)
+			case "score":
+				return ec.fieldContext_QuizAttempt_score(ctx, field)
+			case "maxScore":
+				return ec.fieldContext_QuizAttempt_maxScore(ctx, field)
+			case "totalQuestions":
+				return ec.fieldContext_QuizAttempt_totalQuestions(ctx, field)
+			case "correctCount":
+				return ec.fieldContext_QuizAttempt_correctCount(ctx, field)
+			case "percentage":
+				return ec.fieldContext_QuizAttempt_percentage(ctx, field)
+			case "masteryLevel":
+				return ec.fieldContext_QuizAttempt_masteryLevel(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_QuizAttempt_completedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type QuizAttempt", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardQuizStats_totalWeakConcepts(ctx context.Context, field graphql.CollectedField, obj *entities.DashboardQuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DashboardQuizStats_totalWeakConcepts,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalWeakConcepts, nil
+		},
+		nil,
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DashboardQuizStats_totalWeakConcepts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardQuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardQuizStats_totalStrongConcepts(ctx context.Context, field graphql.CollectedField, obj *entities.DashboardQuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DashboardQuizStats_totalStrongConcepts,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalStrongConcepts, nil
+		},
+		nil,
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DashboardQuizStats_totalStrongConcepts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardQuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DashboardQuizStats_scoreHistory(ctx context.Context, field graphql.CollectedField, obj *entities.DashboardQuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DashboardQuizStats_scoreHistory,
+		func(ctx context.Context) (any, error) {
+			return obj.ScoreHistory, nil
+		},
+		nil,
+		ec.marshalNScoreDataPoint2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐScoreDataPointᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DashboardQuizStats_scoreHistory(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DashboardQuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "date":
+				return ec.fieldContext_ScoreDataPoint_date(ctx, field)
+			case "score":
+				return ec.fieldContext_ScoreDataPoint_score(ctx, field)
+			case "courseId":
+				return ec.fieldContext_ScoreDataPoint_courseId(ctx, field)
+			case "courseName":
+				return ec.fieldContext_ScoreDataPoint_courseName(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ScoreDataPoint", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuiz_version(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuiz) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuiz_version,
+		func(ctx context.Context) (any, error) {
+			return obj.Version, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuiz_version(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuiz",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuiz_subchapterId(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuiz) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuiz_subchapterId,
+		func(ctx context.Context) (any, error) {
+			return obj.SubchapterID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuiz_subchapterId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuiz",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuiz_lessonId(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuiz) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuiz_lessonId,
+		func(ctx context.Context) (any, error) {
+			return obj.LessonID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuiz_lessonId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuiz",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuiz_questions(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuiz) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuiz_questions,
+		func(ctx context.Context) (any, error) {
+			return obj.Questions, nil
+		},
+		nil,
+		ec.marshalNExtendedQuizQuestion2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐExtendedQuizQuestionᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuiz_questions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuiz",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ExtendedQuizQuestion_id(ctx, field)
+			case "type":
+				return ec.fieldContext_ExtendedQuizQuestion_type(ctx, field)
+			case "difficulty":
+				return ec.fieldContext_ExtendedQuizQuestion_difficulty(ctx, field)
+			case "concept":
+				return ec.fieldContext_ExtendedQuizQuestion_concept(ctx, field)
+			case "question":
+				return ec.fieldContext_ExtendedQuizQuestion_question(ctx, field)
+			case "explanation":
+				return ec.fieldContext_ExtendedQuizQuestion_explanation(ctx, field)
+			case "options":
+				return ec.fieldContext_ExtendedQuizQuestion_options(ctx, field)
+			case "correctIndex":
+				return ec.fieldContext_ExtendedQuizQuestion_correctIndex(ctx, field)
+			case "correctAnswer":
+				return ec.fieldContext_ExtendedQuizQuestion_correctAnswer(ctx, field)
+			case "correctIndices":
+				return ec.fieldContext_ExtendedQuizQuestion_correctIndices(ctx, field)
+			case "minSelections":
+				return ec.fieldContext_ExtendedQuizQuestion_minSelections(ctx, field)
+			case "maxSelections":
+				return ec.fieldContext_ExtendedQuizQuestion_maxSelections(ctx, field)
+			case "codeSnippet":
+				return ec.fieldContext_ExtendedQuizQuestion_codeSnippet(ctx, field)
+			case "language":
+				return ec.fieldContext_ExtendedQuizQuestion_language(ctx, field)
+			case "leftColumn":
+				return ec.fieldContext_ExtendedQuizQuestion_leftColumn(ctx, field)
+			case "rightColumn":
+				return ec.fieldContext_ExtendedQuizQuestion_rightColumn(ctx, field)
+			case "correctPairs":
+				return ec.fieldContext_ExtendedQuizQuestion_correctPairs(ctx, field)
+			case "items":
+				return ec.fieldContext_ExtendedQuizQuestion_items(ctx, field)
+			case "correctOrder":
+				return ec.fieldContext_ExtendedQuizQuestion_correctOrder(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ExtendedQuizQuestion", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_id(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_type(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_type,
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
+		nil,
+		ec.marshalNQuestionType2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuestionType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type QuestionType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_difficulty(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_difficulty,
+		func(ctx context.Context) (any, error) {
+			return obj.Difficulty, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_difficulty(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_concept(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_concept,
+		func(ctx context.Context) (any, error) {
+			return obj.Concept, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_concept(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_question(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_question,
+		func(ctx context.Context) (any, error) {
+			return obj.Question, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_question(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_explanation(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_explanation,
+		func(ctx context.Context) (any, error) {
+			return obj.Explanation, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_explanation(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_options(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_options,
+		func(ctx context.Context) (any, error) {
+			return obj.Options, nil
+		},
+		nil,
+		ec.marshalOString2ᚕstringᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_options(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_correctIndex(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_correctIndex,
+		func(ctx context.Context) (any, error) {
+			return obj.CorrectIndex, nil
+		},
+		nil,
+		ec.marshalOInt2int,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_correctIndex(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_correctAnswer(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_correctAnswer,
+		func(ctx context.Context) (any, error) {
+			return obj.CorrectAnswer, nil
+		},
+		nil,
+		ec.marshalOBoolean2ᚖbool,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_correctAnswer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_correctIndices(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_correctIndices,
+		func(ctx context.Context) (any, error) {
+			return obj.CorrectIndices, nil
+		},
+		nil,
+		ec.marshalOInt2ᚕintᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_correctIndices(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_minSelections(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_minSelections,
+		func(ctx context.Context) (any, error) {
+			return obj.MinSelections, nil
+		},
+		nil,
+		ec.marshalOInt2int,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_minSelections(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_maxSelections(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_maxSelections,
+		func(ctx context.Context) (any, error) {
+			return obj.MaxSelections, nil
+		},
+		nil,
+		ec.marshalOInt2int,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_maxSelections(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_codeSnippet(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_codeSnippet,
+		func(ctx context.Context) (any, error) {
+			return obj.CodeSnippet, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_codeSnippet(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_language(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_language,
+		func(ctx context.Context) (any, error) {
+			return obj.Language, nil
+		},
+		nil,
+		ec.marshalOString2string,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_language(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_leftColumn(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_leftColumn,
+		func(ctx context.Context) (any, error) {
+			return obj.LeftColumn, nil
+		},
+		nil,
+		ec.marshalOString2ᚕstringᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_leftColumn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_rightColumn(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_rightColumn,
+		func(ctx context.Context) (any, error) {
+			return obj.RightColumn, nil
+		},
+		nil,
+		ec.marshalOString2ᚕstringᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_rightColumn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_correctPairs(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_correctPairs,
+		func(ctx context.Context) (any, error) {
+			return obj.CorrectPairs, nil
+		},
+		nil,
+		ec.marshalOInt2ᚕᚕintᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_correctPairs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_items(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_items,
+		func(ctx context.Context) (any, error) {
+			return obj.Items, nil
+		},
+		nil,
+		ec.marshalOString2ᚕstringᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_items(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ExtendedQuizQuestion_correctOrder(ctx context.Context, field graphql.CollectedField, obj *entities.ExtendedQuizQuestion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExtendedQuizQuestion_correctOrder,
+		func(ctx context.Context) (any, error) {
+			return obj.CorrectOrder, nil
+		},
+		nil,
+		ec.marshalOInt2ᚕintᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExtendedQuizQuestion_correctOrder(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExtendedQuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Lesson_title(ctx context.Context, field graphql.CollectedField, obj *entities.Lesson) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2708,6 +4882,8 @@ func (ec *executionContext) fieldContext_Lesson_sublessons(_ context.Context, fi
 				return ec.fieldContext_Lesson_hasSublessons(ctx, field)
 			case "quiz":
 				return ec.fieldContext_Lesson_quiz(ctx, field)
+			case "extendedQuiz":
+				return ec.fieldContext_Lesson_extendedQuiz(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Lesson", field.Name)
 		},
@@ -2772,6 +4948,45 @@ func (ec *executionContext) fieldContext_Lesson_quiz(_ context.Context, field gr
 				return ec.fieldContext_Quiz_questions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Quiz", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Lesson_extendedQuiz(ctx context.Context, field graphql.CollectedField, obj *entities.Lesson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Lesson_extendedQuiz,
+		func(ctx context.Context) (any, error) {
+			return obj.ExtendedQuiz, nil
+		},
+		nil,
+		ec.marshalOExtendedQuiz2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐExtendedQuiz,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Lesson_extendedQuiz(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Lesson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "version":
+				return ec.fieldContext_ExtendedQuiz_version(ctx, field)
+			case "subchapterId":
+				return ec.fieldContext_ExtendedQuiz_subchapterId(ctx, field)
+			case "lessonId":
+				return ec.fieldContext_ExtendedQuiz_lessonId(ctx, field)
+			case "questions":
+				return ec.fieldContext_ExtendedQuiz_questions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ExtendedQuiz", field.Name)
 		},
 	}
 	return fc, nil
@@ -2900,6 +5115,8 @@ func (ec *executionContext) fieldContext_LibraryCourse_lessons(_ context.Context
 				return ec.fieldContext_Lesson_hasSublessons(ctx, field)
 			case "quiz":
 				return ec.fieldContext_Lesson_quiz(ctx, field)
+			case "extendedQuiz":
+				return ec.fieldContext_Lesson_extendedQuiz(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Lesson", field.Name)
 		},
@@ -4419,6 +6636,175 @@ func (ec *executionContext) fieldContext_Mutation_deleteAttachment(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_submitQuizAttempt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_submitQuizAttempt,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SubmitQuizAttempt(ctx, fc.Args["input"].(SubmitQuizAttemptInput))
+		},
+		nil,
+		ec.marshalNQuizAttempt2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizAttempt,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_submitQuizAttempt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_QuizAttempt_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_QuizAttempt_userId(ctx, field)
+			case "courseId":
+				return ec.fieldContext_QuizAttempt_courseId(ctx, field)
+			case "quizType":
+				return ec.fieldContext_QuizAttempt_quizType(ctx, field)
+			case "quizId":
+				return ec.fieldContext_QuizAttempt_quizId(ctx, field)
+			case "score":
+				return ec.fieldContext_QuizAttempt_score(ctx, field)
+			case "maxScore":
+				return ec.fieldContext_QuizAttempt_maxScore(ctx, field)
+			case "totalQuestions":
+				return ec.fieldContext_QuizAttempt_totalQuestions(ctx, field)
+			case "correctCount":
+				return ec.fieldContext_QuizAttempt_correctCount(ctx, field)
+			case "percentage":
+				return ec.fieldContext_QuizAttempt_percentage(ctx, field)
+			case "masteryLevel":
+				return ec.fieldContext_QuizAttempt_masteryLevel(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_QuizAttempt_completedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type QuizAttempt", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_submitQuizAttempt_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addToReviewQueue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_addToReviewQueue,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().AddToReviewQueue(ctx, fc.Args["courseId"].(string), fc.Args["quizId"].(string), fc.Args["questionId"].(string), fc.Args["concept"].(string))
+		},
+		nil,
+		ec.marshalNReviewQueueItem2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐReviewQueueItem,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addToReviewQueue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ReviewQueueItem_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_ReviewQueueItem_userId(ctx, field)
+			case "courseId":
+				return ec.fieldContext_ReviewQueueItem_courseId(ctx, field)
+			case "quizId":
+				return ec.fieldContext_ReviewQueueItem_quizId(ctx, field)
+			case "questionId":
+				return ec.fieldContext_ReviewQueueItem_questionId(ctx, field)
+			case "concept":
+				return ec.fieldContext_ReviewQueueItem_concept(ctx, field)
+			case "wrongCount":
+				return ec.fieldContext_ReviewQueueItem_wrongCount(ctx, field)
+			case "lastAttempt":
+				return ec.fieldContext_ReviewQueueItem_lastAttempt(ctx, field)
+			case "nextReview":
+				return ec.fieldContext_ReviewQueueItem_nextReview(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ReviewQueueItem", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addToReviewQueue_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeFromReviewQueue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_removeFromReviewQueue,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RemoveFromReviewQueue(ctx, fc.Args["courseId"].(string), fc.Args["questionId"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeFromReviewQueue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeFromReviewQueue_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -5467,6 +7853,246 @@ func (ec *executionContext) fieldContext_Query_lessonAttachments(ctx context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_quizStats(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_quizStats,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().QuizStats(ctx, fc.Args["courseId"].(string), fc.Args["quizId"].(string))
+		},
+		nil,
+		ec.marshalOQuizStats2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizStats,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_quizStats(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "quizId":
+				return ec.fieldContext_QuizStats_quizId(ctx, field)
+			case "bestScore":
+				return ec.fieldContext_QuizStats_bestScore(ctx, field)
+			case "latestScore":
+				return ec.fieldContext_QuizStats_latestScore(ctx, field)
+			case "attemptCount":
+				return ec.fieldContext_QuizStats_attemptCount(ctx, field)
+			case "bestMastery":
+				return ec.fieldContext_QuizStats_bestMastery(ctx, field)
+			case "history":
+				return ec.fieldContext_QuizStats_history(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type QuizStats", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_quizStats_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_courseQuizSummary(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_courseQuizSummary,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().CourseQuizSummary(ctx, fc.Args["courseId"].(string))
+		},
+		nil,
+		ec.marshalOCourseQuizSummary2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseQuizSummary,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_courseQuizSummary(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "courseId":
+				return ec.fieldContext_CourseQuizSummary_courseId(ctx, field)
+			case "courseTitle":
+				return ec.fieldContext_CourseQuizSummary_courseTitle(ctx, field)
+			case "totalQuizzes":
+				return ec.fieldContext_CourseQuizSummary_totalQuizzes(ctx, field)
+			case "completedQuizzes":
+				return ec.fieldContext_CourseQuizSummary_completedQuizzes(ctx, field)
+			case "averageScore":
+				return ec.fieldContext_CourseQuizSummary_averageScore(ctx, field)
+			case "overallMastery":
+				return ec.fieldContext_CourseQuizSummary_overallMastery(ctx, field)
+			case "subchapterStats":
+				return ec.fieldContext_CourseQuizSummary_subchapterStats(ctx, field)
+			case "chapterStats":
+				return ec.fieldContext_CourseQuizSummary_chapterStats(ctx, field)
+			case "weakConcepts":
+				return ec.fieldContext_CourseQuizSummary_weakConcepts(ctx, field)
+			case "strongConcepts":
+				return ec.fieldContext_CourseQuizSummary_strongConcepts(ctx, field)
+			case "reviewQueueSize":
+				return ec.fieldContext_CourseQuizSummary_reviewQueueSize(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CourseQuizSummary", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_courseQuizSummary_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_dashboardQuizStats(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_dashboardQuizStats,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().DashboardQuizStats(ctx, fc.Args["fromDate"].(*string), fc.Args["toDate"].(*string))
+		},
+		nil,
+		ec.marshalNDashboardQuizStats2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐDashboardQuizStats,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_dashboardQuizStats(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalQuizzesTaken":
+				return ec.fieldContext_DashboardQuizStats_totalQuizzesTaken(ctx, field)
+			case "overallAverageScore":
+				return ec.fieldContext_DashboardQuizStats_overallAverageScore(ctx, field)
+			case "overallMastery":
+				return ec.fieldContext_DashboardQuizStats_overallMastery(ctx, field)
+			case "courseSummaries":
+				return ec.fieldContext_DashboardQuizStats_courseSummaries(ctx, field)
+			case "recentAttempts":
+				return ec.fieldContext_DashboardQuizStats_recentAttempts(ctx, field)
+			case "totalWeakConcepts":
+				return ec.fieldContext_DashboardQuizStats_totalWeakConcepts(ctx, field)
+			case "totalStrongConcepts":
+				return ec.fieldContext_DashboardQuizStats_totalStrongConcepts(ctx, field)
+			case "scoreHistory":
+				return ec.fieldContext_DashboardQuizStats_scoreHistory(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DashboardQuizStats", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_dashboardQuizStats_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_reviewQueue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_reviewQueue,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().ReviewQueue(ctx, fc.Args["courseId"].(string), fc.Args["limit"].(*int))
+		},
+		nil,
+		ec.marshalNReviewQueueItem2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐReviewQueueItemᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_reviewQueue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ReviewQueueItem_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_ReviewQueueItem_userId(ctx, field)
+			case "courseId":
+				return ec.fieldContext_ReviewQueueItem_courseId(ctx, field)
+			case "quizId":
+				return ec.fieldContext_ReviewQueueItem_quizId(ctx, field)
+			case "questionId":
+				return ec.fieldContext_ReviewQueueItem_questionId(ctx, field)
+			case "concept":
+				return ec.fieldContext_ReviewQueueItem_concept(ctx, field)
+			case "wrongCount":
+				return ec.fieldContext_ReviewQueueItem_wrongCount(ctx, field)
+			case "lastAttempt":
+				return ec.fieldContext_ReviewQueueItem_lastAttempt(ctx, field)
+			case "nextReview":
+				return ec.fieldContext_ReviewQueueItem_nextReview(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ReviewQueueItem", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_reviewQueue_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -5616,6 +8242,354 @@ func (ec *executionContext) fieldContext_Quiz_questions(_ context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _QuizAttempt_id(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_userId(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_userId,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_courseId(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_courseId,
+		func(ctx context.Context) (any, error) {
+			return obj.CourseID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_courseId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_quizType(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_quizType,
+		func(ctx context.Context) (any, error) {
+			return obj.QuizType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_quizType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_quizId(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_quizId,
+		func(ctx context.Context) (any, error) {
+			return obj.QuizID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_quizId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_score(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_score,
+		func(ctx context.Context) (any, error) {
+			return obj.Score, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_score(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_maxScore(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_maxScore,
+		func(ctx context.Context) (any, error) {
+			return obj.MaxScore, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_maxScore(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_totalQuestions(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_totalQuestions,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalQuestions, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_totalQuestions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_correctCount(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_correctCount,
+		func(ctx context.Context) (any, error) {
+			return obj.CorrectCount, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_correctCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_percentage(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_percentage,
+		func(ctx context.Context) (any, error) {
+			return obj.Percentage, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_percentage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_masteryLevel(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_masteryLevel,
+		func(ctx context.Context) (any, error) {
+			return obj.MasteryLevel, nil
+		},
+		nil,
+		ec.marshalNMasteryLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐMasteryLevel,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_masteryLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type MasteryLevel does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizAttempt_completedAt(ctx context.Context, field graphql.CollectedField, obj *entities.QuizAttempt) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizAttempt_completedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CompletedAt, nil
+		},
+		nil,
+		ec.marshalNDateTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizAttempt_completedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizAttempt",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _QuizQuestion_id(ctx context.Context, field graphql.CollectedField, obj *entities.QuizQuestion) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -5751,6 +8725,844 @@ func (ec *executionContext) _QuizQuestion_explanation(ctx context.Context, field
 func (ec *executionContext) fieldContext_QuizQuestion_explanation(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "QuizQuestion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_id(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_attemptId(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_attemptId,
+		func(ctx context.Context) (any, error) {
+			return obj.AttemptID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_attemptId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_questionId(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_questionId,
+		func(ctx context.Context) (any, error) {
+			return obj.QuestionID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_questionId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_userAnswer(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_userAnswer,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.QuizResponse().UserAnswer(ctx, obj)
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_userAnswer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_isCorrect(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_isCorrect,
+		func(ctx context.Context) (any, error) {
+			return obj.IsCorrect, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_isCorrect(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_pointsEarned(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_pointsEarned,
+		func(ctx context.Context) (any, error) {
+			return obj.PointsEarned, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_pointsEarned(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_pointsPossible(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_pointsPossible,
+		func(ctx context.Context) (any, error) {
+			return obj.PointsPossible, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_pointsPossible(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_confidence(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_confidence,
+		func(ctx context.Context) (any, error) {
+			return obj.Confidence, nil
+		},
+		nil,
+		ec.marshalOConfidenceLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐConfidenceLevel,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_confidence(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ConfidenceLevel does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizResponse_timeTakenSeconds(ctx context.Context, field graphql.CollectedField, obj *entities.QuizResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizResponse_timeTakenSeconds,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.QuizResponse().TimeTakenSeconds(ctx, obj)
+		},
+		nil,
+		ec.marshalOInt2ᚖint,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizResponse_timeTakenSeconds(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizResponse",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizStats_quizId(ctx context.Context, field graphql.CollectedField, obj *entities.QuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizStats_quizId,
+		func(ctx context.Context) (any, error) {
+			return obj.QuizID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizStats_quizId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizStats_bestScore(ctx context.Context, field graphql.CollectedField, obj *entities.QuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizStats_bestScore,
+		func(ctx context.Context) (any, error) {
+			return obj.BestScore, nil
+		},
+		nil,
+		ec.marshalOFloat2ᚖfloat64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizStats_bestScore(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizStats_latestScore(ctx context.Context, field graphql.CollectedField, obj *entities.QuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizStats_latestScore,
+		func(ctx context.Context) (any, error) {
+			return obj.LatestScore, nil
+		},
+		nil,
+		ec.marshalOFloat2ᚖfloat64,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizStats_latestScore(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizStats_attemptCount(ctx context.Context, field graphql.CollectedField, obj *entities.QuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizStats_attemptCount,
+		func(ctx context.Context) (any, error) {
+			return obj.AttemptCount, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizStats_attemptCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizStats_bestMastery(ctx context.Context, field graphql.CollectedField, obj *entities.QuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizStats_bestMastery,
+		func(ctx context.Context) (any, error) {
+			return obj.BestMastery, nil
+		},
+		nil,
+		ec.marshalNMasteryLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐMasteryLevel,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizStats_bestMastery(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type MasteryLevel does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QuizStats_history(ctx context.Context, field graphql.CollectedField, obj *entities.QuizStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_QuizStats_history,
+		func(ctx context.Context) (any, error) {
+			return obj.History, nil
+		},
+		nil,
+		ec.marshalNQuizAttempt2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizAttemptᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_QuizStats_history(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QuizStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_QuizAttempt_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_QuizAttempt_userId(ctx, field)
+			case "courseId":
+				return ec.fieldContext_QuizAttempt_courseId(ctx, field)
+			case "quizType":
+				return ec.fieldContext_QuizAttempt_quizType(ctx, field)
+			case "quizId":
+				return ec.fieldContext_QuizAttempt_quizId(ctx, field)
+			case "score":
+				return ec.fieldContext_QuizAttempt_score(ctx, field)
+			case "maxScore":
+				return ec.fieldContext_QuizAttempt_maxScore(ctx, field)
+			case "totalQuestions":
+				return ec.fieldContext_QuizAttempt_totalQuestions(ctx, field)
+			case "correctCount":
+				return ec.fieldContext_QuizAttempt_correctCount(ctx, field)
+			case "percentage":
+				return ec.fieldContext_QuizAttempt_percentage(ctx, field)
+			case "masteryLevel":
+				return ec.fieldContext_QuizAttempt_masteryLevel(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_QuizAttempt_completedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type QuizAttempt", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_id(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_userId(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_userId,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_courseId(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_courseId,
+		func(ctx context.Context) (any, error) {
+			return obj.CourseID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_courseId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_quizId(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_quizId,
+		func(ctx context.Context) (any, error) {
+			return obj.QuizID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_quizId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_questionId(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_questionId,
+		func(ctx context.Context) (any, error) {
+			return obj.QuestionID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_questionId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_concept(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_concept,
+		func(ctx context.Context) (any, error) {
+			return obj.Concept, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_concept(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_wrongCount(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_wrongCount,
+		func(ctx context.Context) (any, error) {
+			return obj.WrongCount, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_wrongCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_lastAttempt(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_lastAttempt,
+		func(ctx context.Context) (any, error) {
+			return obj.LastAttempt, nil
+		},
+		nil,
+		ec.marshalNDateTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_lastAttempt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewQueueItem_nextReview(ctx context.Context, field graphql.CollectedField, obj *entities.ReviewQueueItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ReviewQueueItem_nextReview,
+		func(ctx context.Context) (any, error) {
+			return obj.NextReview, nil
+		},
+		nil,
+		ec.marshalNDateTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ReviewQueueItem_nextReview(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewQueueItem",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScoreDataPoint_date(ctx context.Context, field graphql.CollectedField, obj *entities.ScoreDataPoint) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ScoreDataPoint_date,
+		func(ctx context.Context) (any, error) {
+			return obj.Date, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ScoreDataPoint_date(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScoreDataPoint",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScoreDataPoint_score(ctx context.Context, field graphql.CollectedField, obj *entities.ScoreDataPoint) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ScoreDataPoint_score,
+		func(ctx context.Context) (any, error) {
+			return obj.Score, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ScoreDataPoint_score(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScoreDataPoint",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScoreDataPoint_courseId(ctx context.Context, field graphql.CollectedField, obj *entities.ScoreDataPoint) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ScoreDataPoint_courseId,
+		func(ctx context.Context) (any, error) {
+			return obj.CourseID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ScoreDataPoint_courseId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScoreDataPoint",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScoreDataPoint_courseName(ctx context.Context, field graphql.CollectedField, obj *entities.ScoreDataPoint) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ScoreDataPoint_courseName,
+		func(ctx context.Context) (any, error) {
+			return obj.CourseName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ScoreDataPoint_courseName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScoreDataPoint",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -8385,6 +12197,75 @@ func (ec *executionContext) unmarshalInputQuizQuestionInput(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputQuizResponseInput(ctx context.Context, obj any) (QuizResponseInput, error) {
+	var it QuizResponseInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"questionId", "userAnswer", "isCorrect", "pointsEarned", "pointsPossible", "confidence", "timeTakenSeconds"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "questionId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("questionId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.QuestionID = data
+		case "userAnswer":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userAnswer"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserAnswer = data
+		case "isCorrect":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isCorrect"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsCorrect = data
+		case "pointsEarned":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointsEarned"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PointsEarned = data
+		case "pointsPossible":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointsPossible"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PointsPossible = data
+		case "confidence":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("confidence"))
+			data, err := ec.unmarshalOConfidenceLevel2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐConfidenceLevel(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Confidence = data
+		case "timeTakenSeconds":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeTakenSeconds"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TimeTakenSeconds = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj any) (RegisterInput, error) {
 	var it RegisterInput
 	asMap := map[string]any{}
@@ -8447,6 +12328,82 @@ func (ec *executionContext) unmarshalInputStartCourseInput(ctx context.Context, 
 				return it, err
 			}
 			it.LibraryCourseID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSubmitQuizAttemptInput(ctx context.Context, obj any) (SubmitQuizAttemptInput, error) {
+	var it SubmitQuizAttemptInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"courseId", "quizType", "quizId", "score", "maxScore", "totalQuestions", "correctCount", "responses"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "courseId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("courseId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CourseID = data
+		case "quizType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quizType"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.QuizType = data
+		case "quizId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quizId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.QuizID = data
+		case "score":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("score"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Score = data
+		case "maxScore":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxScore"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaxScore = data
+		case "totalQuestions":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("totalQuestions"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TotalQuestions = data
+		case "correctCount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("correctCount"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CorrectCount = data
+		case "responses":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("responses"))
+			data, err := ec.unmarshalNQuizResponseInput2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐQuizResponseInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Responses = data
 		}
 	}
 
@@ -8889,6 +12846,310 @@ func (ec *executionContext) _CourseAnalytics(ctx context.Context, sel ast.Select
 	return out
 }
 
+var courseQuizSummaryImplementors = []string{"CourseQuizSummary"}
+
+func (ec *executionContext) _CourseQuizSummary(ctx context.Context, sel ast.SelectionSet, obj *entities.CourseQuizSummary) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, courseQuizSummaryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CourseQuizSummary")
+		case "courseId":
+			out.Values[i] = ec._CourseQuizSummary_courseId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "courseTitle":
+			out.Values[i] = ec._CourseQuizSummary_courseTitle(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalQuizzes":
+			out.Values[i] = ec._CourseQuizSummary_totalQuizzes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "completedQuizzes":
+			out.Values[i] = ec._CourseQuizSummary_completedQuizzes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "averageScore":
+			out.Values[i] = ec._CourseQuizSummary_averageScore(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "overallMastery":
+			out.Values[i] = ec._CourseQuizSummary_overallMastery(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "subchapterStats":
+			out.Values[i] = ec._CourseQuizSummary_subchapterStats(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "chapterStats":
+			out.Values[i] = ec._CourseQuizSummary_chapterStats(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "weakConcepts":
+			out.Values[i] = ec._CourseQuizSummary_weakConcepts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "strongConcepts":
+			out.Values[i] = ec._CourseQuizSummary_strongConcepts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "reviewQueueSize":
+			out.Values[i] = ec._CourseQuizSummary_reviewQueueSize(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var dashboardQuizStatsImplementors = []string{"DashboardQuizStats"}
+
+func (ec *executionContext) _DashboardQuizStats(ctx context.Context, sel ast.SelectionSet, obj *entities.DashboardQuizStats) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dashboardQuizStatsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DashboardQuizStats")
+		case "totalQuizzesTaken":
+			out.Values[i] = ec._DashboardQuizStats_totalQuizzesTaken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "overallAverageScore":
+			out.Values[i] = ec._DashboardQuizStats_overallAverageScore(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "overallMastery":
+			out.Values[i] = ec._DashboardQuizStats_overallMastery(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "courseSummaries":
+			out.Values[i] = ec._DashboardQuizStats_courseSummaries(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "recentAttempts":
+			out.Values[i] = ec._DashboardQuizStats_recentAttempts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalWeakConcepts":
+			out.Values[i] = ec._DashboardQuizStats_totalWeakConcepts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalStrongConcepts":
+			out.Values[i] = ec._DashboardQuizStats_totalStrongConcepts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "scoreHistory":
+			out.Values[i] = ec._DashboardQuizStats_scoreHistory(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var extendedQuizImplementors = []string{"ExtendedQuiz"}
+
+func (ec *executionContext) _ExtendedQuiz(ctx context.Context, sel ast.SelectionSet, obj *entities.ExtendedQuiz) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, extendedQuizImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExtendedQuiz")
+		case "version":
+			out.Values[i] = ec._ExtendedQuiz_version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "subchapterId":
+			out.Values[i] = ec._ExtendedQuiz_subchapterId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lessonId":
+			out.Values[i] = ec._ExtendedQuiz_lessonId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "questions":
+			out.Values[i] = ec._ExtendedQuiz_questions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var extendedQuizQuestionImplementors = []string{"ExtendedQuizQuestion"}
+
+func (ec *executionContext) _ExtendedQuizQuestion(ctx context.Context, sel ast.SelectionSet, obj *entities.ExtendedQuizQuestion) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, extendedQuizQuestionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExtendedQuizQuestion")
+		case "id":
+			out.Values[i] = ec._ExtendedQuizQuestion_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "type":
+			out.Values[i] = ec._ExtendedQuizQuestion_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "difficulty":
+			out.Values[i] = ec._ExtendedQuizQuestion_difficulty(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "concept":
+			out.Values[i] = ec._ExtendedQuizQuestion_concept(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "question":
+			out.Values[i] = ec._ExtendedQuizQuestion_question(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "explanation":
+			out.Values[i] = ec._ExtendedQuizQuestion_explanation(ctx, field, obj)
+		case "options":
+			out.Values[i] = ec._ExtendedQuizQuestion_options(ctx, field, obj)
+		case "correctIndex":
+			out.Values[i] = ec._ExtendedQuizQuestion_correctIndex(ctx, field, obj)
+		case "correctAnswer":
+			out.Values[i] = ec._ExtendedQuizQuestion_correctAnswer(ctx, field, obj)
+		case "correctIndices":
+			out.Values[i] = ec._ExtendedQuizQuestion_correctIndices(ctx, field, obj)
+		case "minSelections":
+			out.Values[i] = ec._ExtendedQuizQuestion_minSelections(ctx, field, obj)
+		case "maxSelections":
+			out.Values[i] = ec._ExtendedQuizQuestion_maxSelections(ctx, field, obj)
+		case "codeSnippet":
+			out.Values[i] = ec._ExtendedQuizQuestion_codeSnippet(ctx, field, obj)
+		case "language":
+			out.Values[i] = ec._ExtendedQuizQuestion_language(ctx, field, obj)
+		case "leftColumn":
+			out.Values[i] = ec._ExtendedQuizQuestion_leftColumn(ctx, field, obj)
+		case "rightColumn":
+			out.Values[i] = ec._ExtendedQuizQuestion_rightColumn(ctx, field, obj)
+		case "correctPairs":
+			out.Values[i] = ec._ExtendedQuizQuestion_correctPairs(ctx, field, obj)
+		case "items":
+			out.Values[i] = ec._ExtendedQuizQuestion_items(ctx, field, obj)
+		case "correctOrder":
+			out.Values[i] = ec._ExtendedQuizQuestion_correctOrder(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var lessonImplementors = []string{"Lesson"}
 
 func (ec *executionContext) _Lesson(ctx context.Context, sel ast.SelectionSet, obj *entities.Lesson) graphql.Marshaler {
@@ -8955,6 +13216,8 @@ func (ec *executionContext) _Lesson(ctx context.Context, sel ast.SelectionSet, o
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "quiz":
 			out.Values[i] = ec._Lesson_quiz(ctx, field, obj)
+		case "extendedQuiz":
+			out.Values[i] = ec._Lesson_extendedQuiz(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9324,6 +13587,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteAttachment":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteAttachment(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "submitQuizAttempt":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_submitQuizAttempt(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addToReviewQueue":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addToReviewQueue(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeFromReviewQueue":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeFromReviewQueue(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -9795,6 +14079,88 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "quizStats":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_quizStats(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "courseQuizSummary":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_courseQuizSummary(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "dashboardQuizStats":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_dashboardQuizStats(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "reviewQueue":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_reviewQueue(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -9865,6 +14231,100 @@ func (ec *executionContext) _Quiz(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var quizAttemptImplementors = []string{"QuizAttempt"}
+
+func (ec *executionContext) _QuizAttempt(ctx context.Context, sel ast.SelectionSet, obj *entities.QuizAttempt) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, quizAttemptImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("QuizAttempt")
+		case "id":
+			out.Values[i] = ec._QuizAttempt_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._QuizAttempt_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "courseId":
+			out.Values[i] = ec._QuizAttempt_courseId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "quizType":
+			out.Values[i] = ec._QuizAttempt_quizType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "quizId":
+			out.Values[i] = ec._QuizAttempt_quizId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "score":
+			out.Values[i] = ec._QuizAttempt_score(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "maxScore":
+			out.Values[i] = ec._QuizAttempt_maxScore(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalQuestions":
+			out.Values[i] = ec._QuizAttempt_totalQuestions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "correctCount":
+			out.Values[i] = ec._QuizAttempt_correctCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "percentage":
+			out.Values[i] = ec._QuizAttempt_percentage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "masteryLevel":
+			out.Values[i] = ec._QuizAttempt_masteryLevel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "completedAt":
+			out.Values[i] = ec._QuizAttempt_completedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var quizQuestionImplementors = []string{"QuizQuestion"}
 
 func (ec *executionContext) _QuizQuestion(ctx context.Context, sel ast.SelectionSet, obj *entities.QuizQuestion) graphql.Marshaler {
@@ -9898,6 +14358,332 @@ func (ec *executionContext) _QuizQuestion(ctx context.Context, sel ast.Selection
 			}
 		case "explanation":
 			out.Values[i] = ec._QuizQuestion_explanation(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var quizResponseImplementors = []string{"QuizResponse"}
+
+func (ec *executionContext) _QuizResponse(ctx context.Context, sel ast.SelectionSet, obj *entities.QuizResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, quizResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("QuizResponse")
+		case "id":
+			out.Values[i] = ec._QuizResponse_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "attemptId":
+			out.Values[i] = ec._QuizResponse_attemptId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "questionId":
+			out.Values[i] = ec._QuizResponse_questionId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "userAnswer":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QuizResponse_userAnswer(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "isCorrect":
+			out.Values[i] = ec._QuizResponse_isCorrect(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "pointsEarned":
+			out.Values[i] = ec._QuizResponse_pointsEarned(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "pointsPossible":
+			out.Values[i] = ec._QuizResponse_pointsPossible(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "confidence":
+			out.Values[i] = ec._QuizResponse_confidence(ctx, field, obj)
+		case "timeTakenSeconds":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QuizResponse_timeTakenSeconds(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var quizStatsImplementors = []string{"QuizStats"}
+
+func (ec *executionContext) _QuizStats(ctx context.Context, sel ast.SelectionSet, obj *entities.QuizStats) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, quizStatsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("QuizStats")
+		case "quizId":
+			out.Values[i] = ec._QuizStats_quizId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "bestScore":
+			out.Values[i] = ec._QuizStats_bestScore(ctx, field, obj)
+		case "latestScore":
+			out.Values[i] = ec._QuizStats_latestScore(ctx, field, obj)
+		case "attemptCount":
+			out.Values[i] = ec._QuizStats_attemptCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "bestMastery":
+			out.Values[i] = ec._QuizStats_bestMastery(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "history":
+			out.Values[i] = ec._QuizStats_history(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var reviewQueueItemImplementors = []string{"ReviewQueueItem"}
+
+func (ec *executionContext) _ReviewQueueItem(ctx context.Context, sel ast.SelectionSet, obj *entities.ReviewQueueItem) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, reviewQueueItemImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ReviewQueueItem")
+		case "id":
+			out.Values[i] = ec._ReviewQueueItem_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._ReviewQueueItem_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "courseId":
+			out.Values[i] = ec._ReviewQueueItem_courseId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "quizId":
+			out.Values[i] = ec._ReviewQueueItem_quizId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "questionId":
+			out.Values[i] = ec._ReviewQueueItem_questionId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "concept":
+			out.Values[i] = ec._ReviewQueueItem_concept(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "wrongCount":
+			out.Values[i] = ec._ReviewQueueItem_wrongCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lastAttempt":
+			out.Values[i] = ec._ReviewQueueItem_lastAttempt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "nextReview":
+			out.Values[i] = ec._ReviewQueueItem_nextReview(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var scoreDataPointImplementors = []string{"ScoreDataPoint"}
+
+func (ec *executionContext) _ScoreDataPoint(ctx context.Context, sel ast.SelectionSet, obj *entities.ScoreDataPoint) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, scoreDataPointImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ScoreDataPoint")
+		case "date":
+			out.Values[i] = ec._ScoreDataPoint_date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "score":
+			out.Values[i] = ec._ScoreDataPoint_score(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "courseId":
+			out.Values[i] = ec._ScoreDataPoint_courseId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "courseName":
+			out.Values[i] = ec._ScoreDataPoint_courseName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10633,7 +15419,7 @@ func (ec *executionContext) marshalNAttachment2ᚕᚖgithubᚗcomᚋprojectᚋba
 func (ec *executionContext) marshalNAttachment2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐAttachment(ctx context.Context, sel ast.SelectionSet, v *entities.Attachment) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -10647,7 +15433,7 @@ func (ec *executionContext) marshalNAuthPayload2githubᚗcomᚋprojectᚋbackend
 func (ec *executionContext) marshalNAuthPayload2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v *AuthPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -10705,7 +15491,7 @@ func (ec *executionContext) marshalNBookmark2ᚕᚖgithubᚗcomᚋprojectᚋback
 func (ec *executionContext) marshalNBookmark2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐBookmark(ctx context.Context, sel ast.SelectionSet, v *entities.Bookmark) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -10722,7 +15508,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -10779,11 +15565,65 @@ func (ec *executionContext) marshalNCourseAnalytics2ᚕᚖgithubᚗcomᚋproject
 func (ec *executionContext) marshalNCourseAnalytics2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseAnalytics(ctx context.Context, sel ast.SelectionSet, v *entities.CourseAnalytics) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
 	return ec._CourseAnalytics(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCourseQuizSummary2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseQuizSummaryᚄ(ctx context.Context, sel ast.SelectionSet, v []*entities.CourseQuizSummary) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCourseQuizSummary2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseQuizSummary(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCourseQuizSummary2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseQuizSummary(ctx context.Context, sel ast.SelectionSet, v *entities.CourseQuizSummary) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CourseQuizSummary(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNCreateLibraryCourseInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐCreateLibraryCourseInput(ctx context.Context, v any) (CreateLibraryCourseInput, error) {
@@ -10816,6 +15656,20 @@ func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋprojectᚋb
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNDashboardQuizStats2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐDashboardQuizStats(ctx context.Context, sel ast.SelectionSet, v entities.DashboardQuizStats) graphql.Marshaler {
+	return ec._DashboardQuizStats(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDashboardQuizStats2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐDashboardQuizStats(ctx context.Context, sel ast.SelectionSet, v *entities.DashboardQuizStats) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DashboardQuizStats(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNDateTime2timeᚐTime(ctx context.Context, v any) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -10826,7 +15680,7 @@ func (ec *executionContext) marshalNDateTime2timeᚐTime(ctx context.Context, se
 	res := graphql.MarshalTime(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -10843,10 +15697,58 @@ func (ec *executionContext) marshalNDifficulty2githubᚗcomᚋprojectᚋbackend�
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNExtendedQuizQuestion2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐExtendedQuizQuestion(ctx context.Context, sel ast.SelectionSet, v entities.ExtendedQuizQuestion) graphql.Marshaler {
+	return ec._ExtendedQuizQuestion(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNExtendedQuizQuestion2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐExtendedQuizQuestionᚄ(ctx context.Context, sel ast.SelectionSet, v []entities.ExtendedQuizQuestion) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNExtendedQuizQuestion2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐExtendedQuizQuestion(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
@@ -10859,7 +15761,7 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	res := graphql.MarshalFloatContext(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return graphql.WrapContextMarshaler(ctx, res)
@@ -10875,7 +15777,7 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	res := graphql.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -10896,7 +15798,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -10912,7 +15814,7 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 	res := graphql.MarshalInt64(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -11067,7 +15969,7 @@ func (ec *executionContext) marshalNLibraryCourse2ᚕᚖgithubᚗcomᚋproject�
 func (ec *executionContext) marshalNLibraryCourse2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐLibraryCourse(ctx context.Context, sel ast.SelectionSet, v *entities.LibraryCourse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -11081,7 +15983,7 @@ func (ec *executionContext) marshalNLibraryCourseConnection2githubᚗcomᚋproje
 func (ec *executionContext) marshalNLibraryCourseConnection2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐLibraryCourseConnection(ctx context.Context, sel ast.SelectionSet, v *LibraryCourseConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -11091,6 +15993,98 @@ func (ec *executionContext) marshalNLibraryCourseConnection2ᚖgithubᚗcomᚋpr
 func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐLoginInput(ctx context.Context, v any) (LoginInput, error) {
 	res, err := ec.unmarshalInputLoginInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNMasteryLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐMasteryLevel(ctx context.Context, v any) (entities.MasteryLevel, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := entities.MasteryLevel(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNMasteryLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐMasteryLevel(ctx context.Context, sel ast.SelectionSet, v entities.MasteryLevel) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNQuestionType2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuestionType(ctx context.Context, v any) (entities.QuestionType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := entities.QuestionType(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNQuestionType2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuestionType(ctx context.Context, sel ast.SelectionSet, v entities.QuestionType) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNQuizAttempt2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizAttempt(ctx context.Context, sel ast.SelectionSet, v entities.QuizAttempt) graphql.Marshaler {
+	return ec._QuizAttempt(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNQuizAttempt2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizAttemptᚄ(ctx context.Context, sel ast.SelectionSet, v []entities.QuizAttempt) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNQuizAttempt2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizAttempt(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNQuizAttempt2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizAttempt(ctx context.Context, sel ast.SelectionSet, v *entities.QuizAttempt) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._QuizAttempt(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNQuizQuestion2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizQuestion(ctx context.Context, sel ast.SelectionSet, v entities.QuizQuestion) graphql.Marshaler {
@@ -11161,9 +16155,183 @@ func (ec *executionContext) unmarshalNQuizQuestionInput2ᚖgithubᚗcomᚋprojec
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNQuizResponseInput2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐQuizResponseInputᚄ(ctx context.Context, v any) ([]*QuizResponseInput, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]*QuizResponseInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNQuizResponseInput2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐQuizResponseInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNQuizResponseInput2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐQuizResponseInput(ctx context.Context, v any) (*QuizResponseInput, error) {
+	res, err := ec.unmarshalInputQuizResponseInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNQuizStats2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizStats(ctx context.Context, sel ast.SelectionSet, v entities.QuizStats) graphql.Marshaler {
+	return ec._QuizStats(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNQuizStats2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizStatsᚄ(ctx context.Context, sel ast.SelectionSet, v []entities.QuizStats) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNQuizStats2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizStats(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐRegisterInput(ctx context.Context, v any) (RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNReviewQueueItem2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐReviewQueueItem(ctx context.Context, sel ast.SelectionSet, v entities.ReviewQueueItem) graphql.Marshaler {
+	return ec._ReviewQueueItem(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNReviewQueueItem2ᚕᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐReviewQueueItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*entities.ReviewQueueItem) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNReviewQueueItem2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐReviewQueueItem(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNReviewQueueItem2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐReviewQueueItem(ctx context.Context, sel ast.SelectionSet, v *entities.ReviewQueueItem) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ReviewQueueItem(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNScoreDataPoint2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐScoreDataPoint(ctx context.Context, sel ast.SelectionSet, v entities.ScoreDataPoint) graphql.Marshaler {
+	return ec._ScoreDataPoint(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNScoreDataPoint2ᚕgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐScoreDataPointᚄ(ctx context.Context, sel ast.SelectionSet, v []entities.ScoreDataPoint) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNScoreDataPoint2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐScoreDataPoint(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNStartCourseInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐStartCourseInput(ctx context.Context, v any) (StartCourseInput, error) {
@@ -11181,7 +16349,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -11217,6 +16385,11 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	return ret
 }
 
+func (ec *executionContext) unmarshalNSubmitQuizAttemptInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐSubmitQuizAttemptInput(ctx context.Context, v any) (SubmitQuizAttemptInput, error) {
+	res, err := ec.unmarshalInputSubmitQuizAttemptInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNTokenPayload2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐTokenPayload(ctx context.Context, sel ast.SelectionSet, v TokenPayload) graphql.Marshaler {
 	return ec._TokenPayload(ctx, sel, &v)
 }
@@ -11224,7 +16397,7 @@ func (ec *executionContext) marshalNTokenPayload2githubᚗcomᚋprojectᚋbacken
 func (ec *executionContext) marshalNTokenPayload2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐTokenPayload(ctx context.Context, sel ast.SelectionSet, v *TokenPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -11297,7 +16470,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋprojectᚋbackend�
 func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐUser(ctx context.Context, sel ast.SelectionSet, v *entities.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -11311,7 +16484,7 @@ func (ec *executionContext) marshalNUserConnection2githubᚗcomᚋprojectᚋback
 func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐUserConnection(ctx context.Context, sel ast.SelectionSet, v *UserConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -11369,7 +16542,7 @@ func (ec *executionContext) marshalNUserCourse2ᚕᚖgithubᚗcomᚋprojectᚋba
 func (ec *executionContext) marshalNUserCourse2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐUserCourse(ctx context.Context, sel ast.SelectionSet, v *entities.UserCourse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -11383,7 +16556,7 @@ func (ec *executionContext) marshalNUserCourseConnection2githubᚗcomᚋproject�
 func (ec *executionContext) marshalNUserCourseConnection2ᚖgithubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐUserCourseConnection(ctx context.Context, sel ast.SelectionSet, v *UserCourseConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -11448,7 +16621,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -11620,7 +16793,7 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -11637,7 +16810,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -11671,6 +16844,45 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOConfidenceLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐConfidenceLevel(ctx context.Context, v any) (entities.ConfidenceLevel, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := entities.ConfidenceLevel(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOConfidenceLevel2githubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐConfidenceLevel(ctx context.Context, sel ast.SelectionSet, v entities.ConfidenceLevel) graphql.Marshaler {
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(string(v))
+	return res
+}
+
+func (ec *executionContext) unmarshalOConfidenceLevel2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐConfidenceLevel(ctx context.Context, v any) (*entities.ConfidenceLevel, error) {
+	if v == nil {
+		return nil, nil
+	}
+	tmp, err := graphql.UnmarshalString(v)
+	res := entities.ConfidenceLevel(tmp)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOConfidenceLevel2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐConfidenceLevel(ctx context.Context, sel ast.SelectionSet, v *entities.ConfidenceLevel) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(string(*v))
+	return res
+}
+
+func (ec *executionContext) marshalOCourseQuizSummary2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐCourseQuizSummary(ctx context.Context, sel ast.SelectionSet, v *entities.CourseQuizSummary) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CourseQuizSummary(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalODateTime2ᚖtimeᚐTime(ctx context.Context, v any) (*time.Time, error) {
@@ -11708,6 +16920,114 @@ func (ec *executionContext) marshalODifficulty2ᚖgithubᚗcomᚋprojectᚋbacke
 	_ = ctx
 	res := graphql.MarshalString(string(*v))
 	return res
+}
+
+func (ec *executionContext) marshalOExtendedQuiz2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐExtendedQuiz(ctx context.Context, sel ast.SelectionSet, v *entities.ExtendedQuiz) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ExtendedQuiz(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v any) (*float64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	res := graphql.MarshalFloatContext(*v)
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v any) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt(v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕintᚄ(ctx context.Context, v any) ([]int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕᚕintᚄ(ctx context.Context, v any) ([][]int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([][]int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNInt2ᚕintᚄ(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v [][]int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNInt2ᚕintᚄ(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
@@ -11821,6 +17141,13 @@ func (ec *executionContext) unmarshalOQuizInput2ᚖgithubᚗcomᚋprojectᚋback
 	}
 	res, err := ec.unmarshalInputQuizInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOQuizStats2ᚖgithubᚗcomᚋprojectᚋbackendᚋdomainᚋentitiesᚐQuizStats(ctx context.Context, sel ast.SelectionSet, v *entities.QuizStats) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._QuizStats(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v any) (string, error) {

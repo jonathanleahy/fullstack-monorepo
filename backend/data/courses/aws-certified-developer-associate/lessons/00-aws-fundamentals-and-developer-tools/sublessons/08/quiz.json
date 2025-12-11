@@ -1,0 +1,93 @@
+{
+  "version": "1.0",
+  "subchapterId": "08",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "Client vs Resource",
+      "question": "What is the difference between Boto3's Client and Resource APIs?",
+      "options": [
+        "Client is for Python 2, Resource is for Python 3",
+        "Client provides low-level 1:1 API mapping, Resource provides high-level object-oriented interface",
+        "Resource is faster than Client",
+        "Client requires credentials, Resource uses anonymous access"
+      ],
+      "correctIndex": 1,
+      "explanation": "Client provides direct 1:1 mapping to AWS API operations with dictionary responses. Resource provides a cleaner object-oriented interface with attributes and methods. Use Client when Resource doesn't support the operation."
+    },
+    {
+      "id": "q2",
+      "type": "code_analysis",
+      "difficulty": 3,
+      "concept": "DynamoDB Decimal",
+      "question": "Why will this code fail?",
+      "codeSnippet": "table.put_item(Item={\n    'PetId': 'pet-001',\n    'Weight': 25.5  # Python float\n})",
+      "language": "python",
+      "options": [
+        "DynamoDB doesn't support numeric values",
+        "DynamoDB doesn't accept Python floats - use Decimal instead",
+        "The table name is missing",
+        "put_item requires a different syntax"
+      ],
+      "correctIndex": 1,
+      "explanation": "DynamoDB doesn't accept Python floats. Use Decimal from the decimal module: Decimal('25.5'). This is a common gotcha when working with DynamoDB in Python."
+    },
+    {
+      "id": "q3",
+      "type": "multiple_select",
+      "difficulty": 4,
+      "concept": "Pagination Handling",
+      "question": "How can you handle pagination when querying DynamoDB with Boto3? (Select ALL that apply)",
+      "options": [
+        "Check for 'LastEvaluatedKey' in the response and loop with ExclusiveStartKey",
+        "Use a Paginator from the client",
+        "Set 'AllItems=True' parameter to get all results",
+        "Increase the Limit parameter to a very large number"
+      ],
+      "correctIndices": [0, 1],
+      "minSelections": 1,
+      "maxSelections": 4,
+      "explanation": "Handle pagination by checking LastEvaluatedKey and looping, or use the cleaner Paginator API. There's no 'AllItems' parameter, and Limit doesn't guarantee all results."
+    },
+    {
+      "id": "q4",
+      "type": "code_analysis",
+      "difficulty": 4,
+      "concept": "Pre-signed URLs",
+      "question": "What does this code generate?",
+      "codeSnippet": "url = s3.generate_presigned_url(\n    'get_object',\n    Params={'Bucket': 'images', 'Key': 'photo.jpg'},\n    ExpiresIn=3600\n)",
+      "language": "python",
+      "options": [
+        "A permanent public URL for the S3 object",
+        "A temporary URL that allows downloading the object for 1 hour without AWS credentials",
+        "A URL that uploads files to S3",
+        "An error because S3 objects can't be shared"
+      ],
+      "correctIndex": 1,
+      "explanation": "generate_presigned_url creates a temporary URL allowing access to the S3 object without AWS credentials. ExpiresIn=3600 means it's valid for 1 hour (3600 seconds)."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "difficulty": 3,
+      "concept": "Lambda Initialization",
+      "question": "In AWS Lambda, you should create Boto3 clients inside the handler function for each invocation.",
+      "correctAnswer": false,
+      "explanation": "Create clients OUTSIDE the handler function. They persist across warm starts, avoiding repeated initialization overhead. Only the handler function is called on each invocation."
+    },
+    {
+      "id": "q6",
+      "type": "matching",
+      "difficulty": 3,
+      "concept": "Boto3 Concepts",
+      "question": "Match each Boto3 concept with its description:",
+      "leftColumn": ["Session", "Client", "Resource", "Waiter"],
+      "rightColumn": ["Object-oriented high-level API", "Waits for AWS operations to complete", "Low-level 1:1 API mapping", "Stores configuration and credentials"],
+      "correctPairs": [[0, 3], [1, 2], [2, 0], [3, 1]],
+      "explanation": "Session manages configuration/credentials. Client provides low-level API access. Resource provides high-level OOP interface. Waiter polls until an operation completes."
+    }
+  ]
+}

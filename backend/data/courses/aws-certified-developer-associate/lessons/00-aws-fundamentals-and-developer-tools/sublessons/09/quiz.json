@@ -1,0 +1,83 @@
+{
+  "version": "1.0",
+  "subchapterId": "09",
+  "lessonId": "00-aws-fundamentals-and-developer-tools",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "true_false",
+      "difficulty": 1,
+      "concept": "CloudShell Cost",
+      "question": "AWS CloudShell is free to use.",
+      "correctAnswer": true,
+      "explanation": "CloudShell is free! It provides a browser-based shell with AWS CLI pre-installed and automatically authenticated. No setup or cost required."
+    },
+    {
+      "id": "q2",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "CloudShell Features",
+      "question": "What is the persistent storage limit for CloudShell per region?",
+      "options": [
+        "100 MB",
+        "500 MB",
+        "1 GB",
+        "5 GB"
+      ],
+      "correctIndex": 2,
+      "explanation": "CloudShell provides 1 GB of persistent storage per region in your home directory. Files you save persist between sessions but are region-specific."
+    },
+    {
+      "id": "q3",
+      "type": "multiple_select",
+      "difficulty": 3,
+      "concept": "Cloud9 Features",
+      "question": "What does AWS Cloud9 provide? (Select ALL that apply)",
+      "options": [
+        "Full IDE with code editor and debugger",
+        "Real-time collaboration with team members",
+        "Pre-installed AWS CLI and SDKs",
+        "Free compute resources (no cost)"
+      ],
+      "correctIndices": [0, 1, 2],
+      "minSelections": 2,
+      "maxSelections": 4,
+      "explanation": "Cloud9 provides a full IDE, real-time collaboration, and pre-installed tools. However, it runs on EC2 instances which cost money - Cloud9 itself is free but the underlying compute isn't."
+    },
+    {
+      "id": "q4",
+      "type": "matching",
+      "difficulty": 3,
+      "concept": "CloudShell vs Cloud9",
+      "question": "Match each feature with the appropriate tool:",
+      "leftColumn": ["Quick CLI commands", "Full application development", "Free compute", "Long-running Docker containers"],
+      "rightColumn": ["CloudShell", "Cloud9", "CloudShell", "Cloud9"],
+      "correctPairs": [[0, 0], [1, 1], [2, 2], [3, 3]],
+      "explanation": "CloudShell is best for quick CLI work and is free. Cloud9 is better for full development, Docker, and long-running tasks but costs money (EC2)."
+    },
+    {
+      "id": "q5",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "concept": "Cloud9 Costs",
+      "question": "How can you avoid unexpected costs with AWS Cloud9?",
+      "options": [
+        "Use the largest instance type for faster development",
+        "Enable auto-stop to shutdown after idle time",
+        "Cloud9 is free, there are no costs to manage",
+        "Delete the Cloud9 IDE after each session"
+      ],
+      "correctIndex": 1,
+      "explanation": "Enable auto-stop (automatic shutdown after idle time) to avoid paying for EC2 when not actively using Cloud9. The default is 30 minutes of idle time."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "difficulty": 2,
+      "concept": "CloudShell Authentication",
+      "question": "You must run 'aws configure' in CloudShell to set up credentials before using AWS CLI commands.",
+      "correctAnswer": false,
+      "explanation": "CloudShell is automatically authenticated with your console credentials. No setup required - just open CloudShell and start running commands immediately."
+    }
+  ]
+}

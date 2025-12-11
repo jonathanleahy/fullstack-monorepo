@@ -1,5 +1,15 @@
 export type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 
+// Question type definitions for extended quiz system
+export type QuestionType =
+  | 'multiple_choice'
+  | 'true_false'
+  | 'multiple_select'
+  | 'code_analysis'
+  | 'matching'
+  | 'ordering';
+
+// Legacy quiz question (simple multiple choice)
 export interface QuizQuestion {
   id: string;
   question: string;
@@ -8,6 +18,73 @@ export interface QuizQuestion {
   explanation?: string;
 }
 
+// Extended question types for the new quiz system
+export interface BaseQuizQuestion {
+  id: string;
+  type: QuestionType;
+  question: string;
+  difficulty: number; // 1-5
+  concept?: string;
+  explanation?: string;
+}
+
+export interface MultipleChoiceQuestion extends BaseQuizQuestion {
+  type: 'multiple_choice';
+  options: string[];
+  correctIndex: number;
+}
+
+export interface TrueFalseQuestion extends BaseQuizQuestion {
+  type: 'true_false';
+  correctAnswer: boolean;
+}
+
+export interface MultipleSelectQuestion extends BaseQuizQuestion {
+  type: 'multiple_select';
+  options: string[];
+  correctIndices: number[];
+  minSelections?: number;
+  maxSelections?: number;
+}
+
+export interface CodeAnalysisQuestion extends BaseQuizQuestion {
+  type: 'code_analysis';
+  codeSnippet: string;
+  language?: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export interface MatchingQuestion extends BaseQuizQuestion {
+  type: 'matching';
+  leftColumn: string[];
+  rightColumn: string[];
+  correctPairs: [number, number][];
+}
+
+export interface OrderingQuestion extends BaseQuizQuestion {
+  type: 'ordering';
+  items: string[];
+  correctOrder: number[];
+}
+
+export type ExtendedQuizQuestion =
+  | MultipleChoiceQuestion
+  | TrueFalseQuestion
+  | MultipleSelectQuestion
+  | CodeAnalysisQuestion
+  | MatchingQuestion
+  | OrderingQuestion;
+
+// Extended quiz with new question types
+export interface ExtendedQuiz {
+  version?: string;
+  subchapterId?: string;
+  lessonId?: string;
+  questions: ExtendedQuizQuestion[];
+}
+
+// Legacy quiz (for backwards compatibility)
 export interface Quiz {
   questions: QuizQuestion[];
 }
@@ -19,6 +96,7 @@ export interface Lesson {
   sublessons?: Lesson[];
   hasSublessons: boolean;
   quiz?: Quiz;
+  extendedQuiz?: ExtendedQuiz;
 }
 
 export interface LibraryCourse {
