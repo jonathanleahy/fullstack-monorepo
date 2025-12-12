@@ -291,13 +291,19 @@ interface SideBySideBlockProps {
   diagram: string;
   text: string;
   position: 'left' | 'right';
-  size: 'small' | 'medium' | 'large';
+  size: string;
 }
 
-const sizeWidths = {
-  small: 'w-1/3',
-  medium: 'w-5/12',
-  large: 'w-1/2',
+// Proportional widths for side-by-side diagrams
+const sizeWidths: Record<string, string> = {
+  '1/3': 'w-1/3',
+  '1/2': 'w-1/2',
+  '2/3': 'w-2/3',
+  'full': 'w-full',
+  // Backwards compatibility
+  'small': 'w-1/3',
+  'medium': 'w-1/2',
+  'large': 'w-2/3',
 };
 
 function SideBySideBlock({ diagram, text, position, size }: SideBySideBlockProps) {
@@ -333,8 +339,10 @@ function SideBySideBlock({ diagram, text, position, size }: SideBySideBlockProps
   const canMoveUp = canMoveDiagram?.(diagram, 'up') ?? false;
   const canMoveDown = canMoveDiagram?.(diagram, 'down') ?? false;
 
+  const widthClass = sizeWidths[layoutSettings.size] || 'w-1/2';
+
   const diagramElement = (
-    <div className={`${sizeWidths[layoutSettings.size]} flex-shrink-0`}>
+    <div className={`${widthClass} flex-shrink-0 [&_svg]:w-full [&_svg]:h-auto`}>
       <div className="sticky top-4">
         <MermaidDiagram chart={diagram} compact hideExpandButton={editMode} />
       </div>
@@ -383,13 +391,19 @@ interface FloatingBlockProps {
   diagram: string;
   text: string;
   float: 'left' | 'right';
-  size: 'small' | 'medium' | 'large';
+  size: string;
 }
 
-const floatWidths = {
-  small: 'w-56',
-  medium: 'w-72',
-  large: 'w-96',
+// Proportional widths for floating diagrams
+const floatWidths: Record<string, string> = {
+  '1/3': 'w-1/3',
+  '1/2': 'w-1/2',
+  '2/3': 'w-2/3',
+  'full': 'w-full',
+  // Backwards compatibility
+  'small': 'w-1/3',
+  'medium': 'w-1/2',
+  'large': 'w-2/3',
 };
 
 function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
@@ -426,6 +440,7 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
   const canMoveDown = canMoveDiagram?.(diagram, 'down') ?? false;
 
   const floatClass = layoutSettings.position === 'left' ? 'float-left mr-6' : 'float-right ml-6';
+  const widthClass = floatWidths[layoutSettings.size] || 'w-1/2';
 
   // In edit mode, show layout picker
   if (editMode) {
@@ -444,7 +459,7 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
           canMoveDown={canMoveDown}
         />
         <div className="my-6 overflow-hidden not-prose pt-10">
-          <div className={`${floatClass} ${floatWidths[layoutSettings.size]} mb-4`}>
+          <div className={`${floatClass} ${widthClass} mb-4 [&_svg]:w-full [&_svg]:h-auto`}>
             <MermaidDiagram chart={diagram} compact hideExpandButton />
           </div>
           <div className="prose prose-slate dark:prose-invert max-w-none">
@@ -461,7 +476,7 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
   // Don't contain the float - let subsequent content flow around the diagram
   return (
     <>
-      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4 not-prose`}>
+      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4 not-prose [&_svg]:w-full [&_svg]:h-auto`}>
         <MermaidDiagram chart={diagram} compact />
       </div>
       <div className="prose prose-slate dark:prose-invert max-w-none">
@@ -488,7 +503,7 @@ function findMermaidDiagrams(content: string): Array<{ start: number; end: numbe
   const diagrams: Array<{ start: number; end: number; code: string }> = [];
 
   // First find layout blocks with mermaid diagrams - these take precedence
-  const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/g;
+  const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large|1\/3|1\/2|2\/3|full))?\n([\s\S]*?):::/g;
   const layoutRanges: Array<{ start: number; end: number }> = [];
   let layoutMatch;
 
@@ -562,7 +577,8 @@ function parseLayoutBlocks(content: string): LayoutBlock[] {
   const blocks: LayoutBlock[] = [];
 
   // Pattern: :::sidebyside:position:size or :::floating:position:size
-  const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/g;
+  // Size can be: small, medium, large (legacy) or 1/3, 1/2, 2/3, full (new)
+  const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large|1\/3|1\/2|2\/3|full))?\n([\s\S]*?):::/g;
 
   let lastIndex = 0;
   let match;
@@ -646,7 +662,7 @@ export function MarkdownRenderer({ content, className = '', editMode = false, on
   // Handle moving a diagram up or down in the content
   const handleMoveDiagram = useCallback((diagramCode: string, direction: 'up' | 'down') => {
     // Find the layout block with this diagram
-    const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/g;
+    const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large|1\/3|1\/2|2\/3|full))?\n([\s\S]*?):::/g;
     let match;
     let targetBlock: { start: number; end: number; fullMatch: string } | null = null;
 
@@ -676,7 +692,7 @@ export function MarkdownRenderer({ content, className = '', editMode = false, on
     // Result: Text paragraphs are unchanged, only the diagram position changes.
 
     // Parse the layout block to extract diagram and text
-    const innerContent = targetBlock.fullMatch.match(/:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/);
+    const innerContent = targetBlock.fullMatch.match(/:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large|1\/3|1\/2|2\/3|full))?\n([\s\S]*?):::/);
     if (!innerContent) return;
 
     const layoutType = innerContent[1] as 'sidebyside' | 'floating';
@@ -742,7 +758,7 @@ export function MarkdownRenderer({ content, className = '', editMode = false, on
       // Move down - find the first paragraph after the block to become the new wrapped text
 
       // Check if contentAfter starts with a layout block
-      const layoutBlockMatch = afterTrimmed.match(/^:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/);
+      const layoutBlockMatch = afterTrimmed.match(/^:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large|1\/3|1\/2|2\/3|full))?\n([\s\S]*?):::/);
 
       let firstParagraphAfter: string;
       let remainingAfter: string;
@@ -796,7 +812,7 @@ export function MarkdownRenderer({ content, className = '', editMode = false, on
   // Check if a diagram can be moved in a direction
   const canMoveDiagramCheck = useCallback((diagramCode: string, direction: 'up' | 'down'): boolean => {
     // Find the layout block with this diagram
-    const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/g;
+    const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large|1\/3|1\/2|2\/3|full))?\n([\s\S]*?):::/g;
     let match;
 
     while ((match = layoutPattern.exec(content)) !== null) {

@@ -2,7 +2,22 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 export type LayoutType = 'normal' | 'sidebyside' | 'floating';
 export type Position = 'left' | 'right';
-export type Size = 'small' | 'medium' | 'large';
+export type Size = '1/3' | '1/2' | '2/3' | 'full';
+
+// Map old size names to new ones for backwards compatibility
+const sizeAliases: Record<string, Size> = {
+  'small': '1/3',
+  'medium': '1/2',
+  'large': '2/3',
+  '1/3': '1/3',
+  '1/2': '1/2',
+  '2/3': '2/3',
+  'full': 'full',
+};
+
+export function normalizeSize(size: string): Size {
+  return sizeAliases[size] || '1/2';
+}
 
 export interface LayoutSettings {
   layout: LayoutType;
@@ -27,7 +42,7 @@ export function DiagramLayoutPicker({
   diagramCode,
   currentLayout = 'normal',
   currentPosition = 'right',
-  currentSize = 'medium',
+  currentSize = '1/2',
   currentText: _currentText = '',
   onLayoutChange,
   onMoveUp,
@@ -219,30 +234,42 @@ Your text content goes here...
           <div className="w-px h-4 bg-gray-200" />
 
           <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-500 px-1">Size:</span>
+            <span className="text-xs text-gray-500 px-1">Width:</span>
             <button
-              onClick={() => handleSizeChange('small')}
+              onClick={() => handleSizeChange('1/3')}
               className={`px-1.5 py-0.5 text-xs rounded ${
-                size === 'small' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                size === '1/3' ? 'bg-gray-200' : 'hover:bg-gray-100'
               }`}
+              title="1/3 width"
             >
-              S
+              ⅓
             </button>
             <button
-              onClick={() => handleSizeChange('medium')}
+              onClick={() => handleSizeChange('1/2')}
               className={`px-1.5 py-0.5 text-xs rounded ${
-                size === 'medium' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                size === '1/2' ? 'bg-gray-200' : 'hover:bg-gray-100'
               }`}
+              title="1/2 width"
             >
-              M
+              ½
             </button>
             <button
-              onClick={() => handleSizeChange('large')}
+              onClick={() => handleSizeChange('2/3')}
               className={`px-1.5 py-0.5 text-xs rounded ${
-                size === 'large' ? 'bg-gray-200' : 'hover:bg-gray-100'
+                size === '2/3' ? 'bg-gray-200' : 'hover:bg-gray-100'
               }`}
+              title="2/3 width"
             >
-              L
+              ⅔
+            </button>
+            <button
+              onClick={() => handleSizeChange('full')}
+              className={`px-1.5 py-0.5 text-xs rounded ${
+                size === 'full' ? 'bg-gray-200' : 'hover:bg-gray-100'
+              }`}
+              title="Full width"
+            >
+              Full
             </button>
           </div>
 
