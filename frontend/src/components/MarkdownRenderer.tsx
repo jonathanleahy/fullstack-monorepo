@@ -342,7 +342,7 @@ function SideBySideBlock({ diagram, text, position, size }: SideBySideBlockProps
   const widthClass = sizeWidths[layoutSettings.size] || 'w-1/2';
 
   const diagramElement = (
-    <div className={`${widthClass} flex-shrink-0 [&_svg]:w-full [&_svg]:h-auto`}>
+    <div className={`${widthClass} flex-shrink-0 [&_svg]:max-w-full [&_svg]:h-auto`}>
       <div className="sticky top-4">
         <MermaidDiagram chart={diagram} compact hideExpandButton={editMode} />
       </div>
@@ -459,7 +459,7 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
           canMoveDown={canMoveDown}
         />
         <div className="my-6 overflow-hidden not-prose pt-10">
-          <div className={`${floatClass} ${widthClass} mb-4 [&_svg]:w-full [&_svg]:h-auto`}>
+          <div className={`${floatClass} ${widthClass} mb-4 [&_svg]:max-w-full [&_svg]:h-auto`}>
             <MermaidDiagram chart={diagram} compact hideExpandButton />
           </div>
           <div className="prose prose-slate dark:prose-invert max-w-none">
@@ -476,7 +476,7 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
   // Don't contain the float - let subsequent content flow around the diagram
   return (
     <>
-      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4 not-prose [&_svg]:w-full [&_svg]:h-auto`}>
+      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4 not-prose [&_svg]:max-w-full [&_svg]:h-auto`}>
         <MermaidDiagram chart={diagram} compact />
       </div>
       <div className="prose prose-slate dark:prose-invert max-w-none">
