@@ -407,3 +407,6 @@ graph TB
 ---
 
 *Next: Alex explores instance metadata and user data.*
+
+---
+*v1.0*

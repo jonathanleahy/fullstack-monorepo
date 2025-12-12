@@ -394,3 +394,6 @@ When NOT to use a Role:
 ---
 
 *Next: Alex learns how to set up roles for specific AWS services.*
+
+---
+*v1.0*

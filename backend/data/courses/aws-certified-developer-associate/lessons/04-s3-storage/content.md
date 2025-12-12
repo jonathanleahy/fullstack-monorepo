@@ -77,3 +77,6 @@ S3 is heavily tested on the DVA-C02 exam:
 - **Maya** - Frontend developer handling image uploads
 - **Sam** - DevOps mentor with S3 architecture experience
 - **The Finance Team** - Very interested in storage cost optimization
+
+---
+*v1.0*

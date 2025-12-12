@@ -171,3 +171,6 @@ graph TB
 
 *Ready to learn how to design databases that scale infinitely? Let's start with Alex's challenge - understanding exactly why relational databases struggle with flexible schemas.*
 
+
+---
+*v1.0*

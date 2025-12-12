@@ -421,3 +421,6 @@ Final: ALLOWED
 ---
 
 *Next: Alex learns about IAM Roles - temporary credentials for services and cross-account access.*
+
+---
+*v1.0*

@@ -484,3 +484,6 @@ The team reviews what they learned:
 ---
 
 *Next: **The Journey of a Message** - Understanding visibility timeout, message states, and why Alex's duplicate notifications happened.*
+
+---
+*v1.0*

@@ -264,3 +264,6 @@ As you follow Alex through this chapter, you'll learn to implement all these sec
 ---
 
 *Next: Alex learns the fundamentals of IAM and starts fixing these critical issues.*
+
+---
+*v1.0*

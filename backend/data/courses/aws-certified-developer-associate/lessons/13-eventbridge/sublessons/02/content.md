@@ -478,3 +478,6 @@ graph LR
 
 *Next: **Event Buses** - Let's get hands-on with creating and managing default, custom, and cross-account event buses.*
 
+
+---
+*v1.0*

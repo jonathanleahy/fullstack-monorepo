@@ -408,3 +408,6 @@ class PetTrackerWrites:
 ---
 
 *Next: Understanding capacity modes and pricing.*
+
+---
+*v1.0*

@@ -344,3 +344,6 @@ $ aws ec2 describe-instance-type-offerings \
 ---
 
 *Next: Alex learns about Edge Locations and how to make PetTracker fast for users everywhere.*
+
+---
+*v1.0*

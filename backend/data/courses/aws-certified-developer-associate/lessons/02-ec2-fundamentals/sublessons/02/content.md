@@ -327,3 +327,6 @@ flowchart TD
 ---
 
 *Next: Alex learns about AMIs and how to create custom images.*
+
+---
+*v1.0*

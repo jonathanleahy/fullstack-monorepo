@@ -527,3 +527,6 @@ InputTemplate: |
 
 *Next: **Archive and Replay** - Let's learn how to store events and replay them when needed.*
 
+
+---
+*v1.0*

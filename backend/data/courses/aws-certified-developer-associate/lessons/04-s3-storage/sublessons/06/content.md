@@ -403,3 +403,6 @@ configure_encryption(
 ---
 
 *Next: Alex learns about pre-signed URLs for secure temporary access.*
+
+---
+*v1.0*

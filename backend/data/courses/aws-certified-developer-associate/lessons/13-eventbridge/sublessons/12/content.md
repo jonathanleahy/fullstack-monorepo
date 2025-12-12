@@ -512,3 +512,6 @@ def handler(event, context):
 
 *Next: **Security and Access Control** - Let's explore how to secure your event buses and rules.*
 
+
+---
+*v1.0*

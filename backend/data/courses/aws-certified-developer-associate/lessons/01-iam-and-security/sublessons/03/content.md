@@ -503,3 +503,6 @@ fatal error: An error occurred (AccessDenied) when calling the PutObject operati
 ---
 
 *Next: Alex learns how IAM evaluates multiple policies and why explicit Deny always wins.*
+
+---
+*v1.0*

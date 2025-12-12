@@ -418,3 +418,6 @@ aws budgets create-budget \
 ---
 
 *Next: Alex learns to monitor and troubleshoot EC2 instances.*
+
+---
+*v1.0*

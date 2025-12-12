@@ -411,3 +411,6 @@ aws ec2 revoke-security-group-ingress \
 ---
 
 *Next: Alex learns about key pairs and SSH access management.*
+
+---
+*v1.0*

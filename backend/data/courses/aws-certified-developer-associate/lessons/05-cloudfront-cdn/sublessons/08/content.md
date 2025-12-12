@@ -417,3 +417,6 @@ curl https://d1234example.cloudfront.net/images/test.jpg
 ---
 
 *Next: Lambda@Edge and CloudFront Functions for edge computing.*
+
+---
+*v1.0*

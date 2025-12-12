@@ -400,3 +400,6 @@ aws ec2 create-key-pair --key-name pettracker-prod ...
 ---
 
 *Next: Alex configures EBS volumes for storage.*
+
+---
+*v1.0*

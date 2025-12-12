@@ -509,3 +509,6 @@ EndDate: "2024-12-02T23:59:59Z"    # Cyber Monday ends
 
 *Next: **EventBridge Pipes** - Let's explore point-to-point integration with filtering and enrichment.*
 
+
+---
+*v1.0*

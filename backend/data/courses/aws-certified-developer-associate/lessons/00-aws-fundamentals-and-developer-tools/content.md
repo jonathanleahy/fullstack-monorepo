@@ -404,3 +404,6 @@ This foundational knowledge appears throughout the exam. Understanding these con
 ---
 
 *Ready to dive in? The first lesson explores AWS's global infrastructure in detail - how to select regions, design for high availability, and understand the physical reality behind "the cloud."*
+
+---
+*v1.0*

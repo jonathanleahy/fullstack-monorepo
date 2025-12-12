@@ -412,3 +412,6 @@ done
 ---
 
 *Next: Alex dives into IAM Policies - the JSON documents that define what users can actually do.*
+
+---
+*v1.0*

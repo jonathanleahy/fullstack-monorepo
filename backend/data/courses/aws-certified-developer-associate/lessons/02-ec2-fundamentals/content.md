@@ -69,3 +69,6 @@ Even in a serverless-focused exam, EC2 knowledge is essential for understanding 
 - **Sam** - DevOps mentor who's managed thousands of instances
 - **Marcus** - The SRE who gets paged when instances go down
 - **The Finance Team** - Very interested in EC2 cost optimization
+
+---
+*v1.0*

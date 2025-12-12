@@ -528,3 +528,6 @@ This won't match `"status": "completed"`. Use `equals-ignore-case` if needed.
 
 *Next: **AWS Service Integration** - Let's see how 200+ AWS services send events to EventBridge automatically.*
 
+
+---
+*v1.0*

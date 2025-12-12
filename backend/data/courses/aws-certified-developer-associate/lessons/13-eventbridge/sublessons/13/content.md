@@ -622,3 +622,6 @@ EventBridgeEndpoint:
 
 *Next: **Alex's Solution** - Let's bring everything together with the complete unified event architecture.*
 
+
+---
+*v1.0*

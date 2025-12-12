@@ -64,3 +64,6 @@ Expect 15-20% of exam questions to directly involve IAM concepts.
 - **Sam** - DevOps mentor, helps with implementation
 - **Maya** - Frontend developer who needs limited AWS access
 - **The CTO** - Gets involved when security incidents happen
+
+---
+*v1.0*

@@ -460,3 +460,6 @@ graph TB
 ---
 
 *Next: Alex learns about cross-account access using IAM roles.*
+
+---
+*v1.0*

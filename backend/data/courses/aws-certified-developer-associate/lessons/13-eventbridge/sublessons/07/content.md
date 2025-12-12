@@ -529,3 +529,6 @@ fields:
 
 *Next: **SaaS Partner Integration** - Let's see how third-party services like Stripe and Auth0 send events to EventBridge.*
 
+
+---
+*v1.0*

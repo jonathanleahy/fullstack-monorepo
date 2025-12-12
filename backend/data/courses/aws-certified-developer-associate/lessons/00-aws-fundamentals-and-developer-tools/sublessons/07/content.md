@@ -421,3 +421,6 @@ graph TB
 ---
 
 *Next: Alex dives deep into Python's Boto3 SDK with practical PetTracker examples.*
+
+---
+*v1.0*

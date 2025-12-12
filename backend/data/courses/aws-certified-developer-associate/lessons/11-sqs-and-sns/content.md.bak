@@ -254,7 +254,6 @@ This chapter follows Alex's journey from the National Pet Day disaster to buildi
 
 ## The Architecture We're Building
 
-:::floating:right:medium
 ```mermaid
 graph TB
     subgraph "After: Resilient"
@@ -270,7 +269,6 @@ graph TB
 ```
 
 Each notification channel processes independently. A slow email service doesn't delay SMS. A crashing push service doesn't lose messages - they wait in the queue. If a message fails repeatedly, it goes to the Dead Letter Queue for investigation instead of retrying forever.
-:::
 
 ## Why This Matters for the Exam
 
@@ -292,5 +290,3 @@ The DVA-C02 exam loves messaging questions. Expect:
 ---
 
 *Ready to dive in? The first lesson explores SQS fundamentals - how queues work, what makes them reliable, and how to create your first queue.*
----
-*v1.0*

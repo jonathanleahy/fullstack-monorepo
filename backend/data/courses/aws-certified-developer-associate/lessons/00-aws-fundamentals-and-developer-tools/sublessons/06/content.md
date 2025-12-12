@@ -398,3 +398,6 @@ aws s3 rb s3://your-unique-test-bucket-name --force
 ---
 
 *Next: Alex explores the AWS SDKs and learns to integrate AWS into application code.*
+
+---
+*v1.0*

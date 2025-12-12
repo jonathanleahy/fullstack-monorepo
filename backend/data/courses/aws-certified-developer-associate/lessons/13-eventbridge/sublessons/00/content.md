@@ -407,3 +407,6 @@ Add new fields, never remove or rename:
 
 *Next: **The Problem in Detail** - Now that you understand events, let's see the real code and debugging scenarios that make manual event handling so painful.*
 
+
+---
+*v1.0*

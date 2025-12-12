@@ -75,3 +75,6 @@ Understanding when to use Beanstalk vs. raw EC2 vs. containers is essential for 
 - **Maya** - Frontend developer who loves Beanstalk's simplicity
 - **Sam** - DevOps mentor helping with advanced configurations
 - **The QA Team** - Very interested in staging environments
+
+---
+*v1.0*

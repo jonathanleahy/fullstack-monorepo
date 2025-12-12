@@ -423,3 +423,6 @@ graph TD
 ---
 
 *Next: Alex sets up billing alerts - the most important lesson to learn early!*
+
+---
+*v1.0*

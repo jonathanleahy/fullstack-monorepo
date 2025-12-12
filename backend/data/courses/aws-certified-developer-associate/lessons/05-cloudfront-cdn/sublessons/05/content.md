@@ -413,3 +413,6 @@ comparison = {
 ---
 
 *Next: Implementing security with HTTPS.*
+
+---
+*v1.0*

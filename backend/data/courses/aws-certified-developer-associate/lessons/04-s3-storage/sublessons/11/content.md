@@ -452,3 +452,6 @@ Key topics for DVA-C02:
 ---
 
 *Next Chapter: CloudFront CDN - Alex learns to distribute content globally.*
+
+---
+*v1.0*

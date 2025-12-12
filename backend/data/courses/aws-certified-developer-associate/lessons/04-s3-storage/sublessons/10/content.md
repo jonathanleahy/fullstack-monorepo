@@ -351,3 +351,6 @@ aws s3api put-bucket-cors \
 ---
 
 *Next: Alex brings it all together with a complete S3 implementation.*
+
+---
+*v1.0*

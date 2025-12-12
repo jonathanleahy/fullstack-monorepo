@@ -500,3 +500,6 @@ def handler(event, context):
 
 *Next: **EventBridge Scheduler** - Let's explore time-based event triggering beyond simple cron jobs.*
 
+
+---
+*v1.0*

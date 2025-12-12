@@ -444,3 +444,6 @@ aws cloudfront test-function \
 ---
 
 *Next: Monitoring and optimizing CloudFront performance.*
+
+---
+*v1.0*

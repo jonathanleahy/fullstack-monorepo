@@ -447,3 +447,6 @@ The mental model you learned here - **consumers decide what they want** - applie
 
 — Alex, after shipping the unified architecture
 
+
+---
+*v1.0*

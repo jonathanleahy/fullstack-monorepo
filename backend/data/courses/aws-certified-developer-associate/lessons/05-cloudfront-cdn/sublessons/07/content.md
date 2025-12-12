@@ -405,3 +405,6 @@ best_practices = [
 ---
 
 *Next: Origin Access Control for securing S3 origins.*
+
+---
+*v1.0*

@@ -358,3 +358,6 @@ Response:
 ---
 
 *Next: Creating and configuring CloudFront distributions.*
+
+---
+*v1.0*

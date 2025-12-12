@@ -342,3 +342,6 @@ Annual savings: $349.20
 ---
 
 *Next: Alex learns bucket policies and security for S3.*
+
+---
+*v1.0*

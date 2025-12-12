@@ -429,3 +429,6 @@ $ aws sts get-caller-identity --profile mytest
 ---
 
 *Next: Alex masters essential AWS CLI commands for daily development.*
+
+---
+*v1.0*

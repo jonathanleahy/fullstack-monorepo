@@ -284,3 +284,6 @@ Over the next lessons, Alex will learn how to:
 ---
 
 *Next: Alex learns the core concepts of Elastic Beanstalk - applications, environments, and versions.*
+
+---
+*v1.0*

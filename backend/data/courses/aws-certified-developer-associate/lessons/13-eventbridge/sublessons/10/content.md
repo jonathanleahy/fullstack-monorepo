@@ -504,3 +504,6 @@ graph LR
 
 *Next: **Input Transformation** - Let's dive deeper into reshaping event data.*
 
+
+---
+*v1.0*

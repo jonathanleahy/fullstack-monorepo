@@ -96,3 +96,6 @@ Let's start by understanding where AWS actually runs your code...
 ---
 
 *Next: Alex learns about AWS Global Infrastructure and finally understands why there are so many "regions" to choose from.*
+
+---
+*v1.0*

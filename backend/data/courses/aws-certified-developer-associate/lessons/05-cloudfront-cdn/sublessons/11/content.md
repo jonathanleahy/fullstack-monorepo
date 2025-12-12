@@ -417,3 +417,6 @@ Key topics for DVA-C02:
 ---
 
 *Next Chapter: DynamoDB - Alex tackles the need for a flexible, scalable database as PetTracker's data model evolves.*
+
+---
+*v1.0*

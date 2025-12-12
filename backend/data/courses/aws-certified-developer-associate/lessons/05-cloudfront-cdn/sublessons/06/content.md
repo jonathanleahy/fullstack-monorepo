@@ -406,3 +406,6 @@ Add security headers with response headers policy:
 ---
 
 *Next: Implementing signed URLs and signed cookies for private content.*
+
+---
+*v1.0*

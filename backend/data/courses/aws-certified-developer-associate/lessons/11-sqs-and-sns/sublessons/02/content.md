@@ -485,3 +485,6 @@ Alex summarizes what was learned:
 ---
 
 *Next: **When Messages Go Wrong** - What happens when a message keeps failing? Alex discovers poison messages and the solution: Dead Letter Queues.*
+
+---
+*v1.0*

@@ -424,3 +424,6 @@ def configure_notifications(bucket_name):
 ---
 
 *Next: Alex learns about static website hosting.*
+
+---
+*v1.0*

@@ -441,3 +441,6 @@ Before launching production instances:
 ---
 
 *Next: Alex configures security groups to control network access.*
+
+---
+*v1.0*

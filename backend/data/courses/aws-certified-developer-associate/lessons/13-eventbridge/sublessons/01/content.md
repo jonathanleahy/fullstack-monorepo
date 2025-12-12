@@ -455,3 +455,6 @@ graph LR
 
 *Next: **EventBridge Architecture** - Now that you've felt the pain, let's see how EventBridge solves each of these problems at an architectural level.*
 
+
+---
+*v1.0*

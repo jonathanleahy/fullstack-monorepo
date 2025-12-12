@@ -398,3 +398,6 @@ flowchart TD
 
 *Next: **Rules and Targets** - Now that you understand where events flow, let's learn how to route them to the right destinations.*
 
+
+---
+*v1.0*

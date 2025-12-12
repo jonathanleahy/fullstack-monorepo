@@ -404,3 +404,6 @@ write_costs = {
 ---
 
 *Next: Implementing efficient read operations with Query and Scan.*
+
+---
+*v1.0*

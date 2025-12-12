@@ -424,3 +424,6 @@ Alex summarizes FIFO queues:
 ---
 
 *Next: Securing your messages - Alex learns about encryption and access control for SQS and SNS.*
+
+---
+*v1.0*

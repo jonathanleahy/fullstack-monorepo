@@ -336,3 +336,6 @@ Most workloads use shared tenancy. Dedicated options are for:
 ---
 
 *Next: Alex dives deep into instance types to find the right one for the ML workload.*
+
+---
+*v1.0*

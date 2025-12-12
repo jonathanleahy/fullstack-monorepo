@@ -34,3 +34,6 @@ PetTracker's user base has gone global! Users in Australia, Europe, and Asia are
 ---
 
 *Follow along as Alex transforms PetTracker from a single-region application to a globally distributed content delivery platform.*
+
+---
+*v1.0*

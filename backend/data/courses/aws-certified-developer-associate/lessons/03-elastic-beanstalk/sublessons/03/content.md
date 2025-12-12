@@ -418,3 +418,6 @@ OptionSettings:
 ---
 
 *Next: Alex learns about deployment strategies for zero-downtime updates.*
+
+---
+*v1.0*

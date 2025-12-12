@@ -390,3 +390,6 @@ comparison = {
 ---
 
 *Next: DynamoDB Streams for event-driven architectures.*
+
+---
+*v1.0*

@@ -518,3 +518,6 @@ ForwardToCustomBus:
 
 *Next: **Custom Events** - Now let's learn how to publish your own events from your applications.*
 
+
+---
+*v1.0*

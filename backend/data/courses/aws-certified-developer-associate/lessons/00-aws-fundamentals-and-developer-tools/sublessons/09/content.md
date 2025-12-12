@@ -395,3 +395,6 @@ aws cloud9 create-environment-ec2 \
 ---
 
 *Next: Alex learns where to find help - documentation, support, and community resources.*
+
+---
+*v1.0*

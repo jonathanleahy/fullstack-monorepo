@@ -404,3 +404,6 @@ activities = queries.get_pet_activities('pet-001', '2024-01-01', '2024-01-31')
 ---
 
 *Next: Write operations and conditional updates.*
+
+---
+*v1.0*

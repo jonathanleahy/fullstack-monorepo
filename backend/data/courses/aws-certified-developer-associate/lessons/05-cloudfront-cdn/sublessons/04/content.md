@@ -424,3 +424,6 @@ optimization_tips = [
 ---
 
 *Next: Invalidating cached content when it changes.*
+
+---
+*v1.0*

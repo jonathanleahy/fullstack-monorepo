@@ -398,3 +398,6 @@ Then routing in Lambda code. You're paying for invocations you don't need.
 
 *Next: **Event Patterns** - Now let's master the powerful pattern matching syntax that makes EventBridge filtering so flexible.*
 
+
+---
+*v1.0*

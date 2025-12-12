@@ -382,3 +382,6 @@ Alex reflects on what was learned:
 ---
 
 *Next: Not all messages matter to all subscribers. Alex learns to use SNS filter policies to route messages intelligently.*
+
+---
+*v1.0*

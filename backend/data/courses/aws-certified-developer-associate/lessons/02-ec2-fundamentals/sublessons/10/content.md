@@ -442,3 +442,6 @@ aws cloudwatch put-metric-alarm \
 ---
 
 *Next: Alex puts it all together to build a production-ready ML server.*
+
+---
+*v1.0*

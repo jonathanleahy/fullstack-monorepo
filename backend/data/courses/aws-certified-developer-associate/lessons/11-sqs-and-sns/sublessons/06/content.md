@@ -421,3 +421,6 @@ Alex summarizes the fan-out pattern:
 ---
 
 *Next: What happens when messages keep failing? Alex discovers Dead Letter Queues.*
+
+---
+*v1.0*

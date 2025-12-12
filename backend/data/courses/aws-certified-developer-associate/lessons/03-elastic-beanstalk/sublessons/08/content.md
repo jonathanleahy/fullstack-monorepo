@@ -373,3 +373,6 @@ def return_db_connection(conn):
 ---
 
 *Next: Alex learns about blue/green deployments for zero-risk releases.*
+
+---
+*v1.0*

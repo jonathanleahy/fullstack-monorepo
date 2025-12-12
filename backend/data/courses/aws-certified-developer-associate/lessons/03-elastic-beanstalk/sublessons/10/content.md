@@ -391,3 +391,6 @@ Resources:
 ---
 
 *Next: Alex brings it all together with a complete production setup.*
+
+---
+*v1.0*

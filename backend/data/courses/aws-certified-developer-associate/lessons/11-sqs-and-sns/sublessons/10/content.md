@@ -520,3 +520,6 @@ $ aws cloudwatch get-metric-statistics \
 ---
 
 *Next: Putting it all together - Alex's complete notification solution.*
+
+---
+*v1.0*

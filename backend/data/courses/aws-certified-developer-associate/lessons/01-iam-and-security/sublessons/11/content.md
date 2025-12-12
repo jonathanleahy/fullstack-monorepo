@@ -301,3 +301,6 @@ $ aws ec2 describe-instance-types \
 **Congratulations!** You've completed Chapter 1. Alex (and you) now have a solid security foundation for building applications on AWS.
 
 *Next Chapter: EC2 Fundamentals - Building PetTracker's compute infrastructure.*
+
+---
+*v1.0*

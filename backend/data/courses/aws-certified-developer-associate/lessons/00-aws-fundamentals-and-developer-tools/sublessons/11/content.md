@@ -393,3 +393,6 @@ $ aws iam get-account-summary
 **Congratulations!** You've completed Chapter 0. Alex (and you) are now ready to start building PetTracker securely and cost-effectively.
 
 *Next Chapter: IAM and Security - Locking down PetTracker properly.*
+
+---
+*v1.0*

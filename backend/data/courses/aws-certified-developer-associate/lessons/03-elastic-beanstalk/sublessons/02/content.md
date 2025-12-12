@@ -392,3 +392,6 @@ graph LR
 ---
 
 *Next: Alex learns to use the EB CLI for faster deployments.*
+
+---
+*v1.0*
