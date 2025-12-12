@@ -6,10 +6,7 @@
 
 To truly understand why message queues matter, imagine a busy restaurant on a Saturday night. When 50 customers walk in at once, what happens? The kitchen doesn't try to cook 50 meals simultaneously - that would be chaos. Instead, orders go on a ticket rail. The kitchen works through tickets at a sustainable pace. Customers wait, but everyone eventually gets served.
 
-Now imagine the alternative: the waiter takes an order and stands at the kitchen window, waiting for that meal to be prepared before taking another order. If the kitchen is slow, the waiter is blocked. If the kitchen is overwhelmed, orders get lost. If the waiter gives up waiting, the customer never gets their food.
-
-This second scenario is exactly how most software systems are built. Service A calls Service B directly. Service A waits for a response. If Service B is slow, Service A is blocked. If Service B is overwhelmed, requests fail. If Service A times out, the work is lost.
-
+:::floating:right:2/3
 ```mermaid
 graph LR
     subgraph "Without Queue: Tight Coupling"
@@ -19,8 +16,12 @@ graph LR
     end
 ```
 
+Now imagine the alternative: the waiter takes an order and stands at the kitchen window, waiting for that meal to be prepared before taking another order. If the kitchen is slow, the waiter is blocked. If the kitchen is overwhelmed, orders get lost. If the waiter gives up waiting, the customer never gets their food.
+:::
+
 A message queue breaks this dependency. Service A drops a message in the queue and immediately moves on. Service B picks up messages whenever it's ready, at its own pace. If there's a traffic spike, messages pile up in the queue instead of crashing your services. If Service B is temporarily down, messages wait until it recovers. No data is lost.
 
+:::floating:left:medium
 ```mermaid
 graph LR
     subgraph "With Queue: Loose Coupling"
@@ -29,6 +30,9 @@ graph LR
         Note2[A returns immediately.<br/>B processes when ready.<br/>Spikes become manageable delays.]
     end
 ```
+
+This second scenario is exactly how most software systems are built. Service A calls Service B directly. Service A waits for a response. If Service B is slow, Service A is blocked. If Service B is overwhelmed, requests fail. If Service A times out, the work is lost.
+:::
 
 **The fundamental insight:** Queues separate "I want this done" from "I'm doing this now." The requester doesn't need to wait. The processor doesn't need to keep up in real-time. The queue absorbs the mismatch.
 
@@ -118,8 +122,7 @@ This durability is automatic. You don't configure it, you don't pay extra for it
 
 ### Layer 2: The Visibility Timeout Magic
 
-Here's where SQS solves the database-as-queue problems. When a consumer receives a message, **SQS doesn't delete it**. Instead, SQS makes the message invisible to other consumers for a period called the "visibility timeout."
-
+:::floating:right:2/3
 ```mermaid
 sequenceDiagram
     participant Q as SQS Queue
@@ -139,6 +142,9 @@ sequenceDiagram
         Q->>C1: Here's message #123 again
     end
 ```
+
+Here's where SQS solves the database-as-queue problems. When a consumer receives a message, **SQS doesn't delete it**. Instead, SQS makes the message invisible to other consumers for a period called the "visibility timeout."
+:::
 
 If the consumer processes successfully and deletes the message - great, it's gone. But if the consumer crashes, the message automatically becomes visible again after the timeout expires. Another consumer picks it up. The message is never lost.
 
@@ -248,6 +254,7 @@ This chapter follows Alex's journey from the National Pet Day disaster to buildi
 
 ## The Architecture We're Building
 
+:::floating:right:medium
 ```mermaid
 graph TB
     subgraph "After: Resilient"
@@ -263,6 +270,7 @@ graph TB
 ```
 
 Each notification channel processes independently. A slow email service doesn't delay SMS. A crashing push service doesn't lose messages - they wait in the queue. If a message fails repeatedly, it goes to the Dead Letter Queue for investigation instead of retrying forever.
+:::
 
 ## Why This Matters for the Exam
 
