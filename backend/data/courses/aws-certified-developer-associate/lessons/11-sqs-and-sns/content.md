@@ -293,4 +293,4 @@ The DVA-C02 exam loves messaging questions. Expect:
 
 *Ready to dive in? The first lesson explores SQS fundamentals - how queues work, what makes them reliable, and how to create your first queue.*
 ---
-*v1.0*
+*v2.0*

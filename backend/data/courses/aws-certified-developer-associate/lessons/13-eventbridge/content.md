@@ -500,4 +500,4 @@ The DVA-C02 exam tests EventBridge frequently. Expect:
 *Ready to go deeper? Start with **Events Deep Dive** to explore event structures, schemas, and patterns that the overview only touched on. Or jump to any sub-chapter based on what you need.*
 
 ---
-*v1.0*
+*v2.0*
