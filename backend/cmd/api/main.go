@@ -56,8 +56,10 @@ func main() {
 
 	// Initialize course repository (folder-based or database)
 	var libraryCourseRepo repositories.LibraryCourseRepository
+	var folderCourseRepo *folder.FolderCourseRepository
 	if cfg.UseFolderCourses {
-		libraryCourseRepo = folder.NewFolderCourseRepository(cfg.CoursesPath)
+		folderCourseRepo = folder.NewFolderCourseRepository(cfg.CoursesPath)
+		libraryCourseRepo = folderCourseRepo
 		slog.Info("Using folder-based course repository", "path", cfg.CoursesPath)
 	} else {
 		libraryCourseRepo = db.NewLibraryCourseRepository(database)
@@ -83,6 +85,7 @@ func main() {
 		BookmarkRepo:      bookmarkRepo,
 		AnalyticsRepo:     analyticsRepo,
 		AttachmentRepo:    attachmentRepo,
+		FolderCourseRepo:  folderCourseRepo,
 	}
 
 	// Initialize HTTP handlers

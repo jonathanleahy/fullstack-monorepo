@@ -111,6 +111,12 @@ type TokenPayload struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+type UpdateLessonContentInput struct {
+	LibraryCourseID string `json:"libraryCourseId"`
+	LessonPath      []int  `json:"lessonPath"`
+	Content         string `json:"content"`
+}
+
 type UpdateLibraryCourseInput struct {
 	Title          *string              `json:"title,omitempty"`
 	Description    *string              `json:"description,omitempty"`

@@ -146,6 +146,7 @@ type ComplexityRoot struct {
 	Lesson struct {
 		Content       func(childComplexity int) int
 		ExtendedQuiz  func(childComplexity int) int
+		FolderIndex   func(childComplexity int) int
 		HasSublessons func(childComplexity int) int
 		Order         func(childComplexity int) int
 		Quiz          func(childComplexity int) int
@@ -198,6 +199,7 @@ type ComplexityRoot struct {
 		SubmitQuizAttempt     func(childComplexity int, input SubmitQuizAttemptInput) int
 		UnenrollFromCourse    func(childComplexity int, libraryCourseID string) int
 		UpdateCourseProgress  func(childComplexity int, libraryCourseID string, lessonIndex int, completed bool) int
+		UpdateLessonContent   func(childComplexity int, input UpdateLessonContentInput) int
 		UpdateLibraryCourse   func(childComplexity int, id string, input UpdateLibraryCourseInput) int
 		UpdateProgress        func(childComplexity int, input UpdateProgressInput) int
 		UpdateUser            func(childComplexity int, id string, input UpdateUserInput) int
@@ -374,6 +376,7 @@ type MutationResolver interface {
 	SubmitQuizAttempt(ctx context.Context, input SubmitQuizAttemptInput) (*entities.QuizAttempt, error)
 	AddToReviewQueue(ctx context.Context, courseID string, quizID string, questionID string, concept string) (*entities.ReviewQueueItem, error)
 	RemoveFromReviewQueue(ctx context.Context, courseID string, questionID string) (bool, error)
+	UpdateLessonContent(ctx context.Context, input UpdateLessonContentInput) (bool, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, id string) (*entities.User, error)
@@ -845,6 +848,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Lesson.ExtendedQuiz(childComplexity), true
+	case "Lesson.folderIndex":
+		if e.complexity.Lesson.FolderIndex == nil {
+			break
+		}
+
+		return e.complexity.Lesson.FolderIndex(childComplexity), true
 	case "Lesson.hasSublessons":
 		if e.complexity.Lesson.HasSublessons == nil {
 			break
@@ -1211,6 +1220,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.UpdateCourseProgress(childComplexity, args["libraryCourseId"].(string), args["lessonIndex"].(int), args["completed"].(bool)), true
+	case "Mutation.updateLessonContent":
+		if e.complexity.Mutation.UpdateLessonContent == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateLessonContent_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateLessonContent(childComplexity, args["input"].(UpdateLessonContentInput)), true
 	case "Mutation.updateLibraryCourse":
 		if e.complexity.Mutation.UpdateLibraryCourse == nil {
 			break
@@ -1955,6 +1975,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputStartCourseInput,
 		ec.unmarshalInputSubmitQuizAttemptInput,
+		ec.unmarshalInputUpdateLessonContentInput,
 		ec.unmarshalInputUpdateLibraryCourseInput,
 		ec.unmarshalInputUpdateProgressInput,
 		ec.unmarshalInputUpdateUserInput,
@@ -2352,6 +2373,17 @@ func (ec *executionContext) field_Mutation_updateCourseProgress_args(ctx context
 		return nil, err
 	}
 	args["completed"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateLessonContent_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateLessonContentInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐUpdateLessonContentInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -4846,6 +4878,35 @@ func (ec *executionContext) fieldContext_Lesson_order(_ context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Lesson_folderIndex(ctx context.Context, field graphql.CollectedField, obj *entities.Lesson) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Lesson_folderIndex,
+		func(ctx context.Context) (any, error) {
+			return obj.FolderIndex, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Lesson_folderIndex(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Lesson",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Lesson_sublessons(ctx context.Context, field graphql.CollectedField, obj *entities.Lesson) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -4876,6 +4937,8 @@ func (ec *executionContext) fieldContext_Lesson_sublessons(_ context.Context, fi
 				return ec.fieldContext_Lesson_content(ctx, field)
 			case "order":
 				return ec.fieldContext_Lesson_order(ctx, field)
+			case "folderIndex":
+				return ec.fieldContext_Lesson_folderIndex(ctx, field)
 			case "sublessons":
 				return ec.fieldContext_Lesson_sublessons(ctx, field)
 			case "hasSublessons":
@@ -5109,6 +5172,8 @@ func (ec *executionContext) fieldContext_LibraryCourse_lessons(_ context.Context
 				return ec.fieldContext_Lesson_content(ctx, field)
 			case "order":
 				return ec.fieldContext_Lesson_order(ctx, field)
+			case "folderIndex":
+				return ec.fieldContext_Lesson_folderIndex(ctx, field)
 			case "sublessons":
 				return ec.fieldContext_Lesson_sublessons(ctx, field)
 			case "hasSublessons":
@@ -6799,6 +6864,47 @@ func (ec *executionContext) fieldContext_Mutation_removeFromReviewQueue(ctx cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_removeFromReviewQueue_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateLessonContent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateLessonContent,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().UpdateLessonContent(ctx, fc.Args["input"].(UpdateLessonContentInput))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateLessonContent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateLessonContent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -12410,6 +12516,47 @@ func (ec *executionContext) unmarshalInputSubmitQuizAttemptInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateLessonContentInput(ctx context.Context, obj any) (UpdateLessonContentInput, error) {
+	var it UpdateLessonContentInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"libraryCourseId", "lessonPath", "content"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "libraryCourseId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("libraryCourseId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LibraryCourseID = data
+		case "lessonPath":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lessonPath"))
+			data, err := ec.unmarshalNInt2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LessonPath = data
+		case "content":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Content = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateLibraryCourseInput(ctx context.Context, obj any) (UpdateLibraryCourseInput, error) {
 	var it UpdateLibraryCourseInput
 	asMap := map[string]any{}
@@ -13176,6 +13323,11 @@ func (ec *executionContext) _Lesson(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "folderIndex":
+			out.Values[i] = ec._Lesson_folderIndex(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "sublessons":
 			out.Values[i] = ec._Lesson_sublessons(ctx, field, obj)
 		case "hasSublessons":
@@ -13608,6 +13760,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "removeFromReviewQueue":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_removeFromReviewQueue(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateLessonContent":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateLessonContent(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -16402,6 +16561,11 @@ func (ec *executionContext) marshalNTokenPayload2ᚖgithubᚗcomᚋprojectᚋbac
 		return graphql.Null
 	}
 	return ec._TokenPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUpdateLessonContentInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐUpdateLessonContentInput(ctx context.Context, v any) (UpdateLessonContentInput, error) {
+	res, err := ec.unmarshalInputUpdateLessonContentInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNUpdateLibraryCourseInput2githubᚗcomᚋprojectᚋbackendᚋadaptersᚋgraphqlᚐUpdateLibraryCourseInput(ctx context.Context, v any) (UpdateLibraryCourseInput, error) {

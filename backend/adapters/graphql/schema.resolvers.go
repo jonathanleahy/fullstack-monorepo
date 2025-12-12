@@ -582,6 +582,27 @@ func (r *mutationResolver) RemoveFromReviewQueue(ctx context.Context, courseID s
 	return err == nil, err
 }
 
+// UpdateLessonContent is the resolver for the updateLessonContent field.
+func (r *mutationResolver) UpdateLessonContent(ctx context.Context, input UpdateLessonContentInput) (bool, error) {
+	// Check if folder-based repository is available
+	if r.FolderCourseRepo == nil {
+		return false, errors.New("content editing only available for folder-based courses")
+	}
+
+	// Convert lesson path from []int to []int
+	lessonPath := make([]int, len(input.LessonPath))
+	for i, v := range input.LessonPath {
+		lessonPath[i] = v
+	}
+
+	err := r.FolderCourseRepo.UpdateLessonContent(ctx, input.LibraryCourseID, lessonPath, input.Content)
+	if err != nil {
+		return false, fmt.Errorf("failed to update lesson content: %w", err)
+	}
+
+	return true, nil
+}
+
 // User returns a single user by ID
 func (r *queryResolver) User(ctx context.Context, id string) (*entities.User, error) {
 	return r.UserUseCase.GetUser(ctx, id)

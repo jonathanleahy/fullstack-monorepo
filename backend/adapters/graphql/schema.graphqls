@@ -80,6 +80,7 @@ type Lesson {
   title: String!
   content: String!
   order: Int!
+  folderIndex: Int!
   sublessons: [Lesson!]
   hasSublessons: Boolean!
   quiz: Quiz
@@ -249,6 +250,8 @@ type Mutation {
   submitQuizAttempt(input: SubmitQuizAttemptInput!): QuizAttempt!
   addToReviewQueue(courseId: ID!, quizId: String!, questionId: String!, concept: String!): ReviewQueueItem!
   removeFromReviewQueue(courseId: ID!, questionId: String!): Boolean!
+  # Lesson content editing (creates .bak backup before saving)
+  updateLessonContent(input: UpdateLessonContentInput!): Boolean!
 }
 
 # Bookmark types
@@ -441,4 +444,11 @@ input SubmitQuizAttemptInput {
   totalQuestions: Int!
   correctCount: Int!
   responses: [QuizResponseInput!]!
+}
+
+# Lesson content editing
+input UpdateLessonContentInput {
+  libraryCourseId: ID!
+  lessonPath: [Int!]!
+  content: String!
 }

@@ -93,6 +93,7 @@ export interface Lesson {
   title: string;
   content: string;
   order: number;
+  folderIndex: number;
   sublessons?: Lesson[];
   hasSublessons: boolean;
   quiz?: Quiz;

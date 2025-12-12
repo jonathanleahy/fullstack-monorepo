@@ -9,7 +9,7 @@ services:
       - ../backend:/app
       - go-cache:/go/pkg/mod
       - backend-data:/app/data
-      - ../backend/data/courses:/app/courses:ro
+      - ../backend/data/courses:/app/courses
     environment:
       - PORT=8082
       - DATABASE_PATH=/app/data/app.db
