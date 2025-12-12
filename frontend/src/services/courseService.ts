@@ -60,6 +60,7 @@ const SUBLESSON_FIELDS = `
   title
   content
   order
+  folderIndex
   hasSublessons
   ${QUIZ_FIELDS}
   ${EXTENDED_QUIZ_FIELDS}
@@ -69,6 +70,7 @@ const LESSON_FRAGMENT = `
   title
   content
   order
+  folderIndex
   hasSublessons
   ${QUIZ_FIELDS}
   ${EXTENDED_QUIZ_FIELDS}
@@ -527,5 +529,23 @@ export const courseService = {
       { libraryCourseId, lessonIndex }
     );
     return data.setCurrentLesson;
+  },
+
+  // Lesson content editing
+  async updateLessonContent(
+    libraryCourseId: string,
+    lessonPath: number[],
+    content: string
+  ): Promise<boolean> {
+    const UPDATE_LESSON_CONTENT = `
+      mutation UpdateLessonContent($input: UpdateLessonContentInput!) {
+        updateLessonContent(input: $input)
+      }
+    `;
+    const data = await graphqlClient.request<{ updateLessonContent: boolean }>(
+      UPDATE_LESSON_CONTENT,
+      { input: { libraryCourseId, lessonPath, content } }
+    );
+    return data.updateLessonContent;
   },
 };

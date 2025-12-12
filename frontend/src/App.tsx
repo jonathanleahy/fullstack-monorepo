@@ -15,6 +15,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ImportCoursePage } from './pages/ImportCoursePage';
 import { BookmarksPage } from './pages/BookmarksPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 function App() {
   return (
@@ -130,6 +131,14 @@ function App() {
             <Layout>
               <AnalyticsPage />
             </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         }
       />

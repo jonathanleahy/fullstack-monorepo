@@ -11,6 +11,7 @@ import { Quiz } from '../components/Quiz';
 import { QuizContainer } from '../components/quiz';
 import type { Quiz as NewQuizType, QuizQuestion as NewQuizQuestion } from '../components/quiz/types';
 import { Progress, Button } from '@repo/playbook';
+import { usePreferences } from '../hooks/usePreferences';
 
 const difficultyColors: Record<Difficulty, string> = {
   BEGINNER: 'bg-green-100 text-green-800',
@@ -85,28 +86,31 @@ interface FlatLesson {
   parentIndex: number | null;
   flatIndex: number;
   path: number[];
+  folderPath: number[]; // Path using folderIndex values (for backend save operations)
 }
 
 function flattenLessons(lessons: Lesson[]): FlatLesson[] {
   const result: FlatLesson[] = [];
 
-  function traverse(lessonList: Lesson[], depth: number, parentIndex: number | null, pathPrefix: number[]) {
+  function traverse(lessonList: Lesson[], depth: number, parentIndex: number | null, pathPrefix: number[], folderPathPrefix: number[]) {
     lessonList.forEach((lesson, idx) => {
       const path = [...pathPrefix, idx];
+      const folderPath = [...folderPathPrefix, lesson.folderIndex];
       result.push({
         lesson,
         depth,
         parentIndex,
         flatIndex: result.length,
         path,
+        folderPath,
       });
       if (lesson.sublessons && lesson.sublessons.length > 0) {
-        traverse(lesson.sublessons, depth + 1, result.length - 1, path);
+        traverse(lesson.sublessons, depth + 1, result.length - 1, path, folderPath);
       }
     });
   }
 
-  traverse(lessons, 0, null, []);
+  traverse(lessons, 0, null, [], []);
   return result;
 }
 
@@ -227,6 +231,11 @@ export function CourseViewerPage() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showCourseInfo, setShowCourseInfo] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [modifiedContent, setModifiedContent] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const { preferences } = usePreferences();
 
   const flatLessons = useMemo(() => {
     return course ? flattenLessons([...course.lessons].sort((a, b) => a.order - b.order)) : [];
@@ -349,8 +358,55 @@ export function CourseViewerPage() {
       case 'b':
         setSidebarCollapsed(prev => !prev);
         break;
+      case 'e':
+        if (!hasUnsavedChanges) {
+          setEditMode(prev => !prev);
+        }
+        break;
     }
-  }, [course, flatLessons.length, selectedLesson, handleSelectLesson]);
+  }, [course, flatLessons.length, selectedLesson, handleSelectLesson, hasUnsavedChanges]);
+
+  // Handle content changes from edit mode
+  const handleContentChange = useCallback((newContent: string) => {
+    setModifiedContent(newContent);
+    setHasUnsavedChanges(true);
+  }, []);
+
+  // Cancel edit mode and discard changes
+  const handleCancelEdit = useCallback(() => {
+    setEditMode(false);
+    setHasUnsavedChanges(false);
+    setModifiedContent(null);
+  }, []);
+
+  // Save changes
+  const handleSaveChanges = useCallback(async () => {
+    if (!course || !modifiedContent) return;
+
+    const currentFlatLessonForSave = flatLessons[selectedLesson];
+    if (!currentFlatLessonForSave) return;
+
+    setIsSaving(true);
+    try {
+      // Use folderPath (based on folderIndex) for backend save operations
+      // This ensures we save to the correct folder regardless of display sort order
+      const lessonPath = currentFlatLessonForSave.folderPath;
+
+      await courseService.updateLessonContent(course.id, lessonPath, modifiedContent);
+
+      // Refresh the course to get updated content
+      await fetchCourse(course.id);
+
+      setEditMode(false);
+      setHasUnsavedChanges(false);
+      setModifiedContent(null);
+    } catch (err) {
+      console.error('Failed to save content:', err);
+      alert('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [course, flatLessons, selectedLesson, modifiedContent, fetchCourse]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyNavigation);
@@ -455,6 +511,57 @@ export function CourseViewerPage() {
             </svg>
           </button>
 
+          {/* Layout Edit Mode Toggle / Save-Cancel */}
+          {hasUnsavedChanges ? (
+            // Show Save/Cancel when there are unsaved changes
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleCancelEdit}
+                disabled={isSaving}
+                className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveChanges}
+                disabled={isSaving}
+                className="px-3 py-1.5 text-sm bg-green-600 text-white hover:bg-green-700 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1"
+              >
+                {isSaving ? (
+                  <>
+                    <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Save</span>
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            // Show edit toggle when no unsaved changes
+            <button
+              onClick={() => setEditMode(!editMode)}
+              className={`p-2 rounded-md transition-colors ${
+                editMode
+                  ? 'bg-primary text-white'
+                  : 'hover:bg-gray-100'
+              }`}
+              title={editMode ? 'Exit layout edit mode (e)' : 'Edit diagram layouts (e)'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+              </svg>
+            </button>
+          )}
+
           {isAuthenticated && user?.id === course.authorId && (
             <Link
               to={`/courses/${course.id}/edit`}
@@ -474,6 +581,17 @@ export function CourseViewerPage() {
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </Link>
+
+          <Link
+            to="/settings"
+            className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+            title="Reading preferences"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </Link>
         </div>
@@ -554,7 +672,10 @@ export function CourseViewerPage() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
           {currentLesson && currentFlatLesson && (
-            <div className="max-w-4xl mx-auto p-6 lg:p-8">
+            <div className={`mx-auto p-6 lg:p-8 ${
+              preferences.font.contentWidth === 'narrow' ? 'max-w-2xl' :
+              preferences.font.contentWidth === 'wide' ? 'max-w-6xl' : 'max-w-4xl'
+            }`}>
               {/* Lesson Header */}
               <div className="mb-6">
                 <div className="flex items-start justify-between gap-4">
@@ -583,9 +704,55 @@ export function CourseViewerPage() {
                 </div>
               </div>
 
+              {/* Edit Mode Banner */}
+              {editMode && (
+                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-amber-100 rounded-lg">
+                        <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-amber-800">Layout Edit Mode</h3>
+                        <p className="text-sm text-amber-700 mt-1">
+                          Select a layout for each diagram. Changes will appear as Save/Cancel buttons in the header.
+                          {hasUnsavedChanges && <span className="font-medium"> You have unsaved changes.</span>}
+                        </p>
+                      </div>
+                    </div>
+                    {!hasUnsavedChanges && (
+                      <button
+                        onClick={() => setEditMode(false)}
+                        className="px-3 py-1.5 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-md transition-colors flex items-center gap-1"
+                      >
+                        <span>Done</span>
+                        <kbd className="text-xs opacity-60">(e)</kbd>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Lesson Content */}
-              <article className="prose prose-gray prose-lg max-w-none prose-p:my-6 prose-h2:mt-20 prose-h2:mb-8 prose-h3:mt-14 prose-h3:mb-6 prose-li:my-2 prose-ul:my-6 prose-ol:my-6">
-                <MarkdownRenderer content={currentLesson.content} />
+              <article className={`prose prose-gray max-w-none prose-p:my-6 prose-h2:mt-20 prose-h2:mb-8 prose-h3:mt-14 prose-h3:mb-6 prose-li:my-2 prose-ul:my-6 prose-ol:my-6 ${
+                // Font size
+                preferences.font.size === 'small' ? 'prose-sm' :
+                preferences.font.size === 'large' ? 'prose-lg' :
+                preferences.font.size === 'xlarge' ? 'prose-xl' : 'prose-base'
+              } ${
+                // Font family
+                preferences.font.family === 'serif' ? 'font-serif' :
+                preferences.font.family === 'mono' ? 'font-mono' :
+                preferences.font.family === 'sans' ? 'font-sans' :
+                preferences.font.family === 'dyslexic' ? 'font-dyslexic' : ''
+              } ${
+                // Line height
+                preferences.font.lineHeight === 'compact' ? '[&_p]:leading-snug' :
+                preferences.font.lineHeight === 'relaxed' ? '[&_p]:leading-relaxed' : ''
+              }`}>
+                <MarkdownRenderer content={modifiedContent ?? currentLesson.content} editMode={editMode} onContentChange={handleContentChange} />
               </article>
 
               {/* Quiz Section - New Extended Quiz System */}

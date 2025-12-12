@@ -269,6 +269,7 @@ func (r *FolderCourseRepository) loadLessons(ctx context.Context, lessonsPath st
 		return entries[i].Name() < entries[j].Name()
 	})
 
+	folderIndex := 0
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
@@ -278,10 +279,14 @@ func (r *FolderCourseRepository) loadLessons(ctx context.Context, lessonsPath st
 		lesson, err := r.loadLesson(ctx, lessonPath)
 		if err != nil {
 			fmt.Printf("Warning: failed to load lesson %s: %v\n", entry.Name(), err)
+			folderIndex++
 			continue
 		}
 
+		// Set the folder index for this lesson (position in alphabetically sorted list)
+		lesson.FolderIndex = folderIndex
 		lessons = append(lessons, *lesson)
+		folderIndex++
 	}
 
 	return lessons, nil
@@ -328,10 +333,23 @@ func (r *FolderCourseRepository) loadLesson(ctx context.Context, lessonPath stri
 		sublessons = []entities.Lesson{}
 	}
 
+	// Derive order from folder name prefix if not set in lesson.json
+	order := lj.Order
+	if order == 0 && lj.Title == "" {
+		// Try to parse order from folder name (e.g., "11-sqs-and-sns" -> 11)
+		folderName := filepath.Base(lessonPath)
+		if len(folderName) >= 2 {
+			var parsed int
+			if _, err := fmt.Sscanf(folderName, "%d-", &parsed); err == nil {
+				order = parsed
+			}
+		}
+	}
+
 	lesson := &entities.Lesson{
 		Title:        lj.Title,
 		Content:      string(content),
-		Order:        lj.Order,
+		Order:        order,
 		Sublessons:   sublessons,
 		Quiz:         quiz,
 		ExtendedQuiz: extendedQuiz,
@@ -362,7 +380,8 @@ func (r *FolderCourseRepository) loadSublessons(ctx context.Context, sublessonsP
 		return entries[i].Name() < entries[j].Name()
 	})
 
-	for i, entry := range entries {
+	folderIndex := 0
+	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
 		}
@@ -391,13 +410,15 @@ func (r *FolderCourseRepository) loadSublessons(ctx context.Context, sublessonsP
 		sublesson := entities.Lesson{
 			Title:        entry.Name(),
 			Content:      string(content),
-			Order:        i,
+			Order:        folderIndex,
+			FolderIndex:  folderIndex,
 			Sublessons:   nil, // Sublessons don't have nested sublessons
 			Quiz:         quiz,
 			ExtendedQuiz: extendedQuiz,
 		}
 
 		sublessons = append(sublessons, sublesson)
+		folderIndex++
 	}
 
 	return sublessons, nil
@@ -734,4 +755,222 @@ func (r *FolderCourseRepository) RefreshCache(ctx context.Context) error {
 	r.cacheMu.Unlock()
 
 	return r.loadCourses(ctx)
+}
+
+// UpdateLessonContent updates the content.md file for a specific lesson
+// It creates a .bak backup before saving
+func (r *FolderCourseRepository) UpdateLessonContent(ctx context.Context, courseID string, lessonPath []int, newContent string) error {
+	// Find the course folder by ID
+	course, err := r.GetByID(ctx, courseID)
+	if err != nil {
+		return fmt.Errorf("course not found: %w", err)
+	}
+
+	// Find the course folder path by scanning for matching course.json
+	entries, err := os.ReadDir(r.coursesPath)
+	if err != nil {
+		return fmt.Errorf("failed to read courses directory: %w", err)
+	}
+
+	var courseFolderPath string
+	for _, entry := range entries {
+		if !entry.IsDir() || entry.Name() == "COURSE-TEMPLATE" {
+			continue
+		}
+
+		testPath := filepath.Join(r.coursesPath, entry.Name())
+		courseJSONPath := filepath.Join(testPath, "course.json")
+		data, err := os.ReadFile(courseJSONPath)
+		if err != nil {
+			continue
+		}
+
+		var cj courseJSON
+		if err := json.Unmarshal(data, &cj); err != nil {
+			continue
+		}
+
+		// Check if this course matches
+		testID := cj.ID
+		if testID == "" || testID == "GENERATE-UUID" {
+			// For generated UUIDs, match by title
+			if cj.Title == course.Title {
+				courseFolderPath = testPath
+				break
+			}
+		} else if testID == courseID {
+			courseFolderPath = testPath
+			break
+		}
+	}
+
+	if courseFolderPath == "" {
+		return fmt.Errorf("course folder not found for ID: %s", courseID)
+	}
+
+	// Build the path to the content.md file based on lessonPath
+	// lessonPath is like [0] for first chapter, [0, 2] for first chapter's third sublesson
+	contentPath := filepath.Join(courseFolderPath, "lessons")
+
+	// Get sorted lesson folders
+	lessonEntries, err := os.ReadDir(contentPath)
+	if err != nil {
+		return fmt.Errorf("failed to read lessons directory: %w", err)
+	}
+
+	var lessonFolders []string
+	for _, e := range lessonEntries {
+		if e.IsDir() {
+			lessonFolders = append(lessonFolders, e.Name())
+		}
+	}
+	sort.Strings(lessonFolders)
+
+	if len(lessonPath) == 0 {
+		return fmt.Errorf("empty lesson path")
+	}
+
+	// Navigate to the lesson folder
+	if lessonPath[0] >= len(lessonFolders) {
+		return fmt.Errorf("lesson index %d out of range", lessonPath[0])
+	}
+	contentPath = filepath.Join(contentPath, lessonFolders[lessonPath[0]])
+
+	// If there are more path segments, navigate to sublessons
+	for i := 1; i < len(lessonPath); i++ {
+		sublessonsPath := filepath.Join(contentPath, "sublessons")
+		sublessonEntries, err := os.ReadDir(sublessonsPath)
+		if err != nil {
+			return fmt.Errorf("failed to read sublessons directory: %w", err)
+		}
+
+		var sublessonFolders []string
+		for _, e := range sublessonEntries {
+			if e.IsDir() {
+				sublessonFolders = append(sublessonFolders, e.Name())
+			}
+		}
+		sort.Strings(sublessonFolders)
+
+		if lessonPath[i] >= len(sublessonFolders) {
+			return fmt.Errorf("sublesson index %d out of range", lessonPath[i])
+		}
+		contentPath = filepath.Join(sublessonsPath, sublessonFolders[lessonPath[i]])
+	}
+
+	contentFilePath := filepath.Join(contentPath, "content.md")
+
+	// Create backup
+	existingContent, err := os.ReadFile(contentFilePath)
+	if err == nil {
+		backupPath := contentFilePath + ".bak"
+		if err := os.WriteFile(backupPath, existingContent, 0644); err != nil {
+			return fmt.Errorf("failed to create backup: %w", err)
+		}
+	}
+
+	// Write new content
+	if err := os.WriteFile(contentFilePath, []byte(newContent), 0644); err != nil {
+		return fmt.Errorf("failed to write content: %w", err)
+	}
+
+	// Invalidate cache so next request gets fresh content
+	r.cacheMu.Lock()
+	r.lastLoad = time.Time{}
+	r.cache = nil // Clear cache to force full reload
+	r.cacheMu.Unlock()
+
+	return nil
+}
+
+// GetLessonContentPath returns the file path for a lesson's content.md
+func (r *FolderCourseRepository) GetLessonContentPath(ctx context.Context, courseID string, lessonPath []int) (string, error) {
+	// This is a helper to get the path without modifying anything
+	course, err := r.GetByID(ctx, courseID)
+	if err != nil {
+		return "", fmt.Errorf("course not found: %w", err)
+	}
+
+	entries, err := os.ReadDir(r.coursesPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read courses directory: %w", err)
+	}
+
+	var courseFolderPath string
+	for _, entry := range entries {
+		if !entry.IsDir() || entry.Name() == "COURSE-TEMPLATE" {
+			continue
+		}
+
+		testPath := filepath.Join(r.coursesPath, entry.Name())
+		courseJSONPath := filepath.Join(testPath, "course.json")
+		data, err := os.ReadFile(courseJSONPath)
+		if err != nil {
+			continue
+		}
+
+		var cj courseJSON
+		if err := json.Unmarshal(data, &cj); err != nil {
+			continue
+		}
+
+		testID := cj.ID
+		if testID == "" || testID == "GENERATE-UUID" {
+			if cj.Title == course.Title {
+				courseFolderPath = testPath
+				break
+			}
+		} else if testID == courseID {
+			courseFolderPath = testPath
+			break
+		}
+	}
+
+	if courseFolderPath == "" {
+		return "", fmt.Errorf("course folder not found")
+	}
+
+	contentPath := filepath.Join(courseFolderPath, "lessons")
+
+	lessonEntries, err := os.ReadDir(contentPath)
+	if err != nil {
+		return "", err
+	}
+
+	var lessonFolders []string
+	for _, e := range lessonEntries {
+		if e.IsDir() {
+			lessonFolders = append(lessonFolders, e.Name())
+		}
+	}
+	sort.Strings(lessonFolders)
+
+	if len(lessonPath) == 0 || lessonPath[0] >= len(lessonFolders) {
+		return "", fmt.Errorf("invalid lesson path")
+	}
+
+	contentPath = filepath.Join(contentPath, lessonFolders[lessonPath[0]])
+
+	for i := 1; i < len(lessonPath); i++ {
+		sublessonsPath := filepath.Join(contentPath, "sublessons")
+		sublessonEntries, err := os.ReadDir(sublessonsPath)
+		if err != nil {
+			return "", err
+		}
+
+		var sublessonFolders []string
+		for _, e := range sublessonEntries {
+			if e.IsDir() {
+				sublessonFolders = append(sublessonFolders, e.Name())
+			}
+		}
+		sort.Strings(sublessonFolders)
+
+		if lessonPath[i] >= len(sublessonFolders) {
+			return "", fmt.Errorf("invalid sublesson path")
+		}
+		contentPath = filepath.Join(sublessonsPath, sublessonFolders[lessonPath[i]])
+	}
+
+	return filepath.Join(contentPath, "content.md"), nil
 }

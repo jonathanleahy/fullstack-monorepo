@@ -1,10 +1,20 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo, createContext, useContext } from 'react';
 import mermaid from 'mermaid';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { TerminalBlock, MistakeList, CheckList, Callout, PagerAlert } from '@repo/playbook';
+import { DiagramLayoutPicker, type LayoutSettings } from './DiagramLayoutPicker';
+
+// Edit mode context - provides edit mode state and change callback
+interface EditModeContextType {
+  editMode: boolean;
+  onDiagramLayoutChange?: (diagramCode: string, newMarkdown: string) => void;
+  onMoveDiagram?: (diagramCode: string, direction: 'up' | 'down') => void;
+  canMoveDiagram?: (diagramCode: string, direction: 'up' | 'down') => boolean;
+}
+const EditModeContext = createContext<EditModeContextType>({ editMode: false });
 
 // Image with expand button
 interface ExpandableImageProps {
@@ -86,9 +96,11 @@ mermaid.initialize({
 
 interface MermaidDiagramProps {
   chart: string;
+  compact?: boolean;
+  hideExpandButton?: boolean;
 }
 
-function MermaidDiagram({ chart }: MermaidDiagramProps) {
+function MermaidDiagram({ chart, compact = false, hideExpandButton = false }: MermaidDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -139,19 +151,21 @@ function MermaidDiagram({ chart }: MermaidDiagramProps) {
     <>
       <div
         ref={containerRef}
-        className="mermaid my-4 relative group"
+        className={`mermaid relative group ${compact ? '' : 'my-4'}`}
         data-mermaid
       >
-        <div className="flex justify-center" dangerouslySetInnerHTML={{ __html: svg }} />
-        <button
-          onClick={() => setIsExpanded(true)}
-          className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-          title="Expand diagram"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-          </svg>
-        </button>
+        <div className="flex justify-center [&>svg]:max-w-full [&>svg]:h-auto" dangerouslySetInnerHTML={{ __html: svg }} />
+        {!hideExpandButton && (
+          <button
+            onClick={() => setIsExpanded(true)}
+            className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+            title="Expand diagram"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Lightbox Modal */}
@@ -179,113 +193,774 @@ function MermaidDiagram({ chart }: MermaidDiagramProps) {
   );
 }
 
+// Editable diagram wrapper with live layout preview
+interface EditableDiagramProps {
+  chart: string;
+}
+
+function EditableDiagram({ chart }: EditableDiagramProps) {
+  const { editMode, onDiagramLayoutChange } = useContext(EditModeContext);
+  const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
+    layout: 'normal',
+    position: 'right',
+    size: 'medium',
+  });
+
+  const handleLayoutChange = useCallback((settings: LayoutSettings) => {
+    setLayoutSettings(settings);
+
+    // Generate the new markdown for this diagram with the selected layout
+    if (onDiagramLayoutChange) {
+      let newMarkdown: string;
+      if (settings.layout === 'normal') {
+        newMarkdown = `\`\`\`mermaid\n${chart}\n\`\`\``;
+      } else {
+        newMarkdown = `:::${settings.layout}:${settings.position}:${settings.size}\n\`\`\`mermaid\n${chart}\n\`\`\`\n:::`;
+      }
+      onDiagramLayoutChange(chart, newMarkdown);
+    }
+  }, [chart, onDiagramLayoutChange]);
+
+  // If not in edit mode, just render the normal diagram
+  if (!editMode) {
+    return <MermaidDiagram chart={chart} />;
+  }
+
+  // In edit mode, show layout picker and render according to selected layout
+  const { layout, position, size } = layoutSettings;
+
+  // Sample text for preview
+  const sampleText = `This is preview text showing how your content will flow around the diagram.
+In your actual markdown, replace this with your explanatory content.
+
+The diagram will be positioned according to your selected layout options.`;
+
+  return (
+    <div className="relative my-4">
+      <DiagramLayoutPicker
+        diagramCode={chart}
+        currentLayout={layout}
+        currentPosition={position}
+        currentSize={size}
+        onLayoutChange={handleLayoutChange}
+      />
+
+      {layout === 'normal' && (
+        <MermaidDiagram chart={chart} hideExpandButton />
+      )}
+
+      {layout === 'sidebyside' && (
+        <div className="flex gap-6 items-start not-prose pt-10">
+          {position === 'left' && (
+            <div className={`${sizeWidths[size]} flex-shrink-0`}>
+              <div className="sticky top-4">
+                <MermaidDiagram chart={chart} compact hideExpandButton />
+              </div>
+            </div>
+          )}
+          <div className="flex-1 min-w-0 prose prose-slate dark:prose-invert max-w-none text-sm opacity-60 italic">
+            <p>{sampleText}</p>
+          </div>
+          {position === 'right' && (
+            <div className={`${sizeWidths[size]} flex-shrink-0`}>
+              <div className="sticky top-4">
+                <MermaidDiagram chart={chart} compact hideExpandButton />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {layout === 'floating' && (
+        <div className="overflow-hidden not-prose pt-10">
+          <div className={`${position === 'left' ? 'float-left mr-6' : 'float-right ml-6'} ${floatWidths[size]} mb-4`}>
+            <MermaidDiagram chart={chart} compact hideExpandButton />
+          </div>
+          <div className="prose prose-slate dark:prose-invert max-w-none text-sm opacity-60 italic">
+            <p>{sampleText}</p>
+          </div>
+          <div className="clear-both" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Layout components for diagram positioning
+interface SideBySideBlockProps {
+  diagram: string;
+  text: string;
+  position: 'left' | 'right';
+  size: 'small' | 'medium' | 'large';
+}
+
+const sizeWidths = {
+  small: 'w-1/3',
+  medium: 'w-5/12',
+  large: 'w-1/2',
+};
+
+function SideBySideBlock({ diagram, text, position, size }: SideBySideBlockProps) {
+  const { editMode, onDiagramLayoutChange, onMoveDiagram, canMoveDiagram } = useContext(EditModeContext);
+  const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
+    layout: 'sidebyside',
+    position,
+    size,
+  });
+
+  const handleLayoutChange = useCallback((settings: LayoutSettings) => {
+    setLayoutSettings(settings);
+
+    if (onDiagramLayoutChange) {
+      let newMarkdown: string;
+      if (settings.layout === 'normal') {
+        newMarkdown = `\`\`\`mermaid\n${diagram}\n\`\`\``;
+      } else {
+        newMarkdown = `:::${settings.layout}:${settings.position}:${settings.size}\n\`\`\`mermaid\n${diagram}\n\`\`\`\n\n${text}\n:::`;
+      }
+      onDiagramLayoutChange(diagram, newMarkdown);
+    }
+  }, [diagram, text, onDiagramLayoutChange]);
+
+  const handleMoveUp = useCallback(() => {
+    onMoveDiagram?.(diagram, 'up');
+  }, [diagram, onMoveDiagram]);
+
+  const handleMoveDown = useCallback(() => {
+    onMoveDiagram?.(diagram, 'down');
+  }, [diagram, onMoveDiagram]);
+
+  const canMoveUp = canMoveDiagram?.(diagram, 'up') ?? false;
+  const canMoveDown = canMoveDiagram?.(diagram, 'down') ?? false;
+
+  const diagramElement = (
+    <div className={`${sizeWidths[layoutSettings.size]} flex-shrink-0`}>
+      <div className="sticky top-4">
+        <MermaidDiagram chart={diagram} compact hideExpandButton={editMode} />
+      </div>
+    </div>
+  );
+
+  // In edit mode, show layout picker
+  if (editMode) {
+    return (
+      <div className="relative my-4">
+        <DiagramLayoutPicker
+          diagramCode={diagram}
+          currentLayout={layoutSettings.layout}
+          currentPosition={layoutSettings.position}
+          currentSize={layoutSettings.size}
+          currentText={text}
+          onLayoutChange={handleLayoutChange}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
+        />
+        <div className="my-6 flex gap-6 items-start not-prose pt-10">
+          {layoutSettings.position === 'left' && diagramElement}
+          <div className="flex-1 min-w-0 prose prose-slate dark:prose-invert max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+          </div>
+          {layoutSettings.position === 'right' && diagramElement}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-6 flex gap-6 items-start not-prose">
+      {position === 'left' && diagramElement}
+      <div className="flex-1 min-w-0 prose prose-slate dark:prose-invert max-w-none">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+      </div>
+      {position === 'right' && diagramElement}
+    </div>
+  );
+}
+
+interface FloatingBlockProps {
+  diagram: string;
+  text: string;
+  float: 'left' | 'right';
+  size: 'small' | 'medium' | 'large';
+}
+
+const floatWidths = {
+  small: 'w-56',
+  medium: 'w-72',
+  large: 'w-96',
+};
+
+function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
+  const { editMode, onDiagramLayoutChange, onMoveDiagram, canMoveDiagram } = useContext(EditModeContext);
+  const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
+    layout: 'floating',
+    position: float,
+    size,
+  });
+
+  const handleLayoutChange = useCallback((settings: LayoutSettings) => {
+    setLayoutSettings(settings);
+
+    if (onDiagramLayoutChange) {
+      let newMarkdown: string;
+      if (settings.layout === 'normal') {
+        newMarkdown = `\`\`\`mermaid\n${diagram}\n\`\`\``;
+      } else {
+        newMarkdown = `:::${settings.layout}:${settings.position}:${settings.size}\n\`\`\`mermaid\n${diagram}\n\`\`\`\n\n${text}\n:::`;
+      }
+      onDiagramLayoutChange(diagram, newMarkdown);
+    }
+  }, [diagram, text, onDiagramLayoutChange]);
+
+  const handleMoveUp = useCallback(() => {
+    onMoveDiagram?.(diagram, 'up');
+  }, [diagram, onMoveDiagram]);
+
+  const handleMoveDown = useCallback(() => {
+    onMoveDiagram?.(diagram, 'down');
+  }, [diagram, onMoveDiagram]);
+
+  const canMoveUp = canMoveDiagram?.(diagram, 'up') ?? false;
+  const canMoveDown = canMoveDiagram?.(diagram, 'down') ?? false;
+
+  const floatClass = layoutSettings.position === 'left' ? 'float-left mr-6' : 'float-right ml-6';
+
+  // In edit mode, show layout picker
+  if (editMode) {
+    return (
+      <div className="relative my-4">
+        <DiagramLayoutPicker
+          diagramCode={diagram}
+          currentLayout={layoutSettings.layout}
+          currentPosition={layoutSettings.position}
+          currentSize={layoutSettings.size}
+          currentText={text}
+          onLayoutChange={handleLayoutChange}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
+        />
+        <div className="my-6 overflow-hidden not-prose pt-10">
+          <div className={`${floatClass} ${floatWidths[layoutSettings.size]} mb-4`}>
+            <MermaidDiagram chart={diagram} compact hideExpandButton />
+          </div>
+          <div className="prose prose-slate dark:prose-invert max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+          </div>
+          <div className="clear-both" />
+        </div>
+      </div>
+    );
+  }
+
+  const originalFloatClass = float === 'left' ? 'float-left mr-6' : 'float-right ml-6';
+
+  return (
+    <div className="my-6 overflow-hidden not-prose">
+      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4`}>
+        <MermaidDiagram chart={diagram} compact />
+      </div>
+      <div className="prose prose-slate dark:prose-invert max-w-none">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+      </div>
+      <div className="clear-both" />
+    </div>
+  );
+}
+
+// Parse layout blocks from content
+interface LayoutBlock {
+  type: 'sidebyside' | 'floating' | 'markdown';
+  position?: 'left' | 'right';
+  size?: 'small' | 'medium' | 'large';
+  diagram?: string;
+  text?: string;
+  content?: string;
+  blockIndex?: number;  // Index of this layout block (for text boundary tracking)
+}
+
+
+// Find all mermaid diagrams in content and return their positions
+function findMermaidDiagrams(content: string): Array<{ start: number; end: number; code: string }> {
+  const diagrams: Array<{ start: number; end: number; code: string }> = [];
+
+  // First find layout blocks with mermaid diagrams - these take precedence
+  const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/g;
+  const layoutRanges: Array<{ start: number; end: number }> = [];
+  let layoutMatch;
+
+  while ((layoutMatch = layoutPattern.exec(content)) !== null) {
+    const innerContent = layoutMatch[4];
+    const mermaidMatch = innerContent.match(/```mermaid\n([\s\S]*?)```/);
+    if (mermaidMatch) {
+      diagrams.push({
+        start: layoutMatch.index,
+        end: layoutMatch.index + layoutMatch[0].length,
+        code: mermaidMatch[1].trim(),
+      });
+      layoutRanges.push({
+        start: layoutMatch.index,
+        end: layoutMatch.index + layoutMatch[0].length,
+      });
+    }
+  }
+
+  // Find standalone mermaid code blocks (not inside layout blocks)
+  const mermaidPattern = /```mermaid\n([\s\S]*?)```/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = mermaidPattern.exec(content)) !== null) {
+    const matchIndex = match.index;
+    // Check if this mermaid block is inside a layout block
+    const isInsideLayout = layoutRanges.some(
+      range => matchIndex >= range.start && matchIndex < range.end
+    );
+    if (!isInsideLayout) {
+      diagrams.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        code: match[1].trim(),
+      });
+    }
+  }
+
+  // Sort by position to ensure correct order for replacement
+  diagrams.sort((a, b) => a.start - b.start);
+
+  return diagrams;
+}
+
+// Rebuild content with diagram modifications applied
+function rebuildContentWithModifications(
+  originalContent: string,
+  modifications: Map<string, string>
+): string {
+  if (modifications.size === 0) return originalContent;
+
+  const diagrams = findMermaidDiagrams(originalContent);
+  let result = originalContent;
+  let offset = 0;
+
+  diagrams.forEach((diagram) => {
+    const modification = modifications.get(diagram.code);
+    if (modification) {
+      const originalText = originalContent.slice(diagram.start, diagram.end);
+      const start = diagram.start + offset;
+      const end = diagram.end + offset;
+      result = result.slice(0, start) + modification + result.slice(end);
+      offset += modification.length - originalText.length;
+    }
+  });
+
+  return result;
+}
+
+function parseLayoutBlocks(content: string): LayoutBlock[] {
+  const blocks: LayoutBlock[] = [];
+
+  // Pattern: :::sidebyside:position:size or :::floating:position:size
+  const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/g;
+
+  let lastIndex = 0;
+  let match;
+  let layoutBlockIndex = 0;
+
+  while ((match = layoutPattern.exec(content)) !== null) {
+    // Add any markdown before this block
+    if (match.index > lastIndex) {
+      const beforeText = content.slice(lastIndex, match.index).trim();
+      if (beforeText) {
+        blocks.push({ type: 'markdown', content: beforeText });
+      }
+    }
+
+    const [, layoutType, position = 'right', size = 'medium', innerContent] = match;
+
+    // Extract mermaid diagram from inner content
+    const mermaidMatch = innerContent.match(/```mermaid\n([\s\S]*?)```/);
+    if (mermaidMatch) {
+      const diagram = mermaidMatch[1].trim();
+      const text = innerContent.replace(/```mermaid\n[\s\S]*?```/, '').trim();
+
+      blocks.push({
+        type: layoutType as 'sidebyside' | 'floating',
+        position: position as 'left' | 'right',
+        size: size as 'small' | 'medium' | 'large',
+        diagram,
+        text,
+        blockIndex: layoutBlockIndex++,
+      });
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add any remaining markdown
+  if (lastIndex < content.length) {
+    const remainingText = content.slice(lastIndex).trim();
+    if (remainingText) {
+      blocks.push({ type: 'markdown', content: remainingText });
+    }
+  }
+
+  // If no layout blocks found, treat entire content as markdown
+  if (blocks.length === 0) {
+    blocks.push({ type: 'markdown', content });
+  }
+
+  return blocks;
+}
+
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+  editMode?: boolean;
+  onContentChange?: (newContent: string) => void;
 }
 
-export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className = '', editMode = false, onContentChange }: MarkdownRendererProps) {
+  const blocks = useMemo(() => parseLayoutBlocks(content), [content]);
+
+  // Track diagram modifications - maps diagramCode to modified markdown
+  const diagramModificationsRef = useRef<Map<string, string>>(new Map());
+
+  // Handle diagram layout changes
+  const handleDiagramLayoutChange = useCallback((diagramCode: string, newMarkdown: string) => {
+    diagramModificationsRef.current.set(diagramCode, newMarkdown);
+
+    // Rebuild the full content with modifications
+    if (onContentChange) {
+      const newContent = rebuildContentWithModifications(content, diagramModificationsRef.current);
+      onContentChange(newContent);
+    }
+  }, [content, onContentChange]);
+
+  // Reset modifications when content changes (e.g., after save)
+  useEffect(() => {
+    diagramModificationsRef.current.clear();
+  }, [content]);
+
+  // Handle moving a diagram up or down in the content
+  const handleMoveDiagram = useCallback((diagramCode: string, direction: 'up' | 'down') => {
+    // Find the layout block with this diagram
+    const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/g;
+    let match;
+    let targetBlock: { start: number; end: number; fullMatch: string } | null = null;
+
+    while ((match = layoutPattern.exec(content)) !== null) {
+      const innerContent = match[4];
+      const mermaidMatch = innerContent.match(/```mermaid\n([\s\S]*?)```/);
+      if (mermaidMatch && mermaidMatch[1].trim() === diagramCode) {
+        targetBlock = {
+          start: match.index,
+          end: match.index + match[0].length,
+          fullMatch: match[0],
+        };
+        break;
+      }
+    }
+
+    if (!targetBlock) return;
+
+    // Strategy: Move ONLY the diagram. All text stays exactly where it is.
+    // The layout block syntax (:::floating/sidebyside) contains both a diagram and associated text.
+    // When we "move" the diagram, we:
+    // 1. Remove the diagram from its current layout block
+    // 2. Convert the remaining text in that block to a regular paragraph
+    // 3. Find the paragraph we're moving past
+    // 4. Create a new layout block at the new position with just the diagram
+    //
+    // Result: Text paragraphs are unchanged, only the diagram position changes.
+
+    // Parse the layout block to extract diagram and text
+    const innerContent = targetBlock.fullMatch.match(/:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/);
+    if (!innerContent) return;
+
+    const layoutType = innerContent[1] as 'sidebyside' | 'floating';
+    const position = innerContent[2] || 'right';
+    const size = innerContent[3] || 'medium';
+    const blockInnerContent = innerContent[4];
+
+    // Extract mermaid diagram from block
+    const mermaidMatch = blockInnerContent.match(/```mermaid\n([\s\S]*?)```/);
+    if (!mermaidMatch) return;
+
+    const mermaidBlock = mermaidMatch[0];
+
+    // Extract text that's inside the layout block (after the mermaid block)
+    const textInsideBlock = blockInnerContent.replace(mermaidMatch[0], '').trim();
+
+    // Content before and after the layout block
+    const contentBefore = content.slice(0, targetBlock.start);
+    const contentAfter = content.slice(targetBlock.end);
+
+    // For moving, we need to find actual paragraph boundaries
+    // Split content before into paragraphs
+    const beforeParagraphs = contentBefore.trim().split(/\n\n+/).filter(p => p.trim());
+
+    // For contentAfter, we need to be careful not to split inside layout blocks
+    // Find the first "real" paragraph in contentAfter (not a layout block)
+    const afterTrimmed = contentAfter.trim();
+
+    if (direction === 'up') {
+      if (beforeParagraphs.length === 0) return; // Can't move up
+
+      // The last paragraph before the diagram will become the text INSIDE the new layout block
+      const paragraphToWrapWith = beforeParagraphs.pop()!;
+      const remainingBefore = beforeParagraphs.join('\n\n');
+
+      // Build the new layout block with just the diagram + the paragraph we're moving past
+      const newLayoutBlock = `:::${layoutType}:${position}:${size}\n${mermaidBlock}\n\n${paragraphToWrapWith}\n:::`;
+
+      // Build final content:
+      // [remaining paragraphs before] + [new layout block] + [text that was in old block] + [content after]
+      const parts: string[] = [];
+
+      if (remainingBefore) {
+        parts.push(remainingBefore);
+      }
+
+      parts.push(newLayoutBlock);
+
+      if (textInsideBlock) {
+        parts.push(textInsideBlock);
+      }
+
+      if (afterTrimmed) {
+        parts.push(afterTrimmed);
+      }
+
+      const newContent = parts.join('\n\n');
+
+      if (onContentChange) {
+        onContentChange(newContent.trim());
+      }
+    } else {
+      // Move down - find the first paragraph after the block to become the new wrapped text
+
+      // Check if contentAfter starts with a layout block
+      const layoutBlockMatch = afterTrimmed.match(/^:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/);
+
+      let firstParagraphAfter: string;
+      let remainingAfter: string;
+
+      if (layoutBlockMatch) {
+        // The next thing is another layout block - we can't move past it the same way
+        // For now, extract the text content from it or skip
+        // This is a complex case - let's just take the text from inside the next block
+        const nextBlockText = layoutBlockMatch[4].replace(/```mermaid\n[\s\S]*?```/, '').trim();
+        if (!nextBlockText) return; // Can't move down past another diagram-only block
+        firstParagraphAfter = nextBlockText;
+        remainingAfter = afterTrimmed.slice(layoutBlockMatch[0].length).trim();
+      } else {
+        // Split normally on paragraph boundaries
+        const afterParagraphs = afterTrimmed.split(/\n\n+/).filter(p => p.trim());
+        if (afterParagraphs.length === 0) return; // Can't move down
+
+        firstParagraphAfter = afterParagraphs.shift()!;
+        remainingAfter = afterParagraphs.join('\n\n');
+      }
+
+      // Build the new layout block with the diagram + the paragraph we're moving past
+      const newLayoutBlock = `:::${layoutType}:${position}:${size}\n${mermaidBlock}\n\n${firstParagraphAfter}\n:::`;
+
+      // Build final content:
+      // [content before] + [text that was in old block] + [new layout block] + [remaining after]
+      const parts: string[] = [];
+
+      if (contentBefore.trim()) {
+        parts.push(contentBefore.trim());
+      }
+
+      if (textInsideBlock) {
+        parts.push(textInsideBlock);
+      }
+
+      parts.push(newLayoutBlock);
+
+      if (remainingAfter) {
+        parts.push(remainingAfter);
+      }
+
+      const newContent = parts.join('\n\n');
+
+      if (onContentChange) {
+        onContentChange(newContent.trim());
+      }
+    }
+  }, [content, onContentChange]);
+
+  // Check if a diagram can be moved in a direction
+  const canMoveDiagramCheck = useCallback((diagramCode: string, direction: 'up' | 'down'): boolean => {
+    // Find the layout block with this diagram
+    const layoutPattern = /:::(sidebyside|floating)(?::(left|right))?(?::(small|medium|large))?\n([\s\S]*?):::/g;
+    let match;
+
+    while ((match = layoutPattern.exec(content)) !== null) {
+      const innerContent = match[4];
+      const mermaidMatch = innerContent.match(/```mermaid\n([\s\S]*?)```/);
+      if (mermaidMatch && mermaidMatch[1].trim() === diagramCode) {
+        const contentBefore = content.slice(0, match.index);
+        const contentAfter = content.slice(match.index + match[0].length);
+
+        // Check for paragraphs (content outside of layout blocks)
+        const paragraphsBefore = contentBefore.split(/\n\n+/).filter(p => p.trim());
+        const paragraphsAfter = contentAfter.split(/\n\n+/).filter(p => p.trim());
+
+        if (direction === 'up') {
+          return paragraphsBefore.length > 0;
+        } else {
+          return paragraphsAfter.length > 0;
+        }
+      }
+    }
+    return false;
+  }, [content]);
+
+  const contextValue = useMemo(() => ({
+    editMode,
+    onDiagramLayoutChange: handleDiagramLayoutChange,
+    onMoveDiagram: handleMoveDiagram,
+    canMoveDiagram: canMoveDiagramCheck,
+  }), [editMode, handleDiagramLayoutChange, handleMoveDiagram, canMoveDiagramCheck]);
+
   return (
-    <div className={`prose prose-slate dark:prose-invert max-w-none ${className}`}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          code({ className, children, ...props }) {
-            const match = /language-(\w+)/.exec(className || '');
-            const language = match ? match[1] : '';
-            const codeString = String(children).replace(/\n$/, '');
+    <EditModeContext.Provider value={contextValue}>
+    <div className={`${className}`}>
+      {blocks.map((block, index) => {
+        if (block.type === 'sidebyside' && block.diagram && block.text !== undefined) {
+          return (
+            <SideBySideBlock
+              key={index}
+              diagram={block.diagram}
+              text={block.text}
+              position={block.position || 'right'}
+              size={block.size || 'medium'}
+            />
+          );
+        }
 
-            // Check if this is a mermaid code block
-            if (language === 'mermaid') {
-              return <MermaidDiagram chart={codeString} />;
-            }
+        if (block.type === 'floating' && block.diagram && block.text !== undefined) {
+          return (
+            <FloatingBlock
+              key={index}
+              diagram={block.diagram}
+              text={block.text}
+              float={block.position || 'right'}
+              size={block.size || 'medium'}
+            />
+          );
+        }
 
-            // Custom content block types
-            if (language === 'terminal' || language === 'bash' || language === 'shell') {
-              return <TerminalBlock content={codeString} />;
-            }
+        // Regular markdown
+        return (
+          <div key={index} className="prose prose-slate dark:prose-invert max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({ className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || '');
+                  const language = match ? match[1] : '';
+                  const codeString = String(children).replace(/\n$/, '');
 
-            if (language === 'mistakes' || language === 'errors') {
-              return <MistakeList content={codeString} />;
-            }
+                  // Check if this is a mermaid code block
+                  if (language === 'mermaid') {
+                    return <EditableDiagram chart={codeString} />;
+                  }
 
-            if (language === 'checklist' || language === 'success') {
-              return <CheckList content={codeString} />;
-            }
+                  // Custom content block types
+                  if (language === 'terminal' || language === 'bash' || language === 'shell') {
+                    return <TerminalBlock content={codeString} />;
+                  }
 
-            if (language === 'info' || language === 'note') {
-              return <Callout variant="info" content={codeString} />;
-            }
+                  if (language === 'mistakes' || language === 'errors') {
+                    return <MistakeList content={codeString} />;
+                  }
 
-            if (language === 'warning' || language === 'caution') {
-              return <Callout variant="warning" content={codeString} />;
-            }
+                  if (language === 'checklist' || language === 'success') {
+                    return <CheckList content={codeString} />;
+                  }
 
-            if (language === 'tip' || language === 'hint') {
-              return <Callout variant="tip" content={codeString} />;
-            }
+                  if (language === 'info' || language === 'note') {
+                    return <Callout variant="info" content={codeString} />;
+                  }
 
-            if (language === 'danger' || language === 'critical') {
-              return <Callout variant="danger" content={codeString} />;
-            }
+                  if (language === 'warning' || language === 'caution') {
+                    return <Callout variant="warning" content={codeString} />;
+                  }
 
-            // Pager/notification alerts - sketch style
-            if (language === 'pager' || language === 'alert' || language === 'notification') {
-              // Parse optional metadata from first line: variant|time|source
-              const firstLine = codeString.split('\n')[0];
-              const metaMatch = firstLine.match(/^@(critical|warning|info|success)(?:\s*\|\s*(.+?))?(?:\s*\|\s*(.+?))?$/);
+                  if (language === 'tip' || language === 'hint') {
+                    return <Callout variant="tip" content={codeString} />;
+                  }
 
-              if (metaMatch) {
-                const variant = metaMatch[1] as 'critical' | 'warning' | 'info' | 'success';
-                const time = metaMatch[2]?.trim();
-                const source = metaMatch[3]?.trim();
-                const content = codeString.split('\n').slice(1).join('\n');
-                return <PagerAlert variant={variant} time={time} source={source} content={content} />;
-              }
+                  if (language === 'danger' || language === 'critical') {
+                    return <Callout variant="danger" content={codeString} />;
+                  }
 
-              return <PagerAlert content={codeString} />;
-            }
+                  // Pager/notification alerts - sketch style
+                  if (language === 'pager' || language === 'alert' || language === 'notification') {
+                    // Parse optional metadata from first line: variant|time|source
+                    const firstLine = codeString.split('\n')[0];
+                    const metaMatch = firstLine.match(/^@(critical|warning|info|success)(?:\s*\|\s*(.+?))?(?:\s*\|\s*(.+?))?$/);
 
-            // Check for inline code (no className means inline)
-            const isInline = !className;
-            if (isInline) {
-              return (
-                <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm" {...props}>
-                  {children}
-                </code>
-              );
-            }
+                    if (metaMatch) {
+                      const variant = metaMatch[1] as 'critical' | 'warning' | 'info' | 'success';
+                      const time = metaMatch[2]?.trim();
+                      const source = metaMatch[3]?.trim();
+                      const alertContent = codeString.split('\n').slice(1).join('\n');
+                      return <PagerAlert variant={variant} time={time} source={source} content={alertContent} />;
+                    }
 
-            // Regular code block with syntax highlighting
-            return (
-              <div className="not-prose my-4">
-                <SyntaxHighlighter
-                  style={oneDark}
-                  language={language || 'text'}
-                  PreTag="div"
-                  customStyle={{
-                    margin: 0,
-                    borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                  }}
-                >
-                  {codeString}
-                </SyntaxHighlighter>
-              </div>
-            );
-          },
-          pre({ children }) {
-            // The code component already handles all rendering including custom blocks
-            // Just return children without any wrapper to avoid double-wrapping
-            return <>{children}</>;
-          },
-          img({ src, alt }) {
-            return <ExpandableImage src={src} alt={alt} />;
-          },
-        }}
-      >
-        {content}
-      </ReactMarkdown>
+                    return <PagerAlert content={codeString} />;
+                  }
+
+                  // Check for inline code (no className means inline)
+                  const isInline = !className;
+                  if (isInline) {
+                    return (
+                      <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm" {...props}>
+                        {children}
+                      </code>
+                    );
+                  }
+
+                  // Regular code block with syntax highlighting
+                  return (
+                    <div className="not-prose my-4">
+                      <SyntaxHighlighter
+                        style={oneDark}
+                        language={language || 'text'}
+                        PreTag="div"
+                        customStyle={{
+                          margin: 0,
+                          borderRadius: '0.5rem',
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        {codeString}
+                      </SyntaxHighlighter>
+                    </div>
+                  );
+                },
+                pre({ children }) {
+                  // The code component already handles all rendering including custom blocks
+                  // Just return children without any wrapper to avoid double-wrapping
+                  return <>{children}</>;
+                },
+                img({ src, alt }) {
+                  return <ExpandableImage src={src} alt={alt} />;
+                },
+              }}
+            >
+              {block.content || ''}
+            </ReactMarkdown>
+          </div>
+        );
+      })}
     </div>
+    </EditModeContext.Provider>
   );
 }

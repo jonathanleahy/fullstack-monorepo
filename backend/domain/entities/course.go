@@ -43,6 +43,7 @@ type Lesson struct {
 	Title        string
 	Content      string
 	Order        int
+	FolderIndex  int           // Index in alphabetically sorted folder list (used for save path)
 	Sublessons   []Lesson      // Nested subchapters/sublessons
 	Quiz         *Quiz         // Optional legacy quiz for this lesson
 	ExtendedQuiz *ExtendedQuiz // Optional extended quiz with multiple question types
