@@ -114,7 +114,40 @@ function MermaidDiagram({ chart, compact = false, hideExpandButton = false }: Me
         // Generate unique ID for this diagram
         const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
         const { svg } = await mermaid.render(id, chart);
-        setSvg(svg);
+
+        // Parse SVG and adjust viewBox to remove excess padding
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(svg, 'image/svg+xml');
+        const svgEl = doc.querySelector('svg');
+
+        if (svgEl) {
+          // Get the actual content bounds
+          const tempContainer = document.createElement('div');
+          tempContainer.style.position = 'absolute';
+          tempContainer.style.visibility = 'hidden';
+          tempContainer.innerHTML = svg;
+          document.body.appendChild(tempContainer);
+
+          const tempSvg = tempContainer.querySelector('svg');
+          if (tempSvg) {
+            const bbox = tempSvg.getBBox();
+            // Add small padding around content
+            const padding = 8;
+            const newViewBox = `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding * 2} ${bbox.height + padding * 2}`;
+            svgEl.setAttribute('viewBox', newViewBox);
+            // Remove fixed width/height to allow scaling
+            svgEl.removeAttribute('width');
+            svgEl.removeAttribute('height');
+            svgEl.style.width = '100%';
+            svgEl.style.height = 'auto';
+          }
+
+          document.body.removeChild(tempContainer);
+          setSvg(svgEl.outerHTML);
+        } else {
+          setSvg(svg);
+        }
+
         setError(null);
       } catch (err) {
         console.error('Mermaid rendering error:', err);
@@ -154,7 +187,7 @@ function MermaidDiagram({ chart, compact = false, hideExpandButton = false }: Me
         className={`mermaid relative group ${compact ? '' : 'my-4'}`}
         data-mermaid
       >
-        <div className="flex justify-center [&>svg]:max-w-full [&>svg]:h-auto" dangerouslySetInnerHTML={{ __html: svg }} />
+        <div dangerouslySetInnerHTML={{ __html: svg }} />
         {!hideExpandButton && (
           <button
             onClick={() => setIsExpanded(true)}
@@ -342,7 +375,7 @@ function SideBySideBlock({ diagram, text, position, size }: SideBySideBlockProps
   const widthClass = sizeWidths[layoutSettings.size] || 'w-1/2';
 
   const diagramElement = (
-    <div className={`${widthClass} flex-shrink-0 [&_svg]:max-w-full [&_svg]:h-auto`}>
+    <div className={`${widthClass} flex-shrink-0`}>
       <div className="sticky top-4">
         <MermaidDiagram chart={diagram} compact hideExpandButton={editMode} />
       </div>
@@ -459,7 +492,7 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
           canMoveDown={canMoveDown}
         />
         <div className="my-6 overflow-hidden not-prose pt-10">
-          <div className={`${floatClass} ${widthClass} mb-4 [&_svg]:max-w-full [&_svg]:h-auto`}>
+          <div className={`${floatClass} ${widthClass} mb-4`}>
             <MermaidDiagram chart={diagram} compact hideExpandButton />
           </div>
           <div className="prose prose-slate dark:prose-invert max-w-none">
@@ -476,7 +509,7 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
   // Don't contain the float - let subsequent content flow around the diagram
   return (
     <>
-      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4 not-prose [&_svg]:max-w-full [&_svg]:h-auto`}>
+      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4 not-prose`}>
         <MermaidDiagram chart={diagram} compact />
       </div>
       <div className="prose prose-slate dark:prose-invert max-w-none">
