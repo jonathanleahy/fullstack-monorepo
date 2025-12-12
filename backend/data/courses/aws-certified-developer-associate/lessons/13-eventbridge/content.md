@@ -6,11 +6,10 @@
 
 Think about it this way: when you get a text notification on your phone, that's triggered by an event. Someone sent you a message - that's an event. Your alarm went off - that's an event. Your package was delivered - that's an event. The notification doesn't tell you what to DO about it - it just informs you that something occurred, and YOU decide whether to act on it.
 
-This "announce and let others decide" pattern is fundamental to understanding EventBridge. The phone doesn't know if you'll read the message immediately, ignore it, or delete it without looking. It just delivers the notification. The same principle applies to software events - the system that generates the event doesn't know or care who's listening or what they'll do with the information.
-
+:::floating:right:1/2
 ```mermaid
-graph LR
-    subgraph "Events Are Just 'Something Happened'"
+graph TB
+    subgraph "Events Are Announcements"
         E1["User signed up"]
         E2["File uploaded"]
         E3["Payment processed"]
@@ -18,6 +17,9 @@ graph LR
         E5["Data changed"]
     end
 ```
+
+This "announce and let others decide" pattern is fundamental to understanding EventBridge. The phone doesn't know if you'll read the message immediately, ignore it, or delete it without looking. It just delivers the notification. The same principle applies to software events - the system that generates the event doesn't know or care who's listening or what they'll do with the information.
+:::
 
 In software, events appear everywhere:
 - **User signs up** → that's an event (the authentication service announces it)
@@ -65,6 +67,7 @@ Here's the fundamental difference:
 - "A user signed up" (whoever wants it can subscribe)
 - Consumers create rules to get events they care about.
 
+:::floating:right:2/3
 ```mermaid
 graph LR
     subgraph "SQS: Publisher Decides"
@@ -74,6 +77,10 @@ graph LR
     end
 ```
 
+With SQS, the Order Service must know about every consumer. If marketing wants order events, you change the Order Service code to also send to `marketing-queue`. Every new consumer means a code change and deployment.
+:::
+
+:::floating:left:2/3
 ```mermaid
 graph LR
     subgraph "EventBridge: Consumers Decide"
@@ -83,6 +90,9 @@ graph LR
         EB -->|"Rule: high-value"| C3[VIP Handler]
     end
 ```
+
+With EventBridge, the Order Service just announces "Order Placed." Marketing wants these events? They create a rule - no Order Service changes needed. The publisher is completely decoupled from consumers.
+:::
 
 **The fundamental shift:** With SQS, the publisher must know about every consumer. With EventBridge, the publisher just announces events - consumers subscribe to what they want.
 
@@ -120,9 +130,10 @@ After building a successful app with 50,000 active users, events were coming fro
 
 Each source had its own integration pattern. S3 triggers a Lambda one way - you configure bucket notifications pointing to a Lambda ARN. DynamoDB Streams work completely differently - you create an Event Source Mapping that polls the stream. Stripe needs an API Gateway webhook endpoint that you build yourself. CloudWatch Events uses yet another format with its own rule syntax.
 
+:::floating:right:1/2
 ```mermaid
 graph TB
-    subgraph "The Event Spaghetti Problem"
+    subgraph "Event Spaghetti"
         S3[S3 Events] -->|Config A| L1[Lambda 1]
         DDB[DynamoDB Streams] -->|Config B| L2[Lambda 2]
         Stripe[Stripe Webhooks] -->|API Gateway| L3[Lambda 3]
@@ -131,7 +142,8 @@ graph TB
     end
 ```
 
-The diagram above shows what Alex was managing - five different configuration patterns, five different debugging paths, five different ways things could silently break.
+The diagram shows what Alex was managing - five different configuration patterns, five different debugging paths, five different ways things could silently break.
+:::
 
 When something broke at 2 AM - specifically, subscription renewals stopped processing and 847 customers received incorrect "payment failed" emails despite successful Stripe charges - Alex had to trace through five different integration patterns to find the bug. The Stripe webhook was working. The Lambda was processing. But the downstream DynamoDB Stream consumer had silently failed due to an IAM permission change two weeks earlier. Messages piled up. Silent failure.
 
@@ -221,7 +233,7 @@ StripeMethod:
     Integration:
       Type: AWS_PROXY
       IntegrationHttpMethod: POST
-      Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StripeFunction.Arn}/invocations
+      Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/...
 ```
 
 This is just the infrastructure. Your Lambda also needs to verify Stripe's webhook signature (security), handle all event types in one function (routing), manage retries (Stripe will retry on 5xx errors), and deal with the fact that API Gateway has a 29-second timeout.
@@ -230,22 +242,23 @@ This is just the infrastructure. Your Lambda also needs to verify Stripe's webho
 
 ### Why This Approach Hurts
 
-The table below summarizes the pain, but the real cost isn't in the table - it's the cognitive overhead of maintaining five mental models for "how do events work here?"
-
 | Pain Point | Impact | Real Example |
 |------------|--------|--------------|
-| **Different configs** | Learn 5+ integration patterns, debug 5+ ways | New developer takes 2 weeks to understand event flow |
-| **No central visibility** | Check 5 dashboards to understand event flow | 2 AM debugging requires opening 8 browser tabs |
+| **Different configs** | Learn 5+ integration patterns | New developer takes 2 weeks to understand event flow |
+| **No central visibility** | Check 5 dashboards to understand flow | 2 AM debugging requires opening 8 browser tabs |
 | **Filtering happens late** | Lambda runs, checks if it cares, often does nothing | 70% of photo Lambda invocations wasted ($340/month) |
-| **Adding subscribers is hard** | New consumer = code changes + deployment | Marketing signup events took 4 hours + broke email service |
+| **Adding subscribers is hard** | New consumer = code changes + deployment | Marketing signup events took 4 hours, broke email |
 | **No replay** | Bug fixed? Too bad, events are gone | 847 incorrect notifications couldn't be corrected |
 
 ---
 
 ## How EventBridge Solves This
 
+"What you need," Sam said, looking at Alex's tangled architecture diagram, "is a single event bus. One place where all events flow through."
+
 EventBridge is a serverless event bus - a central router where ALL events flow through.
 
+:::floating:right:2/3
 ```mermaid
 graph TB
     subgraph "Event Sources"
@@ -261,7 +274,7 @@ graph TB
         EB((Event Bus))
     end
 
-    subgraph "Targets (filtered)"
+    subgraph "Targets"
         L1[Payment Lambda]
         L2[Notification Lambda]
         L3[Analytics]
@@ -275,11 +288,14 @@ graph TB
     Schedule --> EB
     Custom --> EB
 
-    EB -->|"source: stripe, amount > 100"| L1
-    EB -->|"detail-type: user.*"| L2
+    EB -->|"amount > 100"| L1
+    EB -->|"user.*"| L2
     EB -->|"all events"| L3
-    EB -->|"source: orders"| SQS
+    EB -->|"orders"| SQS
 ```
+
+Instead of five different integration patterns, everything flows through one bus. Rules examine each event and route it to the right targets. One configuration model, one debugging path, one monitoring dashboard.
+:::
 
 ### How It Works
 
@@ -298,6 +314,30 @@ That's it. Events in → rules filter → events out to the right places.
 **Patterns**: The matching criteria. Can filter on any field in the event - source, type, or any nested value in the detail.
 
 **Targets**: Where matching events go. Lambda, SQS, SNS, Step Functions, API endpoints, other event buses, and more.
+
+### The Code Transformation
+
+Before EventBridge, Alex had hundreds of lines of configuration across multiple services. After:
+
+```python
+import boto3
+
+# Publish an event - ONE pattern for all events
+events = boto3.client('events')
+
+events.put_events(Entries=[{
+    'Source': 'pettracker.orders',
+    'DetailType': 'Order Placed',
+    'Detail': json.dumps({
+        'orderId': 'order-123',
+        'amount': 149.99,
+        'customerId': 'cust-456'
+    }),
+    'EventBusName': 'default'
+}])
+```
+
+That's it. The order service announces what happened. It doesn't know or care who's listening. Anyone who wants order events creates a rule - no changes to this code ever.
 
 ### The Before and After
 
@@ -321,6 +361,34 @@ Great question. They serve different purposes:
 **SNS** is designed for simple pub/sub fan-out. You publish to a topic, all subscribers get the message. Filtering is basic (message attributes only).
 
 **EventBridge** is designed for intelligent event routing. You publish to a bus, rules examine the content, only matching targets receive events.
+
+:::floating:left:1/2
+```mermaid
+graph TB
+    subgraph "SNS: All Get Everything"
+        Pub[Publisher] --> Topic((Topic))
+        Topic --> Sub1[Subscriber 1]
+        Topic --> Sub2[Subscriber 2]
+        Topic --> Sub3[Subscriber 3]
+    end
+```
+
+With SNS, you publish to a topic and all subscribers receive a copy. You can filter on message attributes, but not on the message body content.
+:::
+
+:::floating:right:1/2
+```mermaid
+graph TB
+    subgraph "EventBridge: Rules Route"
+        Pub2[Publisher] --> Bus((Bus))
+        Bus -->|"Rule A"| T1[Target 1]
+        Bus -->|"Rule B"| T2[Target 2]
+        Bus -->|"Rule C"| T3[Target 3]
+    end
+```
+
+With EventBridge, rules examine the full event content. Only matching events reach each target. You can filter on any nested field, do numeric comparisons, and use complex patterns.
+:::
 
 | Feature | SNS | EventBridge |
 |---------|-----|-------------|
@@ -364,6 +432,8 @@ This rule matches payments over $100 from US or Canada that aren't refunded. The
 - **Numeric**: `"amount": [{"numeric": [">", 100, "<=", 1000]}]`
 - **Exists**: `"metadata": [{"exists": true}]`
 - **Anything-but**: `"status": [{"anything-but": ["cancelled"]}]`
+
+For PetTracker, this meant the photo processing Lambda went from handling all 12,000 daily uploads to only the 3,600 that actually needed processing. A 70% reduction in Lambda invocations, saving $340/month.
 
 ---
 
@@ -428,4 +498,3 @@ The DVA-C02 exam tests EventBridge frequently. Expect:
 ---
 
 *Ready to go deeper? Start with **Events Deep Dive** to explore event structures, schemas, and patterns that the overview only touched on. Or jump to any sub-chapter based on what you need.*
-
