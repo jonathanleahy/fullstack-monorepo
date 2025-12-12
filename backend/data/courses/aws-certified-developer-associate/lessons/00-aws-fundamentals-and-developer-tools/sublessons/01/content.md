@@ -2,6 +2,12 @@
 
 ## Alex Discovers the World Map
 
+:::floating:right:1/2
+![AWS Global Infrastructure Map](https://picsum.photos/seed/aws-infra/600/400 "AWS data centers span 6 continents with 33+ regions worldwide")
+
+Alex clicked through to the AWS Global Infrastructure page and was amazed by the scale. Data centers on every continent, connected by a private fiber network spanning the globe.
+:::
+
 After the initial confusion, Alex finds something interesting in the AWS Console footer: a link to "AWS Global Infrastructure." Clicking it reveals a world map dotted with locations.
 
 "So AWS isn't just one big computer somewhere," Alex realizes. "It's everywhere!"

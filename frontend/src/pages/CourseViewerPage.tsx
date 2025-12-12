@@ -4,7 +4,7 @@ import { useLibraryCourse } from '../hooks/useCourses';
 import { courseService } from '../services/courseService';
 import { useAuth } from '../hooks/useAuth';
 import type { Difficulty, UserCourse, Lesson, ExtendedQuiz as ExtendedQuizType } from '../types/course';
-import { MarkdownRenderer } from '../components/MarkdownRenderer';
+import { MarkdownRenderer, MDXRenderer } from '../components/markdown';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { LessonProgress } from '../components/LessonProgress';
 import { Quiz } from '../components/Quiz';
@@ -235,6 +235,7 @@ export function CourseViewerPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [modifiedContent, setModifiedContent] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [useMDX, setUseMDX] = useState(true); // Use MDX by default
   const { preferences } = usePreferences();
 
   const flatLessons = useMemo(() => {
@@ -584,6 +585,19 @@ export function CourseViewerPage() {
             </svg>
           </Link>
 
+          {/* MDX/Classic Toggle */}
+          <button
+            onClick={() => setUseMDX(!useMDX)}
+            className={`px-2 py-1 text-xs rounded-md transition-colors ${
+              useMDX
+                ? 'bg-blue-100 text-blue-700'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+            title={useMDX ? 'Using MDX renderer' : 'Using classic renderer'}
+          >
+            {useMDX ? 'MDX' : 'Classic'}
+          </button>
+
           <Link
             to="/settings"
             className="p-2 hover:bg-gray-100 rounded-md transition-colors"
@@ -752,7 +766,11 @@ export function CourseViewerPage() {
                 preferences.font.lineHeight === 'compact' ? '[&_p]:leading-snug' :
                 preferences.font.lineHeight === 'relaxed' ? '[&_p]:leading-relaxed' : ''
               }`}>
-                <MarkdownRenderer content={modifiedContent ?? currentLesson.content} editMode={editMode} onContentChange={handleContentChange} />
+                {useMDX ? (
+                  <MDXRenderer content={modifiedContent ?? currentLesson.content} editMode={editMode} onContentChange={handleContentChange} />
+                ) : (
+                  <MarkdownRenderer content={modifiedContent ?? currentLesson.content} editMode={editMode} onContentChange={handleContentChange} />
+                )}
               </article>
 
               {/* Quiz Section - New Extended Quiz System */}

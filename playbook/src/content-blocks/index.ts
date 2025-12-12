@@ -5,3 +5,5 @@ export { Callout } from './Callout';
 export { PagerAlert } from './PagerAlert';
 export { SideBySide } from './SideBySide';
 export { FloatingDiagram } from './FloatingDiagram';
+export { EmailPreview } from './EmailPreview';
+export { ImageBlock } from './ImageBlock';

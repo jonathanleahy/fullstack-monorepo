@@ -12,6 +12,11 @@ export default defineConfig({
   server: {
     port: 3001,
     host: true,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
     proxy: {
       '/graphql': {
         target: 'http://localhost:8082',

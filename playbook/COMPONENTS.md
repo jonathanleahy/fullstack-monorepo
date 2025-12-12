@@ -11,8 +11,10 @@ This document describes all available content block components for use in course
 | CheckList | ` ```checklist ` | Success/key takeaway lists |
 | MistakeList | ` ```mistakes ` | Common mistakes/errors |
 | PagerAlert | ` ```pager ` | Notification/alert graphics |
-| SideBySide | `:::sidebyside` | Diagram with text columns |
-| Floating | `:::floating` | Diagram with text wrapping |
+| EmailPreview | ` ```email ` | Styled email message previews |
+| ImageBlock | `![alt](src)` in layouts | Images with expand/caption support |
+| SideBySide | `:::sidebyside` | Content with text columns |
+| Floating | `:::floating` | Content with text wrapping |
 
 ---
 
@@ -142,15 +144,94 @@ CRITICAL: Duplicate notifications detected
 
 ---
 
+### EmailPreview
+
+Styled email message preview that looks like an email client display.
+
+**Basic Syntax:**
+~~~markdown
+```email
+From: user@example.com
+To: support@company.com
+Subject: Account Question
+---
+Hello, I have a question about my account settings.
+Could you help me understand how to change my password?
+```
+~~~
+
+**With Variant:**
+~~~markdown
+```email
+@warning
+From: alerts@pettracker.com
+To: user@example.com
+Subject: Vaccination Reminder
+Date: March 23, 2024
+---
+Your pet's vaccination appointment is coming up.
+Please schedule an appointment within the next week.
+```
+~~~
+
+**Options format:** First line `@variant` (optional)
+- **variant**: `critical` (red), `warning` (amber), `info` (blue/gray), `success` (green)
+
+**Email Headers:**
+- `From:` - Sender email address
+- `To:` - Recipient email address
+- `Subject:` - Email subject line
+- `Date:` - Optional timestamp
+- `---` - Separator between headers and body
+
+**Features:**
+- Colored header bar based on variant (URGENT, IMPORTANT, EMAIL, etc.)
+- Structured From/To/Subject display
+- Body content with variant-appropriate text colors
+- Hand-drawn aesthetic matching other components
+
+---
+
+### ImageBlock
+
+Images with expand-on-click, loading states, and optional captions. Best used inside layouts.
+
+**Standalone (regular markdown):**
+~~~markdown
+![AWS Console Screenshot](/images/aws-console.png)
+~~~
+
+**With Caption (in layout):**
+~~~markdown
+:::floating:right:1/2
+![Step Functions Console](/images/step-functions-console.png "The visual workflow editor")
+
+The Step Functions console provides a visual representation of your workflow,
+making it easy to understand the flow of execution at a glance.
+:::
+~~~
+
+**Features:**
+- Click to expand image in modal overlay
+- Loading skeleton while image loads
+- Error state with fallback UI
+- Optional caption displayed below image
+- Rounded corners and shadow styling
+- Works in both floating and sidebyside layouts
+
+---
+
 ## Layout Components
+
+Layouts wrap any content type (mermaid diagrams, emails, pager alerts, etc.) with text flowing around or beside them.
 
 ### SideBySide Layout
 
-Places a diagram alongside text in a two-column layout. The diagram stays sticky while scrolling.
+Places content alongside text in a two-column layout. The content stays sticky while scrolling.
 
-**Syntax:**
+**Syntax with Mermaid:**
 ~~~markdown
-:::sidebyside:right:medium
+:::sidebyside:right:1/2
 ```mermaid
 graph LR
     A --> B --> C
@@ -159,56 +240,94 @@ graph LR
 Your explanatory text goes here. It will appear in a column
 next to the diagram. You can write multiple paragraphs.
 
-The diagram will stick to the top as you scroll through
+The content will stick to the top as you scroll through
 longer text content.
 :::
 ~~~
 
+**Syntax with Email:**
+~~~markdown
+:::sidebyside:left:1/3
+```email
+@warning
+From: alerts@company.com
+Subject: System Alert
+---
+Important notification message.
+```
+
+Text explaining the context of this email notification
+appears here in the adjacent column.
+:::
+~~~
+
 **Options:**
-- **Position**: `left` or `right` (default: `right`) - which side the diagram appears
-- **Size**: `small`, `medium`, or `large` (default: `medium`) - diagram column width
-  - `small`: 1/3 width
-  - `medium`: 5/12 width
-  - `large`: 1/2 width
+- **Position**: `left` or `right` (default: `right`) - which side the content appears
+- **Size**: `1/3`, `1/2`, `2/3`, or `full` (default: `1/2`) - content column width
 
 **Examples:**
 ```
-:::sidebyside              → diagram right, medium size
-:::sidebyside:left         → diagram left, medium size
-:::sidebyside:right:large  → diagram right, large size
-:::sidebyside:left:small   → diagram left, small size
+:::sidebyside              → content right, 1/2 width
+:::sidebyside:left         → content left, 1/2 width
+:::sidebyside:right:2/3    → content right, 2/3 width
+:::sidebyside:left:1/3     → content left, 1/3 width
 ```
 
 ---
 
 ### Floating Layout
 
-Places a diagram with text wrapping around it, like a floated image in a magazine.
+Places content with text wrapping around it, like a floated image in a magazine.
 
-**Syntax:**
+**Syntax with Mermaid:**
 ~~~markdown
-:::floating:right:medium
+:::floating:right:1/2
 ```mermaid
 stateDiagram-v2
     [*] --> Active
     Active --> [*]
 ```
 
-Your text will wrap around the diagram naturally. This is great
-for shorter diagrams where you want the text to flow around them
+Your text will wrap around the content naturally. This is great
+for shorter content where you want the text to flow around it
 rather than being in a strict column layout.
 
-Continue writing and the text flows beneath the diagram once
+Continue writing and the text flows beneath the content once
 it runs out of space beside it.
 :::
 ~~~
 
+**Syntax with Email:**
+~~~markdown
+:::floating:right:1/2
+```email
+@critical
+From: ceo@company.com
+Subject: URGENT: Action Required
+Date: March 23, 2024 3:47 PM
+---
+The board is asking questions about today's outage.
+We need a fix by end of week.
+```
+
+The email from leadership made it clear: the current
+architecture couldn't handle growth. Something fundamental
+had to change.
+:::
+~~~
+
 **Options:**
-- **Float**: `left` or `right` (default: `right`) - which side the diagram floats to
-- **Size**: `small`, `medium`, or `large` (default: `medium`) - diagram width
-  - `small`: 14rem (224px)
-  - `medium`: 18rem (288px)
-  - `large`: 24rem (384px)
+- **Float**: `left` or `right` (default: `right`) - which side the content floats to
+- **Size**: `1/3`, `1/2`, `2/3`, or `full` (default: `1/2`) - content width
+
+### Supported Content Types in Layouts
+
+Any of these content blocks can be placed inside a layout:
+- `mermaid` - Diagrams (with edit mode support)
+- `email` - Email previews
+- `pager` - Pager alerts
+- `terminal` - Terminal blocks
+- `![](...)` - Images with expand/caption support
 
 ---
 

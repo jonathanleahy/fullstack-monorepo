@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import MDEditor from '@uiw/react-md-editor';
-import { MarkdownRenderer } from './MarkdownRenderer';
+import { MarkdownRenderer } from './markdown';
 import { Button } from '@repo/playbook';
 
 interface MarkdownEditorProps {

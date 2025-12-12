@@ -5,7 +5,7 @@ import { courseService } from '../services/courseService';
 import { analyticsService } from '../services/analyticsService';
 import { useAuth } from '../hooks/useAuth';
 import type { Difficulty, UserCourse, CourseAnalytics, Lesson } from '../types/course';
-import { MarkdownRenderer } from '../components/MarkdownRenderer';
+import { MarkdownRenderer } from '../components/markdown';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { EnrollButton } from '../components/EnrollButton';
 import { LessonProgress } from '../components/LessonProgress';

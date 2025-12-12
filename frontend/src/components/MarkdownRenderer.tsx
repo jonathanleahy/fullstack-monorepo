@@ -4,8 +4,9 @@ import { useEffect, useRef, useState, useCallback, useMemo, createContext, useCo
 import mermaid from 'mermaid';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { TerminalBlock, MistakeList, CheckList, Callout, PagerAlert } from '@repo/playbook';
-import { DiagramLayoutPicker, type LayoutSettings } from './DiagramLayoutPicker';
+import { TerminalBlock, MistakeList, CheckList, Callout, PagerAlert, EmailPreview, ImageBlock } from '@repo/playbook';
+import { LayoutWrapper } from './LayoutWrapper';
+import { DiagramLayoutPicker, normalizeSize, type LayoutSettings } from './DiagramLayoutPicker';
 
 // Edit mode context - provides edit mode state and change callback
 interface EditModeContextType {
@@ -236,7 +237,7 @@ function EditableDiagram({ chart }: EditableDiagramProps) {
   const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
     layout: 'normal',
     position: 'right',
-    size: 'medium',
+    size: '1/2',
   });
 
   const handleLayoutChange = useCallback((settings: LayoutSettings) => {
@@ -344,7 +345,7 @@ function SideBySideBlock({ diagram, text, position, size }: SideBySideBlockProps
   const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
     layout: 'sidebyside',
     position,
-    size,
+    size: normalizeSize(size),
   });
 
   const handleLayoutChange = useCallback((settings: LayoutSettings) => {
@@ -444,7 +445,7 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
   const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({
     layout: 'floating',
     position: float,
-    size,
+    size: normalizeSize(size),
   });
 
   const handleLayoutChange = useCallback((settings: LayoutSettings) => {
@@ -520,11 +521,18 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
 }
 
 // Parse layout blocks from content
+type ContentType = 'mermaid' | 'email' | 'pager' | 'terminal' | 'image' | 'unknown';
+
 interface LayoutBlock {
   type: 'sidebyside' | 'floating' | 'markdown';
   position?: 'left' | 'right';
   size?: 'small' | 'medium' | 'large';
-  diagram?: string;
+  diagram?: string;  // Kept for backward compatibility with mermaid
+  contentType?: ContentType;  // Type of content inside layout
+  contentRaw?: string;  // Raw content string for non-mermaid types
+  imageSrc?: string;  // Image source URL
+  imageAlt?: string;  // Image alt text
+  imageCaption?: string;  // Image caption
   text?: string;
   content?: string;
   blockIndex?: number;  // Index of this layout block (for text boundary tracking)
@@ -606,6 +614,26 @@ function rebuildContentWithModifications(
   return result;
 }
 
+// Detect content type from code block language
+function detectContentType(language: string): ContentType {
+  switch (language.toLowerCase()) {
+    case 'mermaid':
+      return 'mermaid';
+    case 'email':
+      return 'email';
+    case 'pager':
+    case 'alert':
+    case 'notification':
+      return 'pager';
+    case 'terminal':
+    case 'bash':
+    case 'shell':
+      return 'terminal';
+    default:
+      return 'unknown';
+  }
+}
+
 function parseLayoutBlocks(content: string): LayoutBlock[] {
   const blocks: LayoutBlock[] = [];
 
@@ -628,17 +656,53 @@ function parseLayoutBlocks(content: string): LayoutBlock[] {
 
     const [, layoutType, position = 'right', size = 'medium', innerContent] = match;
 
-    // Extract mermaid diagram from inner content
-    const mermaidMatch = innerContent.match(/```mermaid\n([\s\S]*?)```/);
-    if (mermaidMatch) {
-      const diagram = mermaidMatch[1].trim();
-      const text = innerContent.replace(/```mermaid\n[\s\S]*?```/, '').trim();
+    // Try to extract any code block from inner content
+    const codeBlockMatch = innerContent.match(/```(\w+)\n([\s\S]*?)```/);
+
+    // Try to extract image from inner content: ![alt](src) or ![alt](src "caption")
+    const imageMatch = innerContent.match(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/);
+
+    if (codeBlockMatch) {
+      const [fullMatch, language, codeContent] = codeBlockMatch;
+      const contentType = detectContentType(language);
+      const text = innerContent.replace(fullMatch, '').trim();
+
+      if (contentType === 'mermaid') {
+        // Backward compatible: use 'diagram' field for mermaid
+        blocks.push({
+          type: layoutType as 'sidebyside' | 'floating',
+          position: position as 'left' | 'right',
+          size: size as 'small' | 'medium' | 'large',
+          contentType: 'mermaid',
+          diagram: codeContent.trim(),
+          text,
+          blockIndex: layoutBlockIndex++,
+        });
+      } else {
+        // New content types use contentRaw
+        blocks.push({
+          type: layoutType as 'sidebyside' | 'floating',
+          position: position as 'left' | 'right',
+          size: size as 'small' | 'medium' | 'large',
+          contentType,
+          contentRaw: codeContent.trim(),
+          text,
+          blockIndex: layoutBlockIndex++,
+        });
+      }
+    } else if (imageMatch) {
+      // Image inside layout block
+      const [fullMatch, alt, src, caption] = imageMatch;
+      const text = innerContent.replace(fullMatch, '').trim();
 
       blocks.push({
         type: layoutType as 'sidebyside' | 'floating',
         position: position as 'left' | 'right',
         size: size as 'small' | 'medium' | 'large',
-        diagram,
+        contentType: 'image',
+        imageSrc: src,
+        imageAlt: alt || undefined,
+        imageCaption: caption || undefined,
         text,
         blockIndex: layoutBlockIndex++,
       });
@@ -876,11 +940,59 @@ export function MarkdownRenderer({ content, className = '', editMode = false, on
     canMoveDiagram: canMoveDiagramCheck,
   }), [editMode, handleDiagramLayoutChange, handleMoveDiagram, canMoveDiagramCheck]);
 
+  // Helper to render content based on type
+  const renderLayoutContent = (block: LayoutBlock) => {
+    // Mermaid diagram (backward compatible)
+    if (block.contentType === 'mermaid' && block.diagram) {
+      return <MermaidDiagram chart={block.diagram} compact />;
+    }
+
+    // Email preview
+    if (block.contentType === 'email' && block.contentRaw) {
+      // Parse variant from first line if present
+      const firstLine = block.contentRaw.split('\n')[0];
+      const variantMatch = firstLine.match(/^@(critical|warning|info|success)$/);
+      if (variantMatch) {
+        const variant = variantMatch[1] as 'critical' | 'warning' | 'info' | 'success';
+        const emailContent = block.contentRaw.split('\n').slice(1).join('\n');
+        return <EmailPreview variant={variant} content={emailContent} />;
+      }
+      return <EmailPreview content={block.contentRaw} />;
+    }
+
+    // Pager alert
+    if (block.contentType === 'pager' && block.contentRaw) {
+      const firstLine = block.contentRaw.split('\n')[0];
+      const metaMatch = firstLine.match(/^@(critical|warning|info|success)(?:\s*\|\s*(.+?))?(?:\s*\|\s*(.+?))?$/);
+      if (metaMatch) {
+        const variant = metaMatch[1] as 'critical' | 'warning' | 'info' | 'success';
+        const time = metaMatch[2]?.trim();
+        const source = metaMatch[3]?.trim();
+        const alertContent = block.contentRaw.split('\n').slice(1).join('\n');
+        return <PagerAlert variant={variant} time={time} source={source} content={alertContent} />;
+      }
+      return <PagerAlert content={block.contentRaw} />;
+    }
+
+    // Terminal block
+    if (block.contentType === 'terminal' && block.contentRaw) {
+      return <TerminalBlock content={block.contentRaw} />;
+    }
+
+    // Image block
+    if (block.contentType === 'image' && block.imageSrc) {
+      return <ImageBlock src={block.imageSrc} alt={block.imageAlt} caption={block.imageCaption} />;
+    }
+
+    return null;
+  };
+
   return (
     <EditModeContext.Provider value={contextValue}>
     <div className={`${className}`}>
       {blocks.map((block, index) => {
-        if (block.type === 'sidebyside' && block.diagram && block.text !== undefined) {
+        // Handle mermaid diagrams with existing SideBySideBlock/FloatingBlock (edit mode support)
+        if (block.type === 'sidebyside' && block.contentType === 'mermaid' && block.diagram && block.text !== undefined) {
           return (
             <SideBySideBlock
               key={index}
@@ -892,7 +1004,7 @@ export function MarkdownRenderer({ content, className = '', editMode = false, on
           );
         }
 
-        if (block.type === 'floating' && block.diagram && block.text !== undefined) {
+        if (block.type === 'floating' && block.contentType === 'mermaid' && block.diagram && block.text !== undefined) {
           return (
             <FloatingBlock
               key={index}
@@ -902,6 +1014,23 @@ export function MarkdownRenderer({ content, className = '', editMode = false, on
               size={block.size || 'medium'}
             />
           );
+        }
+
+        // Handle other content types with generic LayoutWrapper
+        if ((block.type === 'sidebyside' || block.type === 'floating') && block.contentType && block.contentType !== 'mermaid') {
+          const contentElement = renderLayoutContent(block);
+          if (contentElement) {
+            return (
+              <LayoutWrapper
+                key={index}
+                layout={block.type}
+                position={block.position || 'right'}
+                size={block.size || 'medium'}
+                content={contentElement}
+                text={block.text}
+              />
+            );
+          }
         }
 
         // Regular markdown
@@ -964,6 +1093,21 @@ export function MarkdownRenderer({ content, className = '', editMode = false, on
                     }
 
                     return <PagerAlert content={codeString} />;
+                  }
+
+                  // Email preview - styled email message
+                  if (language === 'email') {
+                    // Parse optional variant from first line: @variant
+                    const firstLine = codeString.split('\n')[0];
+                    const variantMatch = firstLine.match(/^@(critical|warning|info|success)$/);
+
+                    if (variantMatch) {
+                      const variant = variantMatch[1] as 'critical' | 'warning' | 'info' | 'success';
+                      const emailContent = codeString.split('\n').slice(1).join('\n');
+                      return <EmailPreview variant={variant} content={emailContent} />;
+                    }
+
+                    return <EmailPreview content={codeString} />;
                   }
 
                   // Check for inline code (no className means inline)

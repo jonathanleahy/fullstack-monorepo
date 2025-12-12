@@ -6,6 +6,21 @@ It's National Pet Day, and PetTracker is trending on social media. User signups 
 
 "Traffic is 10x normal!" Maya, the frontend developer, announces excitedly.
 
+Then the complaints start rolling in:
+
+```email
+@warning
+From: frustrated_user@petmail.com
+To: support@pettracker.com
+Subject: WHERE IS MY VACCINATION REMINDER?
+---
+I was supposed to get a reminder about Max's rabies shot today.
+It never came. Now I've missed the appointment window!
+
+This is the third notification I've missed this week.
+What's going on with your system?
+```
+
 Then the first alert fires. The notification service is overwhelmed. Users aren't receiving their vaccination reminders. The activity summary emails have stopped completely.
 
 Alex checks the logs:
@@ -51,6 +66,24 @@ graph LR
 | Successfully delivered | 14,850 (99%) | 12,000 (24%) |
 | **Lost notifications** | 150 | **38,000** |
 | Support tickets | 5 | 847 |
+
+:::floating:right:2/3
+```email
+@critical
+From: ceo@pettracker.com
+To: engineering@pettracker.com
+Subject: URGENT: Notification System Failure
+Date: March 23, 2024 3:47 PM
+---
+The board is asking questions about today's outage.
+38,000 missed notifications is unacceptable.
+
+We need a post-mortem and a fix by end of week.
+This cannot happen again.
+```
+
+The email from leadership made it clear: the current architecture couldn't handle growth. Alex knew something fundamental had to change. The synchronous notification system that worked fine at small scale was now a liability.
+:::
 
 Users are furious. The #PetTrackerFail hashtag starts trending.
 
@@ -150,3 +183,6 @@ By the end of this chapter, PetTracker will have a notification system that neve
 ---
 
 *Next: Let's dive into Amazon SQS and learn how message queuing works.*
+
+---
+*v2.0*
