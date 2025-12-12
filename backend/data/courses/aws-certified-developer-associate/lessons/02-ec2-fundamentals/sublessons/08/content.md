@@ -466,4 +466,4 @@ aws ec2 modify-instance-metadata-options \
 *Next: Alex learns about EC2 pricing models to optimize costs.*
 
 ---
-*v1.0*
+*v2.0*

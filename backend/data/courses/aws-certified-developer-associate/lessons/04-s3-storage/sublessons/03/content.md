@@ -468,4 +468,4 @@ print(f"Uploaded to: {result['key']}")
 *Next: Alex learns about S3 storage classes for cost optimization.*
 
 ---
-*v1.0*
+*v2.0*

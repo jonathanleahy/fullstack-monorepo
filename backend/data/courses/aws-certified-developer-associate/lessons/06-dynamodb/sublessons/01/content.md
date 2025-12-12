@@ -389,4 +389,4 @@ create_pettracker_table()
 *Next: Understanding primary keys and effective data modeling.*
 
 ---
-*v1.0*
+*v2.0*

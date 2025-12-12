@@ -464,4 +464,4 @@ echo "=== Audit Complete ==="
 *Next: Alex learns about KMS and encryption to protect PetTracker data.*
 
 ---
-*v1.0*
+*v2.0*

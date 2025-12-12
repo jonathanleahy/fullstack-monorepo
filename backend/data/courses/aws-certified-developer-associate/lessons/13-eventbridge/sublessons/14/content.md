@@ -449,4 +449,4 @@ The mental model you learned here - **consumers decide what they want** - applie
 
 
 ---
-*v1.0*
+*v2.0*

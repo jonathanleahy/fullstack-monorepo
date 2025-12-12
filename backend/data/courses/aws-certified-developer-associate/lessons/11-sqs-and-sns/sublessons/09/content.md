@@ -499,4 +499,4 @@ def secure_queue_setup():
 *Next: Integrating SQS with Lambda for serverless message processing.*
 
 ---
-*v1.0*
+*v2.0*

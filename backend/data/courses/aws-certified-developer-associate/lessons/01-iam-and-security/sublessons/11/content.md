@@ -303,4 +303,4 @@ $ aws ec2 describe-instance-types \
 *Next Chapter: EC2 Fundamentals - Building PetTracker's compute infrastructure.*
 
 ---
-*v1.0*
+*v2.0*

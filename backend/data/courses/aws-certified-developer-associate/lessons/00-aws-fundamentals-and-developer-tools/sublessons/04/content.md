@@ -382,4 +382,4 @@ aws ec2 describe-instances help
 *Next: Alex learns about CLI profiles and how to manage multiple AWS accounts.*
 
 ---
-*v1.0*
+*v2.0*

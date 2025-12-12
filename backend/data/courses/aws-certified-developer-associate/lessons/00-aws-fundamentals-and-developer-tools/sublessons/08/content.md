@@ -464,4 +464,4 @@ def test_create_pet():
 *Next: Alex discovers CloudShell and Cloud9 for browser-based development.*
 
 ---
-*v1.0*
+*v2.0*

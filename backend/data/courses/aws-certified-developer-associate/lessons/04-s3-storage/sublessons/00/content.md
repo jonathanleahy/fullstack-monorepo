@@ -261,4 +261,4 @@ New Thinking:
 *Next: Alex learns the fundamentals of S3 - buckets, objects, and keys.*
 
 ---
-*v1.0*
+*v2.0*

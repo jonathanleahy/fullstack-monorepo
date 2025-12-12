@@ -397,4 +397,4 @@ configure_bucket_security(
 *Next: Alex learns about S3 encryption options.*
 
 ---
-*v1.0*
+*v2.0*

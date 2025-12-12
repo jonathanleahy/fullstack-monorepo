@@ -198,4 +198,4 @@ New Thinking:
 *Next: Alex learns the core concepts of EC2 and what makes it tick.*
 
 ---
-*v1.0*
+*v2.0*

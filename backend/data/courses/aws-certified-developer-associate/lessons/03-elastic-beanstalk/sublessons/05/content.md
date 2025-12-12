@@ -430,4 +430,4 @@ sudo cat /var/log/eb-engine.log
 *Next: Alex learns about platform hooks for even more customization.*
 
 ---
-*v1.0*
+*v2.0*

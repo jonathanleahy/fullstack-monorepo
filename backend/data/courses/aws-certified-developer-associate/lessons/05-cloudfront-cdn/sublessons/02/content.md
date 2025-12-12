@@ -430,4 +430,4 @@ pettracker_distribution = {
 *Next: Configuring origins and cache behaviors.*
 
 ---
-*v1.0*
+*v2.0*

@@ -434,4 +434,4 @@ sudo /var/app/staging/.platform/hooks/predeploy/01_warm_model.sh
 *Next: Alex learns about environment configuration management.*
 
 ---
-*v1.0*
+*v2.0*

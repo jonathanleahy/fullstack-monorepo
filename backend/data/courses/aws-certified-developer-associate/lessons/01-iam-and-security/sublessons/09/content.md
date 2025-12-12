@@ -439,4 +439,4 @@ Key rotation:
 *Next: Alex learns about Secrets Manager and Parameter Store for managing application secrets.*
 
 ---
-*v1.0*
+*v2.0*

@@ -225,4 +225,4 @@ aws configure get region
 *Next: Alex dives deeper into Regions and Availability Zones, learning how to design for high availability.*
 
 ---
-*v1.0*
+*v2.0*

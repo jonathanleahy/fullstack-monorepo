@@ -397,4 +397,4 @@ def get_secure_upload_url(user_id, content_type):
 *Next: Alex learns about versioning and lifecycle rules.*
 
 ---
-*v1.0*
+*v2.0*

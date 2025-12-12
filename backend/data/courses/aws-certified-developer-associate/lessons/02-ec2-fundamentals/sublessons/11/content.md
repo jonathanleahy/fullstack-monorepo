@@ -430,4 +430,4 @@ Key topics for DVA-C02:
 *Next Chapter: Elastic Beanstalk - Let AWS manage your infrastructure while you focus on code.*
 
 ---
-*v1.0*
+*v2.0*

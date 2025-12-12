@@ -530,4 +530,4 @@ This won't match `"status": "completed"`. Use `equals-ignore-case` if needed.
 
 
 ---
-*v1.0*
+*v2.0*

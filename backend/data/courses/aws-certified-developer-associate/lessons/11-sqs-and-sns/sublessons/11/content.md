@@ -610,4 +610,4 @@ $ aws sns subscribe --topic-arn ARN --protocol sqs --notification-endpoint QUEUE
 *Congratulations! You've mastered AWS messaging with SQS and SNS. Take the chapter quiz to test your knowledge, then continue to EventBridge for event-driven architectures.*
 
 ---
-*v1.0*
+*v2.0*

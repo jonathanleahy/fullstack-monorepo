@@ -387,4 +387,4 @@ Alex reflects on advanced SQS features:
 *Next: Alex discovers there's another messaging service in AWS - SNS. What's the difference, and when do you use each?*
 
 ---
-*v1.0*
+*v2.0*

@@ -429,4 +429,4 @@ Alex reflects on message filtering:
 *Next: Alex puts everything together in the powerful fan-out pattern - SNS plus SQS for parallel, independent processing.*
 
 ---
-*v1.0*
+*v2.0*

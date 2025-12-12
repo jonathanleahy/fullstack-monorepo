@@ -463,4 +463,4 @@ Key topics for DVA-C02:
 *Next Chapter: S3 Storage - Alex learns to store pet images and ML models efficiently.*
 
 ---
-*v1.0*
+*v2.0*

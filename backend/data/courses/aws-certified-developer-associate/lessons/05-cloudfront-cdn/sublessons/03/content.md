@@ -410,4 +410,4 @@ graph LR
 *Next: Implementing effective caching strategies.*
 
 ---
-*v1.0*
+*v2.0*

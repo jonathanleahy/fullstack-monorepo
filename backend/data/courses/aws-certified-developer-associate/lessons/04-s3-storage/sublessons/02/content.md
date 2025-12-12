@@ -389,4 +389,4 @@ aws s3 ls
 *Next: Alex learns object operations - uploading, downloading, and managing files.*
 
 ---
-*v1.0*
+*v2.0*

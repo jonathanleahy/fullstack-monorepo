@@ -408,4 +408,4 @@ graph TB
 *Next: Alex implements security best practices across the PetTracker infrastructure.*
 
 ---
-*v1.0*
+*v2.0*

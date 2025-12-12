@@ -304,4 +304,4 @@ s3.create_bucket(
 *Next: Alex learns bucket operations - creating, configuring, and managing buckets.*
 
 ---
-*v1.0*
+*v2.0*

@@ -376,4 +376,4 @@ aws iam delete-user --user-name test-user
 *Next: Alex dives deeper into IAM Users and Groups, implementing proper team structure.*
 
 ---
-*v1.0*
+*v2.0*

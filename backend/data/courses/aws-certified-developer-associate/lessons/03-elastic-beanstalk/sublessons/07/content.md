@@ -408,4 +408,4 @@ eb list
 *Next: Alex integrates databases with Elastic Beanstalk.*
 
 ---
-*v1.0*
+*v2.0*

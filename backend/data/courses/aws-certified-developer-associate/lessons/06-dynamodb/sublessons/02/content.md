@@ -391,4 +391,4 @@ for item in [user, dog, fish, walk]:
 *Next: Implementing Secondary Indexes for additional access patterns.*
 
 ---
-*v1.0*
+*v2.0*

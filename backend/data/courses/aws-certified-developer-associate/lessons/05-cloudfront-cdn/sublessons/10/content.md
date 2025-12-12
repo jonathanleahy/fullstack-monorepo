@@ -447,4 +447,4 @@ cost_optimization = {
 *Next: Alex's complete CloudFront solution for global pet photo delivery.*
 
 ---
-*v1.0*
+*v2.0*

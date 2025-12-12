@@ -278,4 +278,4 @@ By the end of this chapter, Alex (and you) will be able to:
 *Next: Understanding DynamoDB fundamentals and how NoSQL differs from relational databases.*
 
 ---
-*v1.0*
+*v2.0*

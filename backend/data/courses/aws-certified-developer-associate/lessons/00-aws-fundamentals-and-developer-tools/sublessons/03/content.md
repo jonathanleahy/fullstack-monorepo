@@ -375,4 +375,4 @@ $ aws cloudfront get-distribution \
 *Next: Alex sets up the AWS CLI and learns to stop clicking through the console.*
 
 ---
-*v1.0*
+*v2.0*

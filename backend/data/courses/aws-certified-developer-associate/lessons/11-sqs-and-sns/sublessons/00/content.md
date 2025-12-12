@@ -152,4 +152,4 @@ By the end of this chapter, PetTracker will have a notification system that neve
 *Next: Let's dive into Amazon SQS and learn how message queuing works.*
 
 ---
-*v1.0*
+*v2.0*

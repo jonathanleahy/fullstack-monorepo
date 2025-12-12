@@ -391,4 +391,4 @@ Savings: 62%
 *Next: Alex learns about S3 event notifications.*
 
 ---
-*v1.0*
+*v2.0*

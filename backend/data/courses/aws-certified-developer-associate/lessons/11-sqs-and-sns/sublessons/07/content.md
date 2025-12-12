@@ -433,4 +433,4 @@ Alex summarizes what was learned about DLQs:
 *Next: When order matters - Alex learns about FIFO queues for processing events in sequence.*
 
 ---
-*v1.0*
+*v2.0*

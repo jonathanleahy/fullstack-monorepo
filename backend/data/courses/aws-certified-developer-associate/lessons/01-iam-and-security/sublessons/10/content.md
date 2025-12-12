@@ -479,4 +479,4 @@ Resources:
 *Next: Alex completes the security hardening of PetTracker!*
 
 ---
-*v1.0*
+*v2.0*

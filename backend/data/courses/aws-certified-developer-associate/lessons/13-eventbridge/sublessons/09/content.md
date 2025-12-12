@@ -511,4 +511,4 @@ EndDate: "2024-12-02T23:59:59Z"    # Cyber Monday ends
 
 
 ---
-*v1.0*
+*v2.0*

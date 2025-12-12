@@ -395,4 +395,4 @@ $ aws iam get-account-summary
 *Next Chapter: IAM and Security - Locking down PetTracker properly.*
 
 ---
-*v1.0*
+*v2.0*
