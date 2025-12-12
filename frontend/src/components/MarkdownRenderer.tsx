@@ -458,16 +458,16 @@ function FloatingBlock({ diagram, text, float, size }: FloatingBlockProps) {
 
   const originalFloatClass = float === 'left' ? 'float-left mr-6' : 'float-right ml-6';
 
+  // Don't contain the float - let subsequent content flow around the diagram
   return (
-    <div className="my-6 overflow-hidden not-prose">
-      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4`}>
+    <>
+      <div className={`${originalFloatClass} ${floatWidths[size]} mb-4 not-prose`}>
         <MermaidDiagram chart={diagram} compact />
       </div>
       <div className="prose prose-slate dark:prose-invert max-w-none">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
       </div>
-      <div className="clear-both" />
-    </div>
+    </>
   );
 }
 

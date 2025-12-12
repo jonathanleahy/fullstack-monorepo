@@ -115,3 +115,8 @@
 .prose .mermaid {
   @apply flex justify-center;
 }
+
+/* Clear floats before headings and horizontal rules so new sections start fresh */
+.prose h2, .prose h3, .prose hr {
+  clear: both;
+}
